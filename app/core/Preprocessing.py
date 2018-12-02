@@ -1,5 +1,3 @@
-from __future__ import division
-
 import logging
 from pathlib import Path
 from numpy import loadtxt
@@ -11,7 +9,6 @@ from operator import itemgetter
 from collections.abc import Iterable
 
 from app.core.Parameters import PreprocessorParams
-
 logging.basicConfig(level=logging.INFO)
 
 
@@ -59,35 +56,35 @@ class Preprocessor:
     def __map_crop(self, frames):
         assert isinstance(frames, list) and \
                isinstance(frames[0], np.ndarray)
+        items = []
 
-        for idx, frame in enumerate(frames):
-            frames[idx] = frame[
-                          self.PARAMS.frame_y_trim[0]:self.PARAMS.frame_y_trim[1],
-                          self.PARAMS.frame_x_trim[0]:self.PARAMS.frame_x_trim[1]]
-        return frames
+        for frame in frames:
+            frame = frame[self.PARAMS.frame_y_trim[0]:self.PARAMS.frame_y_trim[1],
+                    self.PARAMS.frame_x_trim[0]:self.PARAMS.frame_x_trim[1]]
+            items.append(frame)
+        return items
 
     def __map_scale(self, frames):
         assert isinstance(frames, list) and \
                isinstance(frames[0], np.ndarray)
+        items = []
 
-        if self.PARAMS.frame_scaler == 1.0:
-            return frames
-
-        for idx, frame in enumerate(frames):
-            frames[idx] = cv2.resize(
+        for frame in frames:
+            frame = cv2.resize(
                 frame, (0, 0), fx=self.PARAMS.frame_scaler,
                 fy=self.PARAMS.frame_scaler)
-        return frames
+            items.append(frame)
+        return items
 
-    @staticmethod
-    def __map_normalize(frames):
+    def __map_normalize(self, frames):
         assert isinstance(frames, list) and \
                isinstance(frames[0], np.ndarray)
 
         for idx, val in enumerate(frames):
-            frames[idx] = val / 256.0
+            frames[idx] = val.ravel()
 
-        frames = np.array(frames)
+        frames = self.PARAMS.feature_scaler \
+            .fit_transform(frames)
         return frames
 
     # Merging previous Frames to the Timeline
@@ -100,8 +97,7 @@ class Preprocessor:
         len_indexes = int(len(frames) / timeline)
 
         return frames.reshape(
-            (len_indexes, timeline, frames[0].shape[0],
-             frames[0].shape[1], 1))
+            (len_indexes, timeline, frames[0].shape[0]))
 
     @staticmethod
     def __to_timeline_y(frames):
@@ -128,16 +124,20 @@ class Preprocessor:
 
 #####################################
 if __name__ == "__main__":
+
     def __assert(x_y):
         logging.info('X shape {}'.format(x_y[0].shape))
         logging.info('Y shape {}'.format(x_y[1].shape))
 
-        assert x_y[0].ndim == 5 and x_y[1].ndim == 2 \
+        assert x_y[0].ndim == 3 and x_y[1].ndim == 2 \
                and x_y[0].shape[0] == x_y[1].shape[0]
 
+    Preprocessor(PreprocessorParams((0,))).build(
+        '../../' + Setting.TRAIN_FRAMES,
+        '../../' + Setting.TRAIN_Y, [2, 10, 86]) \
+        .subscribe(__assert)
 
-    Preprocessor(PreprocessorParams(
-        (0, 1, 2), frame_scale=1.5)).build(
+    Preprocessor(PreprocessorParams((0, 1, 2))).build(
         '../../' + Setting.TRAIN_FRAMES,
         '../../' + Setting.TRAIN_Y, [2, 10, 86]) \
         .subscribe(__assert)
