@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="1a2c0f0e-e914-4408-8038-9a62d2def4bb" name="Default Changelist" comment="" />
+    <list default="true" id="1a2c0f0e-e914-4408-8038-9a62d2def4bb" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/Controller.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/core/Preprocessing.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/core/Preprocessing.py" afterDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -12,17 +16,17 @@
     <session id="-45853130">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="65" />
-          <entry key="project.open.time.0" value="10" />
+          <entry key="project.closed" value="66" />
+          <entry key="project.open.time.0" value="11" />
           <entry key="project.open.time.1" value="10" />
           <entry key="project.open.time.10" value="2" />
           <entry key="project.open.time.2" value="1" />
           <entry key="project.open.time.3" value="3" />
-          <entry key="project.open.time.4" value="12" />
+          <entry key="project.open.time.4" value="13" />
           <entry key="project.open.time.5" value="20" />
           <entry key="project.open.time.6" value="6" />
           <entry key="project.open.time.7" value="2" />
-          <entry key="project.opened" value="66" />
+          <entry key="project.opened" value="68" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
@@ -30,30 +34,30 @@
           <entry key="gitignore" value="1" />
           <entry key="iml" value="1" />
           <entry key="jpg" value="66" />
-          <entry key="png" value="205" />
-          <entry key="py" value="270" />
+          <entry key="png" value="206" />
+          <entry key="py" value="273" />
           <entry key="txt" value="12" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
           <entry key="IDEA_MODULE" value="1" />
-          <entry key="Image" value="271" />
+          <entry key="Image" value="272" />
           <entry key="PLAIN_TEXT" value="13" />
-          <entry key="Python" value="270" />
+          <entry key="Python" value="273" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
           <entry key="dummy" value="279" />
           <entry key="gitignore" value="30" />
-          <entry key="py" value="15975" />
+          <entry key="py" value="16086" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="PLAIN_TEXT" value="309" />
-          <entry key="Python" value="15975" />
+          <entry key="Python" value="16086" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.vcs.git.usages" />
@@ -64,13 +68,21 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app/Controller.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-415">
-              <caret line="149" column="59" selection-start-line="149" selection-start-column="59" selection-end-line="149" selection-end-column="59" />
+            <state relative-caret-position="626">
+              <caret line="114" column="35" selection-start-line="114" selection-start-column="35" selection-end-line="114" selection-end-column="35" />
               <folding>
-                <element signature="e#0#9#0" expanded="true" />
-                <marker date="1543349636502" expanded="true" signature="3111:3120" ph="..." />
-                <marker date="1543349636502" expanded="true" signature="5903:5912" ph="..." />
+                <element signature="e#0#18#0" expanded="true" />
+                <marker date="1543417515796" expanded="true" signature="3261:3270" ph="..." />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/core/Preprocessing.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="663">
+              <caret line="49" column="51" selection-start-line="49" selection-start-column="51" selection-end-line="49" selection-end-column="51" />
             </state>
           </provider>
         </entry>
@@ -86,8 +98,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>Evaluable</find>
-      <find>On Items Size</find>
       <find>warm</find>
       <find>coolwa</find>
       <find>logging.info</find>
@@ -116,6 +126,8 @@
       <find>level</find>
       <find>logg</find>
       <find>Shape</find>
+      <find>Evaluation On Items Size</find>
+      <find>On Items Size</find>
     </findStrings>
     <replaceStrings>
       <replace>learn_step</replace>
@@ -163,10 +175,10 @@
         <option value="$PROJECT_DIR$/app/other/Helper.py" />
         <option value="$PROJECT_DIR$/app/core/Model.py" />
         <option value="$PROJECT_DIR$/app/Test.py" />
-        <option value="$PROJECT_DIR$/app/core/Preprocessing.py" />
         <option value="$PROJECT_DIR$/app/Settings.py" />
-        <option value="$PROJECT_DIR$/app/Controller.py" />
         <option value="$PROJECT_DIR$/.gitignore" />
+        <option value="$PROJECT_DIR$/app/core/Preprocessing.py" />
+        <option value="$PROJECT_DIR$/app/Controller.py" />
       </list>
     </option>
   </component>
@@ -199,7 +211,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="PackagesPane" />
+      <pane id="AndroidView" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -239,6 +251,7 @@
           <select />
         </subPane>
       </pane>
+      <pane id="PackagesPane" />
       <pane id="Scope">
         <subPane subId="Scope 'Project Files'; set:Project Files; class com.intellij.psi.search.scope.ProjectFilesScope">
           <expand>
@@ -255,11 +268,10 @@
           <select />
         </subPane>
       </pane>
-      <pane id="AndroidView" />
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1543349978481" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1543418278903" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/app/Models.py" />
     <property name="project.structure.last.edited" value="SDKs" />
     <property name="project.structure.proportion" value="0.15" />
@@ -436,7 +448,7 @@
     <frame x="-6" y="-6" width="1549" height="837" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.3501006" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.36083165" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Image Layers" order="2" />
       <window_info id="Designer" order="3" />
@@ -450,7 +462,7 @@
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.32956153" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="7" visible="true" weight="0.32956153" />
+      <window_info anchor="bottom" id="Terminal" order="7" weight="0.32956153" />
       <window_info anchor="bottom" id="Event Log" order="8" side_tool="true" />
       <window_info anchor="bottom" id="Version Control" order="9" show_stripe_button="false" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
@@ -537,8 +549,6 @@
     </expressions>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/build/V1-SimpleNN-LookBack-1-Layers-12-LR-0.001-Units-17.png" />
-    <entry file="file://$PROJECT_DIR$/build/V1-SimpleNN-LookBack-1-Layers-13-LR-0.001-Units-15.png" />
     <entry file="file://$PROJECT_DIR$/build/V1-SimpleNN-LookBack-1-Layers-13-LR-0.001-Units-17.png" />
     <entry file="file://$PROJECT_DIR$/build/V1-SimpleNN-LookBack-1-Layers-14-LR-0.001-Units-15.png" />
     <entry file="file://$PROJECT_DIR$/build/V1-General.png" />
@@ -622,23 +632,11 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/core/Model.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="271">
-          <caret line="36" column="46" selection-start-line="36" selection-start-column="46" selection-end-line="36" selection-end-column="46" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/app/core/Model.py" />
     <entry file="file://$PROJECT_DIR$/resource/frames/1.jpg">
       <provider selected="true" editor-type-id="images" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/Test.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="339">
-          <caret line="44" column="46" selection-start-line="44" selection-start-column="26" selection-end-line="44" selection-end-column="46" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/app/Test.py" />
     <entry file="file://$PROJECT_DIR$/resource/source/train.txt">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
@@ -721,13 +719,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/core/Preprocessing.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-477">
-          <caret line="52" column="51" selection-start-line="52" selection-start-column="51" selection-end-line="52" selection-end-column="51" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/.gitignore">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="344">
@@ -735,15 +726,31 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/build/V1-Sequential-LookBack-(0, 1, 2)-Layers-~-LR-~-Units-~.png">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
+    <entry file="file://C:/Program Files/Python36-Env/Lib/site-packages/keras/initializers.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="226">
+          <caret line="104" column="8" selection-start-line="104" selection-start-column="8" selection-end-line="104" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/app/Controller.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-415">
-          <caret line="149" column="59" selection-start-line="149" selection-start-column="59" selection-end-line="149" selection-end-column="59" />
+        <state relative-caret-position="626">
+          <caret line="114" column="35" selection-start-line="114" selection-start-column="35" selection-end-line="114" selection-end-column="35" />
           <folding>
-            <element signature="e#0#9#0" expanded="true" />
-            <marker date="1543349636502" expanded="true" signature="3111:3120" ph="..." />
-            <marker date="1543349636502" expanded="true" signature="5903:5912" ph="..." />
+            <element signature="e#0#18#0" expanded="true" />
+            <marker date="1543417515796" expanded="true" signature="3261:3270" ph="..." />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/core/Preprocessing.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="663">
+          <caret line="49" column="51" selection-start-line="49" selection-start-column="51" selection-end-line="49" selection-end-column="51" />
         </state>
       </provider>
     </entry>

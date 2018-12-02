@@ -1,5 +1,3 @@
-import os
-import sys
 import numpy as np
 
 import app.core.Parameters
@@ -16,7 +14,7 @@ import matplotlib.pyplot as plt
 import itertools
 import logging
 from keras import Sequential
-from keras.layers import Dense, Conv2D, MaxPooling2D, Flatten, TimeDistributed
+from keras.layers import Dense
 from keras.layers import SimpleRNN
 from keras.losses import mean_squared_error
 from keras.activations import tanh, linear, sigmoid, relu
@@ -42,10 +40,10 @@ class MiniBatchWorker:
         train, validation = \
             self.split_indexes()
 
-        for e in range(6):
+        for epoch in range(0, 10):
+            logging.info('Starting {} Epoch Training!'
+                         .format(epoch))
             np.random.shuffle(train)
-            logging.info('Starting {} Training Epoch!'
-                         .format(str(e)))
 
             for i in range(0, len(train), self.C_PARAMS.baths):
                 indexes = train[list(range(
@@ -54,6 +52,8 @@ class MiniBatchWorker:
 
             self.__evaluate(validation)
 
+    # Train, it's 2-D arrays already separated
+    # to the timeline. Validation 1-D array.
     def split_indexes(self):
         indexes = np.arange(
             max(self.P_PARAMS.backward), self.C_PARAMS.samples)
@@ -70,6 +70,8 @@ class MiniBatchWorker:
         return train,\
                indexes[max_train_index:]
 
+    # Receive working Indexed and Step, later mapping Values
+    # into Tuple x_y_s = x input, y output, s current step
     def __step_process(self, step, indexes):
         obs = Preprocessor(self.P_PARAMS).build(
             '../' + Settings.TRAIN_FRAMES,
@@ -98,33 +100,24 @@ class MiniBatchWorker:
 
     def __step_model(self, x_y):
         if self.model is None:
-            input_shape = (x_y[0].shape[2],
-                x_y[0].shape[3], 1)
-
-            convolution = Sequential()
-            convolution.add(Conv2D(
-                filters=36, kernel_size=(5, 5), activation=sigmoid,
-                padding='valid', input_shape=input_shape,
-                data_format='channels_last'))
-
-            convolution.add(Conv2D(
-                filters=12, kernel_size=(3, 3), activation=sigmoid,
-                padding='valid', input_shape=input_shape,
-                data_format='channels_last'))
-
-            convolution.add(MaxPooling2D(pool_size=(2, 2)))
-            convolution.add(Flatten())
-
             self.model = Sequential()
-            self.model.add(TimeDistributed(convolution))
+            self.model.add(InputLayer(input_shape=(
+                len(self.P_PARAMS.backward), x_y[0].shape[2])))
 
             self.model.add(
-                LSTM(units=36, return_sequences=True,
-                     kernel_initializer=he_normal()))
+                LSTM(units=128, return_sequences=True,
+                     kernel_initializer=he_normal(),
+                     activation=tanh))
 
             self.model.add(
-                LSTM(units=12, return_sequences=False,
-                          kernel_initializer=he_normal()))
+                LSTM(units=64, return_sequences=True,
+                     kernel_initializer=he_normal(),
+                     activation=tanh))
+
+            self.model.add(
+                LSTM(units=32, return_sequences=False,
+                     kernel_initializer=he_normal(),
+                     activation=tanh))
 
             self.model \
                 .add(Dense(units=1,
@@ -132,64 +125,54 @@ class MiniBatchWorker:
                            activation=linear))
             self.model \
                 .compile(loss=mean_squared_error,
-                         optimizer=Adam(lr=1))
+                         optimizer=Adam(lr=0.1))
 
-        logging.info(
-            'Training Batch loss: {}'.format(
-                self.model.train_on_batch(x_y[0], x_y[1])))
+        self.model.train_on_batch(
+            x_y[0], x_y[1])
 
     def __evaluate(self, validation):
 
         def local_save(x_y):
-            logging.info("Starting Cross Validation...")
-
             evaluation = self.model\
                 .evaluate(x_y[0], x_y[1])
-
-            logging.info("Cross Validation Done on "
-                         "Items Size: {} Value: {}".format(
-                len(x_y[0]), evaluation))
+            logging.info(
+                "Final validation Evaluation On Items Size: {} Value: {}"
+                    .format(len(x_y[0]), evaluation))
             self.VISUAL.set_evaluation(evaluation)
 
         Preprocessor(self.P_PARAMS).build(
             '../' + Settings.TRAIN_FRAMES,
-            '../' + Settings.TRAIN_Y, validation[:10]) \
+            '../' + Settings.TRAIN_Y, validation) \
             .subscribe(local_save)
 
 
 #####################################
 if __name__ == "__main__":
-    sys.setrecursionlimit(100000)
 
     def combine_workers():
-        workers = [MiniBatchWorker(
-            PreprocessorParams(
-                backward=(0, 1, 2), frame_y_trim=(190, -190),
-                frame_x_trim=(220, -220), frame_scale=1.5),
-            ControllerParams(
-                baths=10, train_part=0.9, step_vis=150,
-                samples=20400))]
-        return workers
+        return []
 
+    workers = combine_workers()
+    workers.append(MiniBatchWorker(
+        PreprocessorParams(backward=(0, 1, 2), frame_y_trim=(
+            100, 350), frame_x_trim=(230, 360), frame_scale=1),
+        ControllerParams(baths=10, train_part=0.9, step_vis=150, samples=20400)))
 
-    def worker_plot(worker):
-        fig, ax = plt.subplots()
-        ax.plot(worker.VISUAL.iters,
-                worker.VISUAL.costs)
+    for worker in workers:
+        worker.run()
 
-        ax.set(xlabel='Num of Iter (I)',
-               ylabel='Costs (J)')
-        ax.grid()
-        return plt
+        def worker_plot():
+            fig, ax = plt.subplots()
+            ax.plot(worker.VISUAL.iters,
+                    worker.VISUAL.costs)
 
-    def start_train():
-        for worker in combine_workers():
-            worker.run()
+            ax.set(xlabel='Num of Iter (I)',
+                   ylabel='Costs (J)')
+            ax.grid()
+            return plt
 
-            Helper.save_plot_with(
-                '../' + Settings.BUILD_PATH, worker_plot(worker),
-                'V1', worker.model, worker.P_PARAMS)
-            plt.show()
+        plot = worker_plot()
 
-    start_train()
-
+        Helper.save_plot_with(
+            '../' + Settings.BUILD_PATH, plot,
+            'V1', worker.model, worker.P_PARAMS)
