@@ -104,5 +104,7 @@ venv.bak/
 .mypy_cache/
 
 # Project
+.idea/workspace.xml
+
 resource/frames/
 resource/source/
