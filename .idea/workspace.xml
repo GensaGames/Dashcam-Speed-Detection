@@ -2,13 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1a2c0f0e-e914-4408-8038-9a62d2def4bb" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/Comma-AI-Speed.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Comma-AI-Speed.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dictionaries/GensaGames.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dictionaries/GensaGames.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/dictionaries/gensagames.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipfile" beforeDir="false" afterPath="$PROJECT_DIR$/Pipfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipfile.lock" beforeDir="false" afterPath="$PROJECT_DIR$/Pipfile.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/Controller.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/Settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/core/Parameters.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/core/Parameters.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -19,17 +19,15 @@
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/Pipfile">
+        <entry file="file://$PROJECT_DIR$/app/Controller.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="150">
-              <caret line="10" column="16" selection-start-line="10" selection-start-column="16" selection-end-line="10" selection-end-column="16" />
+            <state relative-caret-position="331">
+              <caret line="196" column="36" lean-forward="true" selection-start-line="196" selection-start-column="36" selection-end-line="196" selection-end-column="36" />
+              <folding>
+                <element signature="e#0#9#0" expanded="true" />
+              </folding>
             </state>
           </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Pipfile.lock">
-          <provider selected="true" editor-type-id="text-editor" />
         </entry>
       </file>
     </leaf>
@@ -43,12 +41,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>Evaluable</find>
-      <find>On Items Size</find>
-      <find>warm</find>
-      <find>coolwa</find>
-      <find>logging.info</find>
-      <find>cool</find>
       <find>coolwar</find>
       <find>war</find>
       <find>eval</find>
@@ -73,6 +65,12 @@
       <find>level</find>
       <find>logg</find>
       <find>Shape</find>
+      <find>loggi</find>
+      <find>logging</find>
+      <find>PARAMS</find>
+      <find>scale</find>
+      <find>Help</find>
+      <find>log</find>
     </findStrings>
     <replaceStrings>
       <replace>learn_step</replace>
@@ -92,6 +90,7 @@
       <replace>self.PARAMS.backward</replace>
       <replace>self._model</replace>
       <replace>Utils.to_timeline</replace>
+      <replace>logging_</replace>
     </replaceStrings>
     <dirStrings>
       <dir>C:\Projects\Python\Comma-AI-Speed\app</dir>
@@ -115,23 +114,23 @@
         <option value="$PROJECT_DIR$/app/Models.py" />
         <option value="$PROJECT_DIR$/app/core/Params.py" />
         <option value="$PROJECT_DIR$/app/core/Sample1.py" />
-        <option value="$PROJECT_DIR$/app/core/Parameters.py" />
         <option value="$PROJECT_DIR$/app/core/Models.py" />
         <option value="$PROJECT_DIR$/app/other/Helper.py" />
         <option value="$PROJECT_DIR$/app/core/Model.py" />
         <option value="$PROJECT_DIR$/app/Test.py" />
-        <option value="$PROJECT_DIR$/app/Settings.py" />
         <option value="$PROJECT_DIR$/app/core/Preprocessing.py" />
-        <option value="$PROJECT_DIR$/app/Controller.py" />
         <option value="$PROJECT_DIR$/Pipfile" />
+        <option value="$PROJECT_DIR$/app/Settings.py" />
+        <option value="$PROJECT_DIR$/app/core/Parameters.py" />
+        <option value="$PROJECT_DIR$/app/Controller.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="5" />
-    <option name="y" value="305" />
-    <option name="width" value="1750" />
-    <option name="height" value="970" />
+    <option name="x" value="1987" />
+    <option name="y" value="205" />
+    <option name="width" value="1533" />
+    <option name="height" value="875" />
   </component>
   <component name="ProjectInspectionProfilesVisibleTreeState">
     <entry key="Project Default">
@@ -389,9 +388,10 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="67" y="25" width="1533" height="875" extended-state="6" />
+    <frame x="1987" y="205" width="1533" height="875" extended-state="6" />
+    <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.35574985" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.29388028" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Image Layers" order="2" />
       <window_info id="Designer" order="3" />
@@ -399,13 +399,13 @@
       <window_info id="Capture Tool" order="5" />
       <window_info id="Favorites" order="6" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Find" order="1" weight="0.3281471" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.3281471" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.32707775" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.32707775" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.39886847" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
-      <window_info anchor="bottom" id="TODO" order="6" weight="0.32956153" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="7" visible="true" weight="0.32841823" />
+      <window_info anchor="bottom" id="TODO" order="6" weight="0.32841823" />
+      <window_info anchor="bottom" id="Terminal" order="7" weight="0.32841823" />
       <window_info anchor="bottom" id="Event Log" order="8" side_tool="true" weight="0.3297587" />
       <window_info anchor="bottom" id="Version Control" order="9" show_stripe_button="false" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
@@ -488,11 +488,6 @@
     </expressions>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/build/V1-SimpleNN-LookBack-1-Layers-13-LR-0.001-Units-15.png" />
-    <entry file="file://$PROJECT_DIR$/build/V1-SimpleNN-LookBack-1-Layers-13-LR-0.001-Units-17.png" />
-    <entry file="file://$PROJECT_DIR$/build/V1-SimpleNN-LookBack-1-Layers-14-LR-0.001-Units-15.png" />
-    <entry file="file://$PROJECT_DIR$/build/V1-General.png" />
-    <entry file="file://$PROJECT_DIR$/build/V1-SimpleNN-LookBack-1-Layers-2-LR-0.001-Units-15.png" />
     <entry file="file://$PROJECT_DIR$/build/V1-SimpleNN-LookBack-1-Layers-15-LR-0.001-Units-15.png" />
     <entry file="file://$PROJECT_DIR$/build/linear/LinearLearning-LookBack-1-BathSize-10-LR-1e-05-Lam-0.1.png" />
     <entry file="file://C:/Program Files/Python36-Env/Lib/site-packages/jsonpickle/pickler.py" />
@@ -537,60 +532,90 @@
     <entry file="file://$USER_HOME$/.IdeaIC2018.2/system/python_stubs/-1102470389/numpy/core/umath.py" />
     <entry file="file://C:/Program Files/Python36-Env/Lib/site-packages/keras/optimizers.py" />
     <entry file="file://C:/Program Files/Python36-Env/Lib/site-packages/rx/core/observablebase.py" />
-    <entry file="file://$PROJECT_DIR$/app/other/Helper.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="186">
-          <caret line="81" column="18" selection-start-line="81" selection-start-column="13" selection-end-line="81" selection-end-column="18" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://C:/Program Files/Python36-Env/Lib/site-packages/scipy/stats/_distn_infrastructure.py" />
-    <entry file="file://$PROJECT_DIR$/app/sift_keypoints.jpg" />
     <entry file="file://$PROJECT_DIR$/app/sift_keypoints1.jpg" />
     <entry file="file://C:/Program Files/Python36-Env/Lib/site-packages/keras/layers/convolutional.py" />
-    <entry file="file://$PROJECT_DIR$/app/Settings.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="221">
-          <caret line="16" column="10" lean-forward="true" selection-start-line="16" selection-start-column="10" selection-end-line="16" selection-end-column="35" />
-        </state>
-      </provider>
+    <entry file="file://$PROJECT_DIR$/Comma-AI-Speed.iml">
+      <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/core/Parameters.py">
+    <entry file="file://$PROJECT_DIR$/Pipfile.lock">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/sift_keypoints.jpg" />
+    <entry file="file://$PROJECT_DIR$/Pipfile">
       <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="8" selection-start-column="8" selection-end-column="8" />
+        <state relative-caret-position="210">
+          <caret line="14" column="19" selection-start-line="14" selection-start-column="19" selection-end-line="14" selection-end-column="19" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/core/Preprocessing.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="225">
-          <caret line="15" lean-forward="true" selection-start-line="15" selection-end-line="15" />
+        <state relative-caret-position="356">
+          <caret line="125" column="36" lean-forward="true" selection-start-line="125" selection-start-column="36" selection-end-line="125" selection-end-column="36" />
           <folding>
             <element signature="e#0#31#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Comma-AI-Speed.iml">
+    <entry file="file://$PROJECT_DIR$/app/core/Parameters.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="106">
+          <caret line="35" column="8" selection-start-line="35" selection-start-column="8" selection-end-line="35" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/other/Helper.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="45">
+          <caret line="3" column="12" selection-start-line="3" selection-start-column="12" selection-end-line="3" selection-end-column="12" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/Settings.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="120">
+          <caret line="8" selection-start-line="8" selection-end-line="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/build/logs.txt">
       <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file:///usr/lib/python3.6/logging/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="238">
+          <caret line="1013" column="8" selection-start-line="1013" selection-start-column="8" selection-end-line="1013" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.local/share/virtualenvs/Comma-AI-Speed-1ZbII9Ct/lib/python3.6/site-packages/keras/layers/core.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="110">
+          <caret line="84" column="36" lean-forward="true" selection-start-line="82" selection-start-column="4" selection-end-line="84" selection-end-column="36" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.local/share/virtualenvs/Comma-AI-Speed-1ZbII9Ct/lib/python3.6/site-packages/keras/layers/pooling.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3750">
+          <caret line="258" column="8" selection-start-line="258" selection-start-column="8" selection-end-line="258" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/model_plot1.png">
+      <provider selected="true" editor-type-id="images" />
     </entry>
     <entry file="file://$PROJECT_DIR$/app/Controller.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="390">
-          <caret line="26" column="35" selection-start-line="26" selection-start-column="35" selection-end-line="26" selection-end-column="35" />
+        <state relative-caret-position="331">
+          <caret line="196" column="36" lean-forward="true" selection-start-line="196" selection-start-column="36" selection-end-line="196" selection-end-column="36" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
         </state>
       </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Pipfile">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="150">
-          <caret line="10" column="16" selection-start-line="10" selection-start-column="16" selection-end-line="10" selection-end-column="16" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Pipfile.lock">
-      <provider selected="true" editor-type-id="text-editor" />
     </entry>
   </component>
   <component name="masterDetails">
@@ -650,6 +675,7 @@
             <option name="proportions">
               <list>
                 <option value="0.2901499" />
+                <option value="0.6" />
               </list>
             </option>
           </splitter-proportions>

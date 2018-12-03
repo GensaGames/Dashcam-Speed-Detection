@@ -3,12 +3,11 @@ from sklearn import preprocessing
 
 class PreprocessorParams:
 
-    def __init__(self, backward=(0,), feature_scaler=
-    preprocessing.MinMaxScaler(),
-                 frame_y_trim=(230, 350), frame_x_trim=(140, 380),
-                 frame_scale=0.7):
+    def __init__(
+            self, backward=(0,), frame_y_trim=(230, 350),
+            frame_x_trim=(140, 380), frame_scale=0.7):
+
         self._backward = backward
-        self._feature_scaler = feature_scaler
         self._frame_y_trim = frame_y_trim
         self._frame_x_trim = frame_x_trim
         self._frame_scale = frame_scale
@@ -16,10 +15,6 @@ class PreprocessorParams:
     @property
     def backward(self):
         return self._backward
-
-    @property
-    def feature_scaler(self):
-        return self._feature_scaler
 
     @property
     def frame_y_trim(self):
@@ -38,6 +33,7 @@ class ControllerParams:
 
     def __init__(self, baths=8, train_part=0.8,
                  samples=20400, step_vis=512):
+
         self._baths = baths
         self._train_part = train_part
         self._samples = samples

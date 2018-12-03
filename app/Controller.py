@@ -15,8 +15,9 @@ from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 import itertools
 import logging
+
 from keras import Sequential
-from keras.layers import Dense, Conv2D, MaxPooling2D, Flatten, TimeDistributed
+from keras.layers import Dense, Conv2D, MaxPooling2D, Flatten, TimeDistributed, Dropout
 from keras.layers import SimpleRNN
 from keras.losses import mean_squared_error
 from keras.activations import tanh, linear, sigmoid, relu
@@ -42,16 +43,17 @@ class MiniBatchWorker:
         train, validation = \
             self.split_indexes()
 
-        for e in range(6):
+        for e in range(10000):
             np.random.shuffle(train)
-            logging.info('Starting {} Training Epoch!'
-                         .format(str(e)))
+            logger.info('Starting {} Training Epoch!'
+                        .format(str(e)))
 
             for i in range(0, len(train), self.C_PARAMS.baths):
                 indexes = train[list(range(
                     i, i + self.C_PARAMS.baths))]
                 self.__step_process(i, indexes)
 
+            np.random.shuffle(validation)
             self.__evaluate(validation)
 
     def split_indexes(self):
@@ -67,7 +69,7 @@ class MiniBatchWorker:
             max_train_index / self.C_PARAMS.baths)
 
         train = indexes[:max_train_index]
-        return train,\
+        return train, \
                indexes[max_train_index:]
 
     def __step_process(self, step, indexes):
@@ -76,13 +78,13 @@ class MiniBatchWorker:
             '../' + Settings.TRAIN_Y, indexes) \
             .publish()
 
-        obs\
+        obs \
             .subscribe(self.__step_model)
 
-        obs\
+        obs \
             .filter(lambda _: step > self.C_PARAMS.step_vis and (
-                    step % self.C_PARAMS.step_vis == 0 or
-                    step >= self.C_PARAMS.samples - self.C_PARAMS.baths)) \
+                step % self.C_PARAMS.step_vis == 0 or
+                step >= self.C_PARAMS.samples - self.C_PARAMS.baths)) \
             .map(lambda x_y: (x_y[0], x_y[1], step)) \
             .subscribe(self.__step_visual)
 
@@ -92,27 +94,27 @@ class MiniBatchWorker:
         cost = self.model \
             .evaluate(x_y_s[0], x_y_s[1])
 
-        logging.info("Added for Visualisation. Iter: {} Cost: {}"
-              .format(x_y_s[2], cost))
+        logger.info("Added for Visualisation. Iter: {} Cost: {}"
+                    .format(x_y_s[2], cost))
         self.VISUAL.add(x_y_s[2], cost)
 
     def __step_model(self, x_y):
         if self.model is None:
             input_shape = (x_y[0].shape[2],
-                x_y[0].shape[3], 1)
+                           x_y[0].shape[3], 1)
 
             convolution = Sequential()
             convolution.add(Conv2D(
-                filters=36, kernel_size=(5, 5), activation=sigmoid,
-                padding='valid', input_shape=input_shape,
+                filters=12, kernel_size=(5, 5),
+                padding='same', input_shape=input_shape,
                 data_format='channels_last'))
 
             convolution.add(Conv2D(
-                filters=12, kernel_size=(3, 3), activation=sigmoid,
+                filters=24, kernel_size=(3, 3), strides=(2, 2),
                 padding='valid', input_shape=input_shape,
                 data_format='channels_last'))
 
-            convolution.add(MaxPooling2D(pool_size=(2, 2)))
+            convolution.add(MaxPooling2D(pool_size=(3, 3)))
             convolution.add(Flatten())
 
             self.model = Sequential()
@@ -124,7 +126,7 @@ class MiniBatchWorker:
 
             self.model.add(
                 LSTM(units=12, return_sequences=False,
-                          kernel_initializer=he_normal()))
+                     kernel_initializer=he_normal()))
 
             self.model \
                 .add(Dense(units=1,
@@ -132,22 +134,22 @@ class MiniBatchWorker:
                            activation=linear))
             self.model \
                 .compile(loss=mean_squared_error,
-                         optimizer=Adam(lr=1))
+                         optimizer=Adam(lr=0.001))
 
-        logging.info(
+        logger.info(
             'Training Batch loss: {}'.format(
                 self.model.train_on_batch(x_y[0], x_y[1])))
 
     def __evaluate(self, validation):
 
         def local_save(x_y):
-            logging.info("Starting Cross Validation...")
+            logger.info("Starting Cross Validation...")
 
-            evaluation = self.model\
+            evaluation = self.model \
                 .evaluate(x_y[0], x_y[1])
 
-            logging.info("Cross Validation Done on "
-                         "Items Size: {} Value: {}".format(
+            logger.info("Cross Validation Done on "
+                        "Items Size: {} Value: {}".format(
                 len(x_y[0]), evaluation))
             self.VISUAL.set_evaluation(evaluation)
 
@@ -159,15 +161,32 @@ class MiniBatchWorker:
 
 #####################################
 if __name__ == "__main__":
-    sys.setrecursionlimit(100000)
+
+    def set_logger():
+        sys.setrecursionlimit(1001001)
+        formatter = logging.Formatter(
+            '%(asctime)-15s %(message)s')
+
+        log = logging.getLogger(
+            os.path.basename(__file__))
+
+        handler = logging.FileHandler(
+            filename='../' + Settings.BUILD_LOGS)
+        handler.setLevel(logging.DEBUG)
+        handler.setFormatter(formatter)
+
+        log.addHandler(handler)
+        return log
+
+    logger = set_logger()
 
     def combine_workers():
         workers = [MiniBatchWorker(
             PreprocessorParams(
                 backward=(0, 1, 2), frame_y_trim=(190, -190),
-                frame_x_trim=(220, -220), frame_scale=1.5),
+                frame_x_trim=(220, -220), frame_scale=1),
             ControllerParams(
-                baths=10, train_part=0.9, step_vis=150,
+                baths=10, train_part=0.99, step_vis=150,
                 samples=20400))]
         return workers
 
@@ -182,6 +201,7 @@ if __name__ == "__main__":
         ax.grid()
         return plt
 
+
     def start_train():
         for worker in combine_workers():
             worker.run()
@@ -192,4 +212,3 @@ if __name__ == "__main__":
             plt.show()
 
     start_train()
-

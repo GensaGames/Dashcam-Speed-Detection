@@ -6,6 +6,7 @@ TRAIN_FRAMES = 'resource/frames/'
 TEST_VIDEO = 'resource/source/test.mp4'
 
 BUILD_PATH = 'build/'
+BUILD_LOGS = 'build/logs.txt'
 
 # import cv2
 # import numpy as np
