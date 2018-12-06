@@ -1,9 +1,15 @@
+import datetime
 import os
 
 import cv2
 import jsonpickle
 import numpy as np
 import jsonpickle.ext.numpy as jsonpickle_numpy
+jsonpickle_numpy.register_handlers()
+
+import app.Settings as Settings
+from keras.models import model_from_json
+from keras.models import load_model
 
 
 ##########################################
@@ -42,28 +48,33 @@ def to_timeline(value):
 
 
 ##########################################
-def save_state_with(path_to, plot, prefix, learner, p_params, visual):
+def backup_model_with(path_to, name, model, *args):
+    path_to = path_to + '/' + name + '/'
     if not os.path.exists(path_to):
         os.makedirs(path_to)
 
-    name = path_to + prefix + '-' + str(type(learner).__name__) + '-LookBack-' \
-           + str(p_params.backward) + '-Layers-' + str('~') \
-           + '-LR-' + str('~') + '-Units-' + str('~')
-
-    # Remove UnSerializable field from Preprocessor
-    p_params_dict = p_params.__dict__
-    del p_params_dict['_feature_scaler']
-
-    with open(name + '.txt', "w") as file:
-        file.write("{}\n\n{}".format(to_json_state(
-            p_params_dict), to_json_state(visual)))
+    model.save(path_to + Settings.BUILD_MODEL)
+    for i in args:
+        with open(path_to + type(i).__name__, "w+") as file:
+            file.write(jsonpickle.encode(i))
 
 
 ##########################################
-def to_json_state(state):
-    jsonpickle_numpy.register_handlers()
-    json = jsonpickle.encode(state)
-    return json
+def restore_model_with(path_to, name):
+    path_to = path_to + '/' + name + '/'
+    if not os.path.exists(path_to):
+        raise FileNotFoundError
+
+    objects = []
+    for i in os.listdir(path_to):
+        if i.__eq__(Settings.BUILD_MODEL):
+            continue
+        with open(path_to + i, "rb") as file:
+            objects.append(jsonpickle.decode(
+                file.read()))
+
+    return load_model(path_to + Settings.BUILD_MODEL), \
+           objects[0], objects[1], objects[2]
 
 
 ##########################################

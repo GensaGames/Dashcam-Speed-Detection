@@ -1,32 +1,18 @@
+import logging
 import os
 import sys
-import numpy as np
 
-import app.core.Parameters
+import matplotlib.pyplot as plt
+import numpy as np
+from keras import Sequential
+from keras.activations import linear, sigmoid, relu
+from keras.initializers import he_normal
+from keras.layers import Dense, Flatten, Dropout, Conv3D, MaxPooling3D
+from keras.losses import mean_squared_error
+from keras.optimizers import Adam
+
 import app.Settings as Settings
 import app.other.Helper as Helper
-import pandas as pd
-from scipy.interpolate import griddata
-from mpl_toolkits.mplot3d import Axes3D
-from matplotlib import cm
-from matplotlib.ticker import LinearLocator, FormatStrFormatter
-from matplotlib import cm
-from mpl_toolkits.mplot3d import Axes3D
-import matplotlib.pyplot as plt
-import itertools
-import logging
-
-from keras import Sequential
-from keras.layers import Dense, Conv2D, MaxPooling2D, Flatten, TimeDistributed, Dropout
-from keras.layers import SimpleRNN
-from keras.losses import mean_squared_error
-from keras.activations import tanh, linear, sigmoid, relu
-from keras.optimizers import RMSprop, SGD, Adadelta, Adam
-from keras.initializers import RandomUniform, he_normal
-from keras.layers import Embedding
-from keras.layers import LSTM
-from keras.layers import InputLayer
-
 from app.core.Parameters import ControllerParams, \
     VisualHolder, PreprocessorParams
 from app.core.Preprocessing import Preprocessor
@@ -34,29 +20,52 @@ from app.core.Preprocessing import Preprocessor
 
 class MiniBatchWorker:
 
-    def __init__(self, p_params, c_params):
+    def __init__(self, p_params, c_params, model=None):
         self.P_PARAMS, self.C_PARAMS, self.VISUAL \
             = p_params, c_params, VisualHolder()
-        self.model = None
+        self.model = model
 
-    def run(self):
+    def start_epochs(self):
         train, validation = \
-            self.split_indexes()
+            self.__split_indexes()
 
-        for e in range(10000):
-            np.random.shuffle(train)
+        for e in range(self.C_PARAMS.epochs):
             logger.info('Starting {} Training Epoch!'
                         .format(str(e)))
+            self.__start_train(train, validation)
 
-            for i in range(0, len(train), self.C_PARAMS.baths):
-                indexes = train[list(range(
-                    i, i + self.C_PARAMS.baths))]
-                self.__step_process(i, indexes)
+    def restore_backup(self):
+        if self.model is not None:
+            logging.error(
+                'Model already created. Do not override!')
+            return
 
-            np.random.shuffle(validation)
-            self.__evaluate(validation)
+        try:
+            self.model, self.VISUAL, self.C_PARAMS, self.P_PARAMS = \
+                Helper.restore_model_with(
+                    '../' + Settings.BUILD, self.C_PARAMS.name)
+        except FileNotFoundError:
+            logging.error(
+                'Do not have Backup! Starting new.')
 
-    def split_indexes(self):
+    def __start_train(self, train, validation):
+        np.random.shuffle(train)
+
+        for i in range(0, len(train), self.C_PARAMS.baths):
+            indexes = train[list(range(
+                i, i + self.C_PARAMS.baths))]
+            self.__step_process(i, indexes)
+            break
+
+        self.__evaluate(validation)
+        self.do_backup()
+
+    def do_backup(self):
+        Helper.backup_model_with(
+            '../' + Settings.BUILD, self.C_PARAMS.name,
+            self.model, self.P_PARAMS, self.C_PARAMS, self.VISUAL)
+
+    def __split_indexes(self):
         indexes = np.arange(
             max(self.P_PARAMS.backward), self.C_PARAMS.samples)
 
@@ -78,16 +87,13 @@ class MiniBatchWorker:
             '../' + Settings.TRAIN_Y, indexes) \
             .publish()
 
-        obs \
-            .subscribe(self.__step_model)
-
-        obs \
-            .filter(lambda _: step > self.C_PARAMS.step_vis and (
+        obs.filter(lambda _: step > self.C_PARAMS.step_vis and (
                 step % self.C_PARAMS.step_vis == 0 or
                 step >= self.C_PARAMS.samples - self.C_PARAMS.baths)) \
             .map(lambda x_y: (x_y[0], x_y[1], step)) \
             .subscribe(self.__step_visual)
 
+        obs.subscribe(self.__step_model)
         obs.connect()
 
     def __step_visual(self, x_y_s):
@@ -96,38 +102,36 @@ class MiniBatchWorker:
 
         logger.info("Added for Visualisation. Iter: {} Cost: {}"
                     .format(x_y_s[2], cost))
-        self.VISUAL.add(x_y_s[2], cost)
+        self.VISUAL.add_iter(x_y_s[2], cost)
 
     def __step_model(self, x_y):
         if self.model is None:
-            input_shape = (x_y[0].shape[2],
-                           x_y[0].shape[3], 1)
-
-            convolution = Sequential()
-            convolution.add(Conv2D(
-                filters=12, kernel_size=(5, 5),
-                padding='same', input_shape=input_shape,
-                data_format='channels_last'))
-
-            convolution.add(Conv2D(
-                filters=24, kernel_size=(3, 3), strides=(2, 2),
-                padding='valid', input_shape=input_shape,
-                data_format='channels_last'))
-
-            convolution.add(MaxPooling2D(pool_size=(3, 3)))
-            convolution.add(Flatten())
+            input_shape = (
+                len(self.P_PARAMS.backward),
+                x_y[0].shape[2], x_y[0].shape[3], 1)
 
             self.model = Sequential()
-            self.model.add(TimeDistributed(convolution))
+            self.model.add(
+                Conv3D(filters=24, kernel_size=(2, 5, 5), strides=(1, 2, 2),
+                       activation=sigmoid, input_shape=input_shape,
+                       padding='valid', data_format='channels_last'))
+
+            self.model.add(Dropout(0.1))
+            self.model.add(MaxPooling3D(pool_size=(1, 2, 2)))
 
             self.model.add(
-                LSTM(units=36, return_sequences=True,
-                     kernel_initializer=he_normal()))
+                Conv3D(filters=48, kernel_size=(1, 3, 3), strides=(1, 1, 1),
+                       activation=sigmoid, input_shape=input_shape,
+                       padding='valid', data_format='channels_last'))
 
-            self.model.add(
-                LSTM(units=12, return_sequences=False,
-                     kernel_initializer=he_normal()))
+            self.model.add(Dropout(0.1))
+            self.model.add(MaxPooling3D(pool_size=(2, 2, 2)))
 
+            self.model.add(Flatten())
+            self.model \
+                .add(Dense(units=48,
+                           kernel_initializer=he_normal(),
+                           activation=relu))
             self.model \
                 .add(Dense(units=1,
                            kernel_initializer=he_normal(),
@@ -136,26 +140,31 @@ class MiniBatchWorker:
                 .compile(loss=mean_squared_error,
                          optimizer=Adam(lr=0.001))
 
-        logger.info(
-            'Training Batch loss: {}'.format(
-                self.model.train_on_batch(x_y[0], x_y[1])))
+            # from keras.utils import plot_model
+            # plot_model(self.model, to_file='model_plot1.png',
+            #            show_shapes=True, show_layer_names=True)
+
+        value = self.model.train_on_batch(x_y[0], x_y[1])
+        logger.debug('Training Batch loss: {}'
+                     .format(value))
 
     def __evaluate(self, validation):
+        np.random.shuffle(validation)
 
         def local_save(x_y):
-            logger.info("Starting Cross Validation...")
+            logger.info("Starting Cross Validation.")
 
             evaluation = self.model \
                 .evaluate(x_y[0], x_y[1])
 
-            logger.info("Cross Validation Done on "
-                        "Items Size: {} Value: {}".format(
-                len(x_y[0]), evaluation))
-            self.VISUAL.set_evaluation(evaluation)
+            logger.info(
+                "Cross Validation Done on Items Size: {} "
+                "Value: {}".format(len(x_y[0]), evaluation))
+            self.VISUAL.add_evaluation(evaluation)
 
         Preprocessor(self.P_PARAMS).build(
             '../' + Settings.TRAIN_FRAMES,
-            '../' + Settings.TRAIN_Y, validation[:10]) \
+            '../' + Settings.TRAIN_Y, validation) \
             .subscribe(local_save)
 
 
@@ -169,6 +178,7 @@ if __name__ == "__main__":
 
         log = logging.getLogger(
             os.path.basename(__file__))
+        log.setLevel(logging.DEBUG)
 
         handler = logging.FileHandler(
             filename='../' + Settings.BUILD_LOGS)
@@ -184,10 +194,10 @@ if __name__ == "__main__":
         workers = [MiniBatchWorker(
             PreprocessorParams(
                 backward=(0, 1, 2), frame_y_trim=(190, -190),
-                frame_x_trim=(220, -220), frame_scale=1),
+                frame_x_trim=(220, -220), frame_scale=1.3),
             ControllerParams(
-                baths=10, train_part=0.99, step_vis=150,
-                samples=20400))]
+                'V1-3D-CNN/', baths=10, train_part=0.99,
+                epochs=10000, step_vis=150, samples=20400))]
         return workers
 
 
@@ -204,10 +214,11 @@ if __name__ == "__main__":
 
     def start_train():
         for worker in combine_workers():
-            worker.run()
+            worker.restore_backup()
+            worker.start_epochs()
 
             Helper.save_plot_with(
-                '../' + Settings.BUILD_PATH, worker_plot(worker),
+                '../' + Settings.BUILD, worker_plot(worker),
                 'V1', worker.model, worker.P_PARAMS)
             plt.show()
 

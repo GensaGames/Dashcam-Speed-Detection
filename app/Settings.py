@@ -1,12 +1,15 @@
-# PreProcessing
+
 TRAIN_VIDEO = 'resource/source/train.mp4'
 TRAIN_Y = 'resource/source/train.txt'
 
 TRAIN_FRAMES = 'resource/frames/'
 TEST_VIDEO = 'resource/source/test.mp4'
 
-BUILD_PATH = 'build/'
-BUILD_LOGS = 'build/logs.txt'
+BUILD = 'build/'
+
+BUILD_LOGS = BUILD + 'logs.txt'
+
+BUILD_MODEL = 'model-view.h5'
 
 # import cv2
 # import numpy as np

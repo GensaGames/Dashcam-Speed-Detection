@@ -1,4 +1,4 @@
-from sklearn import preprocessing
+from collections import deque
 
 
 class PreprocessorParams:
@@ -31,17 +31,27 @@ class PreprocessorParams:
 
 class ControllerParams:
 
-    def __init__(self, baths=8, train_part=0.8,
+    def __init__(self, name, baths=8, train_part=0.8, epochs=10,
                  samples=20400, step_vis=512):
 
+        self._name = name
         self._baths = baths
         self._train_part = train_part
+        self._epochs = epochs
         self._samples = samples
         self._step_vis = step_vis
 
     @property
+    def name(self):
+        return self._name
+
+    @property
     def baths(self):
         return self._baths
+
+    @property
+    def epochs(self):
+        return self._epochs
 
     @property
     def train_part(self):
@@ -58,19 +68,20 @@ class ControllerParams:
 
 class VisualHolder:
     def __init__(self):
-        self._iters, self._costs = [], []
-        self._evaluation = 1e+5
+        self._iters, self._costs = \
+            deque(maxlen=1000), deque(maxlen=1000)
+        self._evaluations = deque(maxlen=1000)
 
-    def add(self, _iter, _cost):
+    def add_iter(self, _iter, _cost):
         self._iters.append(_iter)
         self._costs.append(_cost)
 
-    def set_evaluation(self, val):
-        self._evaluation = val
+    def add_evaluation(self, val):
+        self._evaluations.append(val)
 
     @property
     def evaluation(self):
-        return self._evaluation
+        return self._evaluations
 
     @property
     def costs(self):
