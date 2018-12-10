@@ -56,7 +56,7 @@ Scaling takes some part in preprocessing, even we can simplify and avoid it's us
 
 For some cases, very simple process of scaling up small Image helps to make some kind of preprocessing and retaint most important features and their changes over time. We can compare this process, to some N Compressing, but requires substantially less resources to compute. 
 
-For the normalization, we don't have something new. In case we working with Images, we can just normilize features, over maximum value of colors `mean of RBG values at pixel divided by max possible color value (255)` (or even simpler for an Image, loaded in the Grey filter). As a another point, we can think about normalization with `Scikit-Learn` Scalers, however first variant is good enough. 
+For the normalization, we don't have something new. In case we working with Images, we can just normilize features, over maximum value of colors. Mean of RBG values at pixel divided by Max possible color value (255) (or even simpler for an Image, loaded in the Grey filter). As a another point, we can think about normalization with `Scikit-Learn` Scalers, however first variant is good enough. 
 
 At this stage, we will play with Scaling in two different ways. After choosing some Sub Area from Working, we will. **a) Apply few Scalling Down types. b) Apply some Scalling Up types.**
 
