@@ -1,5 +1,8 @@
 # Toy-Model-Checking
 
+<br/>
+
+
 ## 1. Preprocessing
 
 This section will include all work we did, and other possible thoughts. We have 17 min training video, with 20 frames per second. It's 20400 frames, where we have speed on each frame. From the initial description, we can start with some basics on it. 1. Features taken from Images 2. Features elapsed over time. 
@@ -59,4 +62,7 @@ For some cases, very simple process of scaling up small Image helps to make some
 For the normalization, we don't have something new. In case we working with Images, we can just normilize features, over maximum value of colors. Mean of RBG values at pixel divided by Max possible color value (255) (or even simpler for an Image, loaded in the Grey filter). As a another point, we can think about normalization with `Scikit-Learn` Scalers, however first variant is good enough. 
 
 At this stage, we will play with Scaling in two different ways. After choosing some Sub Area from Working, we will. **a) Apply few Scalling Down types. b) Apply some Scalling Up types.**
+
+
+### 1.3 Frames Timeline 
 
