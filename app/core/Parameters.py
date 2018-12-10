@@ -80,7 +80,7 @@ class VisualHolder:
         self._evaluations.append(val)
 
     @property
-    def evaluation(self):
+    def evaluations(self):
         return self._evaluations
 
     @property

@@ -55,7 +55,6 @@ class MiniBatchWorker:
             indexes = train[list(range(
                 i, i + self.C_PARAMS.baths))]
             self.__step_process(i, indexes)
-            break
 
         self.__evaluate(validation)
         self.do_backup()
@@ -64,6 +63,7 @@ class MiniBatchWorker:
         Helper.backup_model_with(
             '../' + Settings.BUILD, self.C_PARAMS.name,
             self.model, self.P_PARAMS, self.C_PARAMS, self.VISUAL)
+        pass
 
     def __split_indexes(self):
         indexes = np.arange(
@@ -124,14 +124,20 @@ class MiniBatchWorker:
                        activation=sigmoid, input_shape=input_shape,
                        padding='valid', data_format='channels_last'))
 
-            self.model.add(Dropout(0.1))
+            self.model.add(Dropout(0.2))
             self.model.add(MaxPooling3D(pool_size=(2, 2, 2)))
 
             self.model.add(Flatten())
+
             self.model \
-                .add(Dense(units=48,
+                .add(Dense(units=64,
                            kernel_initializer=he_normal(),
                            activation=relu))
+            self.model \
+                .add(Dense(units=36,
+                           kernel_initializer=he_normal(),
+                           activation=relu))
+
             self.model \
                 .add(Dense(units=1,
                            kernel_initializer=he_normal(),
@@ -196,30 +202,32 @@ if __name__ == "__main__":
                 backward=(0, 1, 2), frame_y_trim=(190, -190),
                 frame_x_trim=(220, -220), frame_scale=1.3),
             ControllerParams(
-                'V1-3D-CNN/', baths=10, train_part=0.99,
-                epochs=10000, step_vis=150, samples=20400))]
+                'V2-3D-CNN/', baths=10, train_part=0.99,
+                epochs=1000, step_vis=150, samples=20400))]
         return workers
-
 
     def worker_plot(worker):
         fig, ax = plt.subplots()
-        ax.plot(worker.VISUAL.iters,
-                worker.VISUAL.costs)
 
-        ax.set(xlabel='Num of Iter (I)',
+        ax.plot(
+            range(0, len(worker.VISUAL.evaluations)),
+            worker.VISUAL.evaluations)
+
+        ax.set(xlabel='Iters (I)',
                ylabel='Costs (J)')
         ax.grid()
+
+        plt.savefig(
+            '../' + Settings.BUILD + '/' + worker.C_PARAMS.name
+            + '/' + Settings.BUILD_MODEL_PLOT)
         return plt
 
 
     def start_train():
         for worker in combine_workers():
             worker.restore_backup()
-            worker.start_epochs()
+            # worker.start_epochs()
+            worker_plot(worker)
 
-            Helper.save_plot_with(
-                '../' + Settings.BUILD, worker_plot(worker),
-                'V1', worker.model, worker.P_PARAMS)
-            plt.show()
 
     start_train()

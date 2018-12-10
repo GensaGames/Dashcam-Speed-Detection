@@ -31,23 +31,6 @@ def save_plot(path_to, plot, prefix):
 
 
 ##########################################
-def isqrt(n):
-    x = n
-    y = (x + 1) // 2
-    while y < x:
-        x = y
-        y = (x + n // x) // 2
-    return x ** 2
-
-
-##########################################
-def to_timeline(value):
-    sqrt = int(np.sqrt(value.shape[0]))
-    return value.reshape(sqrt, sqrt,
-                         value.shape[1])
-
-
-##########################################
 def backup_model_with(path_to, name, model, *args):
     path_to = path_to + '/' + name + '/'
     if not os.path.exists(path_to):
