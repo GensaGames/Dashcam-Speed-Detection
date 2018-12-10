@@ -10,4 +10,12 @@ From each frame, we can decide working area, which includes most of the features
 
 <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/source-image.jpg" width="400" height="300" /> <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/source-feature-area.png" width="400" height="300" /> 
 
-But we have another interesting question here. As you can see, we have Working Area, which consist from `Close` and `Far` subareas. First one, has more features about road changes (has more changes over time, due of camera angle). And Second one with more noise like side objects, and car 
+But we have another interesting question here. As you can see, we have Working Area, which consist from `Close` and `Far` subareas. First one, has more features about road changes (has more changes over time, due of camera angle). And Second one with more noise like side objects, other cars and less road changes. 
+
+
+<img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/car-angle-variants.jpg" width="600" height="300" /> 
+
+At this point, we have few variants, for next preprocessing steps. We will use this options in the next phases. - Using `Far` Sub Area. -Using `Mid` Sub Area. - Using `Close` Sub Area. - Using complete Working Area. 
+
+Note. It's very important to reduce number of Inputs, especialy in such cases, where we working with Video, and features elapsed over time. One wrong step will cause your model to have the Curse of Dimensionality. That is why we suppose to avoid last variant with using complete Working Area. 
+
