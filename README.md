@@ -50,13 +50,18 @@ As a result, we come with few options for next work. a) Check Model velocity usi
 
 
 
-### 1.2 Scaling 
+### 1.2 Scaling and Normalization
 
-Scaling takes some part in preprocessing, even we can simplify and avoid it's usage. Scale working in two directions, and for some cases might reduce a Dimensionality in two different ways. The simplest example here it's scaling down image from source to lower one (ex. 500x500 scale down to 250x250). But in some resources, you can find opossite usage of scaling, by increasing image size (ex. 125x125 scale up to 250x250).
+Scaling takes some part in preprocessing, even we can simplify and avoid it's usage. Scale working in two directions, and for some cases might reduce a Dimensionality in two different ways. We will not talk about simple scaling down Image, to reduce it's size (ex. 500x500 scale down to 250x250), but in some resources, you can find opossite usage of scaling, by increasing Image size (ex. 125x125 scale up to 250x250).
 
 <br/>
 
 <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/1.2/scale-source.gif" width="280" height="170" /> <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/1.2/scale-image.gif" width="280" height="170" /> <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/1.2/scale-compressed.gif" width="280" height="170" />
 
 1.2.1. Feature changing over time, with Scaling. LTR Source Image. Scaled. Compressed.
-<br/> <br/>
+<br/><br/>
+
+For some cases, very simple process of scaling up small Image helps to make some kind of preprocessing and retaint most important features and their changes over time. We can compare this process, to some N Compressing, which requires substantially less resources to compute. 
+
+For the normalization, we don't have something new. In case we working with Images, we can just normilize features, over maximum value of colors `mean of RBG values at pixel divided by max possible color value (255)` (or even simpler for an Image, loaded in the Grey filter). As a another point, we can think about normalization over `Scikit-Learn` Scalers, however first variant is good enough. 
+
