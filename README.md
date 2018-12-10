@@ -27,7 +27,7 @@ At this point, we have few variants, for next preprocessing steps. We will use t
 
 <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/image-mov-top-0.jpg" width="280" height="170" /> <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/image-mov-mid-0.jpg" width="280" height="170" /> <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/image-mov-bot-0.jpg" width="280" height="170" /> 
 
-1.1.3. Examples of Sub Areas subtract from complete Working Area. 
+1.1.3. Examples of Sub Area subtract from complete Working Area. LTR Far Area. Mid. Close.
 <br/> <br/> <br/>
 
 *Note 1.1. It's very important to reduce number of Inputs, especialy in such cases, where we working with Video, and features elapsed over time. One wrong step will cause your model to have the Curse of Dimensionality. That is why we suppose to avoid last variant with using complete Working Area.*
@@ -36,7 +36,7 @@ Below animation, how we can estimate it, with changes over time. Note, this samp
 
 <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/image-mov-top-0.gif" width="280" height="170" /> <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/image-mov-mid-0.gif" width="280" height="170" /> <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/image-mov-bot-0.gif" width="280" height="170" /> 
 
-1.1.3. Examples of Sub Area features changing over time. 
+1.1.3. Examples of Sub Area features changing over time. LTR Far Area. Mid. Close.
 <br/> <br/> <br/>
 
 As a result, we come with few options for next work. a) Check Model velocity using several Sub Areas Types. b) Check Model velocity over all possible Sub Areas, with momentum over some shifting.  
