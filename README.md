@@ -10,6 +10,7 @@ This section will include all work we did, and other possible thoughts. We have 
 From each frame, we can decide working area, which includes most of the features, depending on our task. And reduce number of the Inputs. Even we did some feature area investigation, it's easy to manually retrive most useful part.
 
 
+
 <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/source-image.jpg" width="400" height="300" /> <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/source-feature-area.png" width="400" height="300" /> 
 
 1.1.1. Source Image and Source Image Areas. Red Box represents Working Area, for the next steps. 
