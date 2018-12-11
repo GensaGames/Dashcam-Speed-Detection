@@ -91,7 +91,7 @@ In out testing, we might check dependencies between frames `(0, 1)` or `(0, 1, 2
 ### 1.5 Сonclusions
 
 
-In general it's very simple process, where we just shared all thoughts during Preprocessing. For some model, we should take Frames Timeline on Working Area and Normilize inputs. However we came up with several different options, which we should investigate (just combination of possible parameters, also marked above). 
+In general it's very simple process, where we just shared all thoughts during Preprocessing. For some model, we should take Frames Timeline on Working Area and Normilize inputs. However we came up with several different options: Preprocessor combinations, which we should investigate (combination of all possible parameters, also marked above). 
 
 Well known other algorithms might be used for feature extraction on Images. Some of them like SIFT, ORB, HOG and other, might work very well, but doesn't suite for our problem. Main reason covers in performance of our model, and such actions takes huge time for computing.
 
@@ -109,4 +109,63 @@ So far, we didn't have work on this, but still keeping in mind about possible er
 TBD
 
 
+
+
+<br/>
+
+## 2. Model.
+
+Same with preprocessing, we will describe just all investigation and work for choosing Model. We will start from simple implementations. In first phases, we suppose to keep everything as simple, as possible. Because you can increase complexity in any time and every part of the Model. 
+
+
+<br/>
+
+### 2.1 MLP and 2D-CNN
+
+Even from the initial sentence of the task (with processing video), which gives us hint to move in RNN directions, we had few examples of MLP. In our examples, we might represent features as delta changes between frames, where tried to achive some kind of Compressing during Timeline.
+
+After some minor updates in Preprocessing behavior, we used different types of MLP, with different structure. However, this work, didn't effect model learning, and it was hard to resolve pattern in delta changes over time. Even with no Regularization, model didn't fit training samples. No Graphics here. No Samples.
+
+Why 2D-CNN also included here, because we supposed to have such model, with Convolution over Delta changes. Comparing to previous MLP where we might have few Frames on Timeline (which Flatten into row of features), for this case, we had only one delta Frame over previous. Again in our testing it seems real to find correct Windows for Convolution in delta changes over time. But not so good after validation.
+
+
+<br/>
+
+### 2.2 RNN and LSTM
+
+Back to initial thoughts, RNN should have enough velocity on data over time. One more pros here, it's number of the inputs. Comparing to the previous methods, where we Flatten few frames (based on Timeline) into one blob features, here we can consume frames one by one. And finally we can see some progress in Model validation. It was good for next steps, but we didn't enough for working solution. 
+
+
+
+TBD
+
+2.2.1. Velocity of RNN model on some Preprocessor combinations.
+<br/><br/>
+
+
+
+<br/>
+
+### 2.3 2D-CNN with LSTM
+
+Combination of 2D-CNN windows, and tracking frames changes over time should work very well. And for validation, we received even worse result, comparing of RNN. Back to model strucutre, we continue some updates, slowly increasing model complexity, but tests result still not enough to work in this direction. 
+
+
+TBD
+
+2.3.1. Velocity of 2D-CNN with LSTM Model on some Preprocessor combinations.
+<br/><br/>
+
+
+<br/>
+
+### 2.4 3D-CNN
+
+Obviously 3D-CNN takes places in this list. Even this is most recommended types for the features elapsed over time, we came to this Model in last examples. And this Model works noticeably well on validation data. Starting from very simple Model we can see very good results, and continue work on Model complexity and Preprocessor Combinations. You can see how well this Model fit, comparing to other types. 
+
+
+TBD
+
+2.4.1. Velocity of 3D-CNN Model.
+<br/><br/>
 
