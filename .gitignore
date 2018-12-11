@@ -104,7 +104,8 @@ venv.bak/
 .mypy_cache/
 
 # Project
-.idea/workspace.xml
+.idea/
+Toy-Model-Checking.iml
 
 resource/frames/
 resource/source/
