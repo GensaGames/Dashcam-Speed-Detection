@@ -208,8 +208,12 @@ if __name__ == "__main__":
             os.path.basename(__file__))
         log.setLevel(logging.DEBUG)
 
+        path_to = '../' + Settings.BUILD
+        if not os.path.exists(path_to):
+            os.makedirs(path_to)
+
         handler = logging.FileHandler(
-            filename='../' + Settings.BUILD_LOGS)
+            filename=path_to + Settings.BUILD_LOGS)
         handler.setLevel(logging.DEBUG)
         handler.setFormatter(formatter)
 
