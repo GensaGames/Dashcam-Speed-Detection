@@ -2,10 +2,12 @@
 
 <br/>
 
+-----------------
+
 
 ## 1. Preprocessing
 
-This section will include all work we did, and other possible thoughts. We have 17 min training video, with 20 frames per second. It's 20400 frames, where we have speed on each frame. From the initial description, we can start with some basics on it. 1. Features taken from Images 2. Features elapsed over time. 
+We have 17 min training video, with 20 frames per second. It's 20400 frames, where we have speed on each frame. From the initial description, we can start with some basics on it. 1. Features taken from Images 2. Features elapsed over time. We will include all work we had, and other possible thoughts.
 
 
 
@@ -21,7 +23,7 @@ From each frame, we can decide working area, which includes most of the features
 1.1.1. Source Image and Source Image Areas. Red Box represents Working Area, for the next steps. 
 <br/> <br/>
 
-But we have another interesting question here. As you can see, we have Working Area, which consist from `Close` and `Far` subareas. First one, has more features about road changes (has more changes over time, due of camera angle). And Second one with more noise like side objects, other cars and less road changes. 
+But we have another interesting question here. As you can see, we have Working Area, which consist from some Sub Areas, Close and Far. First one, has more features about road changes (has more changes over time, due of camera angle). And Second one with more noise like side objects, other cars and less road changes. 
 
 <br/>
 
@@ -30,7 +32,7 @@ But we have another interesting question here. As you can see, we have Working A
 1.1.2. Frame changes updates in different way, based on Angle of a Camera. 
 <br/> <br/>
 
-At this point, we have few variants, for next preprocessing steps. We will use this options in the next phases. - Using Far Sub Area. - Using Mid Sub Area. - Using Close Sub Area. - Using complete Working Area. 
+At this point, we have few variants, for next preprocessing steps. We will use this options in the next phases. - Using Far Sub Area. - Using Mid Sub Area. - Using Close Sub Area, and so on.
 
 *Note. It's very important to reduce number of Inputs, especialy in such cases, where we working with Video, and features elapsed over time. One wrong step will cause your model to have the Curse of Dimensionality. That is why we suppose to avoid last variant with using complete Working Area.*
 
@@ -52,7 +54,7 @@ As a result, we come with few options for next work **a) Check Model velocity us
 
 ### 1.2 Scaling and Normalization
 
-Scaling takes some part in preprocessing, even we can simplify and avoid it's usage. Scale working in two directions, and for some cases might reduce a Dimensionality in two different ways. We will not talk about simple scaling down Image, to reduce it's size (ex. 500x500 scale down to 250x250), but in some resources, you can find opossite usage of scaling, by increasing Image size (ex. 125x125 scale up to 250x250).
+Scaling takes some part in preprocessing, even we can simplify and avoid it's usage. Scale working in two directions, and for some cases might reduce a Dimensionality in two different ways. We will not talk about simple scaling down Image, to reduce it's size, but in some resources, you can find opossite usage of scaling, by increasing Image size.
 
 <br/>
 
@@ -81,9 +83,9 @@ As we mentioned before, we will work on features elapsed over time. And for the 
 1.3.1. Single training sample consist from several frames
 <br/><br/>
 
-For testing purpose, we created `Preprocessor` objects, which can retrive Timelines in different format, and not only previous frame. We can represent it, as indexes `(0, 1, 2)`, where `(0)` it's current frame, where we now the right Y value (and looking back to the previous `(1)`, and next to it `(2)` frames). 
+For testing purpose, we created Preprocessor objects, which can retrive Timelines in different format, and not only previous frame. We can represent it, as indexes '(0, 1, 2)', where '(0)' it's current frame, where we now the right Y value (and looking back to the previous '(1)', and next to it '(2)' frames). 
 
-In out testing, we might check dependencies between frames `(0, 1)` or `(0, 1, 2, 3, 4)` and some variations in this range.   And even more complicated behavior, Timeline with different steps (ex. with step 2, we will have `(0, 2, 4)`), where frame changes will be more visible. So action items for this mapping is **a) Check different Frame Timelines.**
+In out testing, we might check dependencies between frames '(0, 1)' or '(0, 1, 2, 3, 4)' and some variations in this range.   And even more complicated behavior, Timeline with different steps (ex. with step 2, we will have '(0, 2, 4)'), where frame changes will be more visible. So action items for this mapping is **a) Check different Frame Timelines.**
 
 
 <br/>
@@ -99,9 +101,9 @@ TBD
 ### 1.6 Сonclusions
 
 
-In general it's very simple process, where we just shared all thoughts during Preprocessing. For some model, we should take Frames Timeline on Working Area and Normilize inputs. However we came up with several different options: Preprocessor combinations, which we should investigate (combination of all possible parameters, also marked above). 
+In general it's very simple process, where we just shared all thoughts during Preprocessing. For some model, we should take Frames Timeline on Working Area and Normilize inputs. However we came up with several different options: Preprocessor Combinations, which we should investigate (combination of all possible parameters, also marked above). 
 
-Well known other algorithms might be used for feature extraction on Images. Some of them like SIFT, ORB, HOG and other, might work very well, but doesn't suite for our problem. Main reason covers in performance of our model, and such actions takes huge time for computing.
+Well known other algorithms might be used for feature extraction on Images. Some of them like `SIFT`, `ORB`, `HOG` and other, might work very well, but doesn't suite for our problem. Main reason covers in performance of our model, and such actions takes huge time for computing.
 
 
 <br/>
@@ -148,7 +150,7 @@ Back to initial thoughts, RNN should have enough velocity on data over time. One
 
 TBD
 
-2.2.1. Velocity of RNN model on some Preprocessor combinations.
+2.2.1. Velocity of RNN model on some Preprocessor Combinations.
 <br/><br/>
 
 
@@ -162,7 +164,7 @@ Combination of 2D-CNN windows, and tracking frames changes over time should work
 
 TBD
 
-2.3.1. Velocity of 2D-CNN with LSTM Model on some Preprocessor combinations.
+2.3.1. Velocity of 2D-CNN with LSTM Model on some Preprocessor Combinations.
 <br/><br/>
 
 
