@@ -9,6 +9,7 @@ This section will include all work we did, and other possible thoughts. We have 
 
 
 
+<br/>
 ### 1.1 Working Area
 From each frame, we can decide working area, which includes most of the features, depending on our task. And reduce number of the Inputs. Even we did some feature area investigation, it's easy to manually retrive most useful part.
 
@@ -23,7 +24,7 @@ But we have another interesting question here. As you can see, we have Working A
 
 <br/>
 
-<img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/car-angle-variants.jpg" width="800" height="400" /> 
+<img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/car-angle-variants.jpg" width="800" height="200" /> 
 
 1.1.2. Frame changes updates in different way, based on Angle of a Camera. 
 <br/> <br/>
@@ -46,6 +47,7 @@ As a result, we come with few options for next work. **a) Check Model velocity u
 
 
 
+<br/>
 ### 1.2 Scaling and Normalization
 
 Scaling takes some part in preprocessing, even we can simplify and avoid it's usage. Scale working in two directions, and for some cases might reduce a Dimensionality in two different ways. We will not talk about simple scaling down Image, to reduce it's size (ex. 500x500 scale down to 250x250), but in some resources, you can find opossite usage of scaling, by increasing Image size (ex. 125x125 scale up to 250x250).
@@ -64,5 +66,8 @@ For the normalization, we don't have something new. In case we working with Imag
 At this stage, we will play with Scaling in two different ways. After choosing some Sub Area from Working, we will. **a) Apply few Scalling Down types. b) Apply some Scalling Up types.**
 
 
+<br/>
 ### 1.3 Frames Timeline 
+
+As we mentioned before, using Timeline
 
