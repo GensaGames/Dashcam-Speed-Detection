@@ -105,7 +105,7 @@ venv.bak/
 
 # Project
 .idea/
-Toy-Model-Checking.iml
+Comma-AI-Speed.iml
 
 resource/frames/
 resource/source/
