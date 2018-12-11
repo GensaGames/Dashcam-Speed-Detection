@@ -88,7 +88,15 @@ In out testing, we might check dependencies between frames `(0, 1)` or `(0, 1, 2
 
 <br/>
 
-### 1.5 Сonclusions
+### 1.5 Frames Augmentation
+
+TBD
+
+
+
+<br/>
+
+### 1.6 Сonclusions
 
 
 In general it's very simple process, where we just shared all thoughts during Preprocessing. For some model, we should take Frames Timeline on Working Area and Normilize inputs. However we came up with several different options: Preprocessor combinations, which we should investigate (combination of all possible parameters, also marked above). 
@@ -98,24 +106,25 @@ Well known other algorithms might be used for feature extraction on Images. Some
 
 <br/>
 
-### Bonus. Errors
+### Bonus Errors
 
 So far, we didn't have work on this, but still keeping in mind about possible errors a) Errors on resolving Frames during turning the car. b) Error on road hills and pits. For both problems, we might think about some floating Working Area which will move in random directions (x, y) during training process, to cover most cases in the next validation phase. Right now we will skipp this point. 
 
-<br/>
 
-### Bonus. Frames Augmentation
 
-TBD
 
 
 
 
 <br/>
+
+-----------------------
 
 ## 2. Model.
 
 Same with preprocessing, we will describe just all investigation and work for choosing Model. We will start from simple implementations. In first phases, we suppose to keep everything as simple, as possible. Because you can increase complexity in any time and every part of the Model. 
+
+Below you will find some graphics and Model structures. No Models (or it's structure) has the goal of being correct and used in dirty examples for general evaluation. Check sub branches, for the detailed implementation for each of them. They might have mistakes.  
 
 
 <br/>
