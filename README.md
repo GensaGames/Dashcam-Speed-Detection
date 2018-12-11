@@ -76,11 +76,11 @@ As we mentioned before, we will work on features elapsed over time. And for the 
 
 <br/>
 
-<img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/1.3/frames-elapsed-over-time.jpg" width="800" height="180" /> 
+<img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/1.3/frames-elapsed-over-time.jpg" width="800" height="160" /> 
 
-1.2.1. Single sample consist from several frames
+1.3.1. Single training sample consist from several frames
 <br/><br/>
 
 For testing purpose, we created `Preprocessor` objects, which can retrive Timelines in different format, and not only previous frame. We can represent it, as indexes `(0, 1, 2)`, where `(0)` it's current frame, where we now the right Y value (and looking back to the previous `(1)`, and next to it `(2)` frames). 
 
-In out testing, we might check dependencies between frames `(0, 1)` or `(0, 1, 2, 3, 4)` and some variations in this range.   And even more complicated behavior, Timeline with different steps (ex. with step 2, we will have `(0, 2, 4)`), where frame changes will be more visible. 
+In out testing, we might check dependencies between frames `(0, 1)` or `(0, 1, 2, 3, 4)` and some variations in this range.   And even more complicated behavior, Timeline with different steps (ex. with step 2, we will have `(0, 2, 4)`), where frame changes will be more visible. So action items for this mapping. **a) Check different Frame Timelines.**
