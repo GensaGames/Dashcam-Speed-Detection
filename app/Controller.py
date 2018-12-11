@@ -34,6 +34,24 @@ class MiniBatchWorker:
                         .format(str(e)))
             self.__start_train(train, validation)
 
+    def show_evaluation(self):
+        train, validation = \
+            self.__split_indexes()
+
+        def local_evaluate(x_y):
+            cost = self.model \
+                .evaluate(x_y[0], x_y[1])
+
+            logger.info("Evaluation on Items: {} Cost: {}"
+                        .format(len(x_y[0]), cost))
+
+        while True:
+            np.random.shuffle(validation)
+            Preprocessor(self.P_PARAMS).build(
+                '../' + Settings.TRAIN_FRAMES,
+                '../' + Settings.TRAIN_Y, validation[:150]) \
+                .subscribe(local_evaluate)
+
     def restore_backup(self):
         if self.model is not None:
             logging.error(
@@ -124,17 +142,21 @@ class MiniBatchWorker:
                        activation=sigmoid, input_shape=input_shape,
                        padding='valid', data_format='channels_last'))
 
-            self.model.add(Dropout(0.2))
+            self.model.add(Dropout(0.1))
             self.model.add(MaxPooling3D(pool_size=(2, 2, 2)))
 
             self.model.add(Flatten())
 
             self.model \
-                .add(Dense(units=64,
+                .add(Dense(units=96,
                            kernel_initializer=he_normal(),
                            activation=relu))
             self.model \
-                .add(Dense(units=36,
+                .add(Dense(units=48,
+                           kernel_initializer=he_normal(),
+                           activation=relu))
+            self.model \
+                .add(Dense(units=12,
                            kernel_initializer=he_normal(),
                            activation=relu))
 
@@ -170,7 +192,7 @@ class MiniBatchWorker:
 
         Preprocessor(self.P_PARAMS).build(
             '../' + Settings.TRAIN_FRAMES,
-            '../' + Settings.TRAIN_Y, validation) \
+            '../' + Settings.TRAIN_Y, validation[:150]) \
             .subscribe(local_save)
 
 
@@ -202,7 +224,7 @@ if __name__ == "__main__":
                 backward=(0, 1, 2), frame_y_trim=(190, -190),
                 frame_x_trim=(220, -220), frame_scale=1.3),
             ControllerParams(
-                'V2-3D-CNN/', baths=10, train_part=0.99,
+                'V3-3D-CNN/', baths=10, train_part=0.99,
                 epochs=1000, step_vis=150, samples=20400))]
         return workers
 
@@ -226,8 +248,9 @@ if __name__ == "__main__":
     def start_train():
         for worker in combine_workers():
             worker.restore_backup()
-            # worker.start_epochs()
-            worker_plot(worker)
+            worker.start_epochs()
+            # worker.show_evaluation()
+            # worker_plot(worker)
 
 
     start_train()

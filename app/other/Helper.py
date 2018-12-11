@@ -53,8 +53,11 @@ def restore_model_with(path_to, name):
         if i.__eq__(Settings.BUILD_MODEL):
             continue
         with open(path_to + i, "rb") as file:
-            objects.append(jsonpickle.decode(
-                file.read()))
+            try:
+                objects.append(jsonpickle.decode(
+                    file.read()))
+            except UnicodeDecodeError:
+                objects.append(None)
 
     return load_model(path_to + Settings.BUILD_MODEL), \
            objects[0], objects[1], objects[2]
