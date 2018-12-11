@@ -44,7 +44,7 @@ Below animation, how we can estimate it, with changes over time. Note, this samp
 1.1.3. Sub Area features changing over time. LTR Far - Mid - Close Areas.
 <br/> <br/>
 
-As a result, we come with few options for next work. **a) Check Model velocity using several Sub Areas Types. b) Check Model velocity over all possible Sub Areas, with momentum over some shifting.**
+As a result, we come with few options for next work **a) Check Model velocity using several Sub Areas Types. b) Check Model velocity over all possible Sub Areas, with momentum over some shifting.**
 
 
 
@@ -65,7 +65,7 @@ For some cases, very simple process of scaling up small Image helps to make some
 
 For the normalization, we don't have something new. In case we working with Images, we can just normilize features, over maximum value of colors. Mean of RBG values at pixel divided by Max possible color value (255) (or even simpler for an Image, loaded in the Grey filter). As a another point, we can think about normalization with `Scikit-Learn` Scalers, however first variant is good enough. 
 
-At this stage, we will play with Scaling in two different ways. After choosing some Sub Area from Working, we will. **a) Apply few Scalling Down types. b) Apply some Scalling Up types.**
+At this stage, we will play with Scaling in two different ways. After choosing some Sub Area from Working, we will **a) Apply few Scalling Down types. b) Apply some Scalling Up types.**
 
 
 <br/>
@@ -83,4 +83,4 @@ As we mentioned before, we will work on features elapsed over time. And for the 
 
 For testing purpose, we created `Preprocessor` objects, which can retrive Timelines in different format, and not only previous frame. We can represent it, as indexes `(0, 1, 2)`, where `(0)` it's current frame, where we now the right Y value (and looking back to the previous `(1)`, and next to it `(2)` frames). 
 
-In out testing, we might check dependencies between frames `(0, 1)` or `(0, 1, 2, 3, 4)` and some variations in this range.   And even more complicated behavior, Timeline with different steps (ex. with step 2, we will have `(0, 2, 4)`), where frame changes will be more visible. So action items for this mapping. **a) Check different Frame Timelines.**
+In out testing, we might check dependencies between frames `(0, 1)` or `(0, 1, 2, 3, 4)` and some variations in this range.   And even more complicated behavior, Timeline with different steps (ex. with step 2, we will have `(0, 2, 4)`), where frame changes will be more visible. So action items for this mapping is **a) Check different Frame Timelines.**
