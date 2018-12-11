@@ -85,18 +85,24 @@ For testing purpose, we created `Preprocessor` objects, which can retrive Timeli
 
 In out testing, we might check dependencies between frames `(0, 1)` or `(0, 1, 2, 3, 4)` and some variations in this range.   And even more complicated behavior, Timeline with different steps (ex. with step 2, we will have `(0, 2, 4)`), where frame changes will be more visible. So action items for this mapping is **a) Check different Frame Timelines.**
 
+
 <br/>
 
-### 1.4 Сonclusions
+### 1.5 Сonclusions
 
 
 In general it's very simple process, where we just shared all thoughts during Preprocessing. For some model, we should take Frames Timeline on Working Area and Normilize inputs. However we came up with several different options, which we should investigate (just combination of possible parameters, also marked above). 
 
+Well known other algorithms might be used for feature extraction on Images. Some of them like SIFT, ORB, HOG and other, might work very well, but doesn't suite for our problem. Main reason covers in performance of our model, and such actions takes huge time for computing.
+
+
 <br/>
 
-### Bonus. Error Resolving.
+### Bonus. Errors
 
-TBD
+So far, we didn't have work on this, but still keeping in mind about possible errors a) Errors on resolving Frames during turning the car. b) Error on road hills and pits. For both problems, we might think about some floating Working Area which will move in random directions (x, y) during training process, to cover most cases in next validation phase. Right now we will skipp this point. 
+
+<br/>
 
 ### Bonus. Frames Augmentation
 
