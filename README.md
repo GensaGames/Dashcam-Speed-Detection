@@ -100,7 +100,7 @@ Well known other algorithms might be used for feature extraction on Images. Some
 
 ### Bonus. Errors
 
-So far, we didn't have work on this, but still keeping in mind about possible errors a) Errors on resolving Frames during turning the car. b) Error on road hills and pits. For both problems, we might think about some floating Working Area which will move in random directions (x, y) during training process, to cover most cases in next validation phase. Right now we will skipp this point. 
+So far, we didn't have work on this, but still keeping in mind about possible errors a) Errors on resolving Frames during turning the car. b) Error on road hills and pits. For both problems, we might think about some floating Working Area which will move in random directions (x, y) during training process, to cover most cases in the next validation phase. Right now we will skipp this point. 
 
 <br/>
 
