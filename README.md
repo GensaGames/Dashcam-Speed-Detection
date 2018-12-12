@@ -148,7 +148,7 @@ Back to initial thoughts, RNN should have enough velocity on data over time. One
 
 
 
-TBD
+<img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/2.1-2.3/lstm-sample-over-iteration.png" width="600" height="300" /> 
 
 2.2.1. Velocity of RNN model on some Preprocessor Combinations.
 <br/><br/>
@@ -162,7 +162,7 @@ TBD
 Combination of 2D-CNN windows, and tracking frames changes over time should work very well. And for validation, we received even worse result, comparing of RNN. Back to model strucutre, we continue some updates, slowly increasing model complexity, but tests result still not enough to work in this direction. 
 
 
-TBD
+<img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/2.1-2.3/lstm-cnn-sample-over-iteration.png" width="600" height="300" /> 
 
 2.3.1. Velocity of 2D-CNN with LSTM Model on some Preprocessor Combinations.
 <br/><br/>
