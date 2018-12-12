@@ -36,7 +36,7 @@ def backup_model_with(path_to, name, model, *args):
     if not os.path.exists(path_to):
         os.makedirs(path_to)
 
-    model.save(path_to + Settings.BUILD_MODEL)
+    model.save(path_to + Settings.NAME_MODEL)
     for i in args:
         with open(path_to + type(i).__name__, "w+") as file:
             file.write(jsonpickle.encode(i))
@@ -50,7 +50,7 @@ def restore_model_with(path_to, name):
 
     objects = []
     for i in os.listdir(path_to):
-        if i.__eq__(Settings.BUILD_MODEL):
+        if i.__eq__(Settings.NAME_MODEL):
             continue
         with open(path_to + i, "rb") as file:
             try:
@@ -59,15 +59,18 @@ def restore_model_with(path_to, name):
             except UnicodeDecodeError:
                 objects.append(None)
 
-    return load_model(path_to + Settings.BUILD_MODEL), \
+    return load_model(path_to + Settings.NAME_MODEL), \
            objects[0], objects[1], objects[2]
 
 
 ##########################################
-# to_frames_video(app.Settings.TRAIN_VIDEO,
-#                 app.Settings.TRAIN_FRAMES)
+# to_frames_video('../../' + Settings.TEST_VIDEO,
+#                 '../../' + Settings.TEST_FRAMES)
+#
+# ffmpeg -i source/test.mp4 -y -an -f image2 /
+#      -r 20 frames-t/%01d.jpg
 def to_frames_video(path_from, path_to, img_format='.jpg'):
-    vid = cv2.VideoCapture('../' + path_from)
+    vid = cv2.VideoCapture(path_from)
 
     path_to = '../' + path_to
     if not os.path.exists(path_to):
@@ -84,6 +87,5 @@ def to_frames_video(path_from, path_to, img_format='.jpg'):
         cv2.imwrite(name, frame)
         # next frame
         index += 1
-
 
 

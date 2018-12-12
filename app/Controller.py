@@ -213,7 +213,7 @@ if __name__ == "__main__":
             os.makedirs(path_to)
 
         handler = logging.FileHandler(
-            filename=path_to + Settings.BUILD_LOGS)
+            filename=path_to + Settings.NAME_LOGS)
         handler.setLevel(logging.DEBUG)
         handler.setFormatter(formatter)
 
@@ -225,10 +225,10 @@ if __name__ == "__main__":
     def combine_workers():
         workers = [MiniBatchWorker(
             PreprocessorParams(
-                backward=(0, 1, 2), frame_y_trim=(190, -190),
-                frame_x_trim=(220, -220), frame_scale=1.3),
+                backward=(0, 1, 2), frame_y_trim=(250, -120),
+                frame_x_trim=(220, -220), frame_scale=1.5),
             ControllerParams(
-                'V3-3D-CNN/', baths=10, train_part=0.99,
+                'V20-3D-CNN/', baths=10, train_part=0.9,
                 epochs=1000, step_vis=150, samples=20400))]
         return workers
 
@@ -245,7 +245,7 @@ if __name__ == "__main__":
 
         plt.savefig(
             '../' + Settings.BUILD + '/' + worker.C_PARAMS.name
-            + '/' + Settings.BUILD_MODEL_PLOT)
+            + '/' + Settings.NAME_MODEL_PLOT)
         return plt
 
 

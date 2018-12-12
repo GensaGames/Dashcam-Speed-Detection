@@ -1,15 +1,17 @@
 
-TRAIN_VIDEO = 'resource/source/train.mp4'
-TRAIN_Y = 'resource/source/train.txt'
+RESOURCE = 'resource/'
 
-TRAIN_FRAMES = 'resource/frames/'
-TEST_VIDEO = 'resource/source/test.mp4'
+TRAIN_VIDEO = RESOURCE + 'source/train.mp4'
+TRAIN_FRAMES = RESOURCE + 'frames/'
+TRAIN_Y = RESOURCE + 'source/train.txt'
+
+TEST_VIDEO = RESOURCE + 'source/test.mp4'
+TEST_FRAMES = RESOURCE + 'frames-t/'
 
 BUILD = 'build/'
 
-BUILD_LOGS = 'logs.txt'
-
-BUILD_MODEL = 'model-view.h5'
-BUILD_MODEL_PLOT = 'epochs-plot.png'
+NAME_LOGS = 'logs.txt'
+NAME_MODEL = 'model-view.h5'
+NAME_MODEL_PLOT = 'epochs-plot.png'
 
 
