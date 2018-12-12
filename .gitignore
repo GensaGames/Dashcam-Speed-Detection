@@ -105,7 +105,5 @@ venv.bak/
 
 # Project
 .idea/
+resource/
 Comma-AI-Speed.iml
-
-resource/frames/
-resource/source/
