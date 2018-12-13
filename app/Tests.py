@@ -69,7 +69,7 @@ def test3():
     ax.plot(range (400, 20400, 100), changes)
 
     ax.set(xlabel='Frame Index Over Time',
-           ylabel='Delta Speed Changes for the last Second (-20)')
+           ylabel='Minimum Index on Momentum changes')
 
     annot_max(range (400, 20400, 100), np.array(changes), ax=ax)
     annot_min(range (400, 20400, 100), np.array(changes), ax=ax)
@@ -79,6 +79,8 @@ def test3():
     plt.show()
 
     plt.savefig('plot.png')
+
+test3()
 
 
 def test4():
@@ -101,7 +103,7 @@ def test4():
         range(20, 20400), change_items)
 
     ax.set(xlabel='Frame Index Over Time',
-           ylabel='Delta Speed Changes from the Previous (-1)')
+           ylabel='Delta Speed Changes from the last second (-20)')
 
     annot_max(range (20, 20400), np.array(change_items), ax=ax)
     annot_min(range (20, 20400), np.array(change_items), ax=ax)
@@ -112,8 +114,6 @@ def test4():
 
     plt.savefig('plot.png')
 
-
-test4()
 
 
 
