@@ -23,7 +23,7 @@ First of all, lets check training data and it's changes over time. After tracing
 <br/> <br/>
 
 
-Most useful information, it's changes speed over time. You can see, where speed changes very swift, and we can use it for tracking anomaly detection for next validation phase (when ever your predictions meet near to unexpected result). 
+Most useful information, it's changes speed over time. You can see, where speed changes very swift, and we can use it for tracking anomaly detection for the next validation phase (when ever your predictions meet near to unexpected result). 
 
 
 
@@ -33,6 +33,19 @@ Most useful information, it's changes speed over time. You can see, where speed 
 
 1.1.1. Delta Speed changes over previous frame. 
 <br/> <br/>
+
+
+Above Image explains how Speed may change from the previous. Even one Video is not enough to relay on this value, we can assume this parameter is good for validation and checking anomalies in a prediction. One more sample, of avarage rate of changing Speed, over previous 20 frames (1 second in time). 
+
+<br/>
+
+<img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/speed-changes-mean-20-frame.png" width="900" height="250" /> 
+
+1.1.1. Delta Speed changes over previous 20 Frames.
+<br/> <br/>
+
+
+
 
 
 
