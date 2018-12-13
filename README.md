@@ -1,23 +1,46 @@
 # Toy-Model-Checking
 
+
+
+
+
 <br/>
 
 
 ## 1. Analyze
 
+
+We have 17 min training video, with 20 frames per second. It's 20400 frames, where we have speed on each frame. From the initial description, we can start with some basics on it a) Features taken from Images b) Features elapsed over time. We will include all work we had, and other possible thoughts.
+
+First of all, lets check training data and it's changes over time. After tracing initial training video we came up with next information.
+
+
 <br/>
 
-We have 17 min training video, with 20 frames per second. It's 20400 frames, where we have speed on each frame. From the initial description, we can start with some basics on it. 1. Features taken from Images 2. Features elapsed over time. We will include all work we had, and other possible thoughts.
+<img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/speed-changes-with-frame.png" width="900" height="250" /> 
+
+1.1.1. Speed value at Frame index from initial training Video. 
+<br/> <br/>
+
+
+Most useful information, it's changes speed over time. You can see, where speed changes very swift, and we can use it for tracking anomaly detection for next validation phase (when ever your predictions meet near to unexpected result). 
 
 
 
------------------
+<br/>
 
+<img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/speed-changes-mean-previous.png" width="900" height="250" /> 
+
+1.1.1. Delta Speed changes over previous frame. 
+<br/> <br/>
+
+
+
+
+<br/>
 
 ## 2. Preprocessing
 
-
-<br/>
 
 ### 2.1 Working Area
 From each frame, we can decide working area, which includes most of the features, depending on our task. And reduce number of the Inputs. Even we did some feature area investigation, it's easy to manually retrive most useful part.
@@ -126,7 +149,6 @@ So far, we didn't have work on this, but still keeping in mind about possible er
 
 <br/>
 
------------------------
 
 ## 3. Model.
 
