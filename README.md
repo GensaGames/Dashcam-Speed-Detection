@@ -6,6 +6,8 @@
 
 <br/>
 
+<br/>
+
 
 ## 1. Analyze
 
@@ -31,7 +33,7 @@ Most useful information, it's changes speed over time. You can see, where speed 
 
 <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/speed-changes-with-previous.png" width="900" height="250" /> 
 
-1.1.1. Delta Speed changes over previous frame. 
+1.1.1. Delta Speed changes over Previous frame. 
 <br/> <br/>
 
 
@@ -41,7 +43,7 @@ Above Image explains how Speed may change from the previous. Even one Video is n
 
 <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/speed-changes-delta-20-frame.png" width="900" height="250" /> 
 
-1.1.1. Delta Speed changes over previous 20 Frames.
+1.1.2. Delta Speed changes over Previous 20 frames.
 <br/> <br/>
 
 
@@ -51,8 +53,9 @@ Above Image explains how Speed may change from the previous. Even one Video is n
 
 <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/frame-momentum-same-direction.png" width="900" height="250" /> 
 
-1.1.1. Delta Speed changes over previous 20 Frames.
+1.1.3. Delta Speed changes over previous 20 Frames.
 <br/> <br/>
+
 
 
 <br/>
@@ -66,6 +69,8 @@ So far, we didn't have work on this, but still keeping in mind about possible er
 
 
 
+
+<br/>
 
 <br/>
 
@@ -169,6 +174,8 @@ Well known other algorithms might be used for feature extraction on Images. Some
 
 
 
+
+<br/>
 
 <br/>
 
