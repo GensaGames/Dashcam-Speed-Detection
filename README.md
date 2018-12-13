@@ -2,10 +2,13 @@
 
 <br/>
 
+
+## 1. Preprocessing
+
 -----------------
 
 
-## 1. Preprocessing
+## 2. Preprocessing
 
 We have 17 min training video, with 20 frames per second. It's 20400 frames, where we have speed on each frame. From the initial description, we can start with some basics on it. 1. Features taken from Images 2. Features elapsed over time. We will include all work we had, and other possible thoughts.
 
@@ -13,14 +16,14 @@ We have 17 min training video, with 20 frames per second. It's 20400 frames, whe
 
 <br/>
 
-### 1.1 Working Area
+### 2.1 Working Area
 From each frame, we can decide working area, which includes most of the features, depending on our task. And reduce number of the Inputs. Even we did some feature area investigation, it's easy to manually retrive most useful part.
 
 <br/>
 
 <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/1.1/source-image.jpg" width="400" height="300" /> <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/1.1/source-feature-area.png" width="400" height="300" /> 
 
-1.1.1. Source Image and Source Image Areas. Red Box represents Working Area, for the next steps. 
+2.1.1. Source Image and Source Image Areas. Red Box represents Working Area, for the next steps. 
 <br/> <br/>
 
 But we have another interesting question here. As you can see, we have Working Area, which consist from some Sub Areas, Close and Far. First one, has more features about road changes (has more changes over time, due of camera angle). And Second one with more noise like side objects, other cars and less road changes. 
@@ -29,7 +32,7 @@ But we have another interesting question here. As you can see, we have Working A
 
 <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/1.1/car-angle-variants.jpg" width="800" height="200" /> 
 
-1.1.2. Frame changes updates in different way, based on Angle of a Camera. 
+2.1.2. Frame changes updates in different way, based on Angle of a Camera. 
 <br/> <br/>
 
 At this point, we have few variants, for next preprocessing steps. We will use this options in the next phases. - Using Far Sub Area. - Using Mid Sub Area. - Using Close Sub Area, and so on.
@@ -43,7 +46,7 @@ Below animation, how we can estimate it, with changes over time. Note, this samp
 
 <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/1.1/image-mov-top-0.gif" width="280" height="170" /> <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/1.1/image-mov-mid-0.gif" width="280" height="170" /> <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/1.1/image-mov-bot-0.gif" width="280" height="170" /> 
 
-1.1.3. Sub Area features changing over time. LTR Far - Mid - Close Areas.
+2.1.3. Sub Area features changing over time. LTR Far - Mid - Close Areas.
 <br/> <br/>
 
 As a result, we come with few options for next work **a) Check Model velocity using several Sub Areas Types. b) Check Model velocity over all possible Sub Areas, with momentum over some shifting.**
@@ -52,7 +55,7 @@ As a result, we come with few options for next work **a) Check Model velocity us
 
 <br/>
 
-### 1.2 Scaling and Normalization
+### 2.2 Scaling and Normalization
 
 Scaling takes some part in preprocessing, even we can simplify and avoid it's usage. Scale working in two directions, and for some cases might reduce a Dimensionality in two different ways. We will not talk about simple scaling down Image, to reduce it's size, but in some resources, you can find opossite usage of scaling, by increasing Image size.
 
@@ -60,7 +63,7 @@ Scaling takes some part in preprocessing, even we can simplify and avoid it's us
 
 <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/1.2/scale-source.gif" width="280" height="170" /> <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/1.2/scale-image.gif" width="280" height="170" /> <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/1.2/scale-compressed.gif" width="280" height="170" />
 
-1.2.1. Feature changing over time. LTR Source - Scaled - Compressed Images.
+2.2.1. Feature changing over time. LTR Source - Scaled - Compressed Images.
 <br/><br/>
 
 For some cases, very simple process of scaling up small Image helps to make some kind of preprocessing and retaint most important features and their changes over time. We can compare this process, to some N Compressing, but requires substantially less resources to compute. 
@@ -72,7 +75,7 @@ At this stage, we will play with Scaling in two different ways. After choosing s
 
 <br/>
 
-### 1.3 Frames Timeline 
+### 2.3 Frames Timeline 
 
 As we mentioned before, we will work on features elapsed over time. And for the single training sample, we should have few frames before the focus one. This Timeline of single training sample, might be configured in very different way. And not only previous frame, before the focused.
 
@@ -80,7 +83,7 @@ As we mentioned before, we will work on features elapsed over time. And for the 
 
 <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/1.3/frames-elapsed-over-time.jpg" width="800" height="160" /> 
 
-1.3.1. Single training sample consist from several frames
+2.3.1. Single training sample consist from several frames
 <br/><br/>
 
 For testing purpose, we created Preprocessor objects, which can retrive Timelines in different format, and not only previous frame. We can represent it, as indexes '(0, 1, 2)', where '(0)' it's current frame, where we now the right Y value (and looking back to the previous '(1)', and next to it '(2)' frames). 
@@ -90,7 +93,7 @@ In out testing, we might check dependencies between frames '(0, 1)' or '(0, 1, 2
 
 <br/>
 
-### 1.5 Frames Augmentation
+### 2.4 Frames Augmentation
 
 TBD
 
@@ -98,7 +101,7 @@ TBD
 
 <br/>
 
-### 1.6 Сonclusions
+### 2.5 Сonclusions
 
 
 In general it's very simple process, where we just shared all thoughts during Preprocessing. For some model, we should take Frames Timeline on Working Area and Normilize inputs. However we came up with several different options: Preprocessor Combinations, which we should investigate (combination of all possible parameters, also marked above). 
@@ -122,7 +125,7 @@ So far, we didn't have work on this, but still keeping in mind about possible er
 
 -----------------------
 
-## 2. Model.
+## 3. Model.
 
 Same with preprocessing, we will describe just all investigation and work for choosing Model. We will start from simple implementations. In first phases, we suppose to keep everything as simple, as possible. Because you can increase complexity in any time and every part of the Model. 
 
@@ -131,7 +134,7 @@ Below you will find some graphics and Model structures. No Models (or it's struc
 
 <br/>
 
-### 2.1 MLP and 2D-CNN
+### 3.1 MLP and 2D-CNN
 
 Even from the initial sentence of the task (with processing video), which gives us hint to move in RNN directions, we had few examples of MLP. In our examples, we might represent features as delta changes between frames, where tried to achive some kind of Compressing during Timeline.
 
@@ -142,7 +145,7 @@ Why 2D-CNN also included here, because we supposed to have such model, with Conv
 
 <br/>
 
-### 2.2 RNN and LSTM
+### 3.2 RNN and LSTM
 
 Back to initial thoughts, RNN should have enough velocity on data over time. One more pros here, it's number of the inputs. Comparing to the previous methods, where we Flatten few frames (based on Timeline) into one blob features, here we can consume frames one by one. And finally we can see some progress in Model validation. It was good for next steps, but we didn't enough for working solution. 
 
@@ -150,33 +153,33 @@ Back to initial thoughts, RNN should have enough velocity on data over time. One
 
 <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/2.1-2.3/lstm-sample-over-iteration.png" width="600" height="300" /> 
 
-2.2.1. Velocity of RNN model on some Preprocessor Combinations.
+3.2.1. Velocity of RNN model on some Preprocessor Combinations.
 <br/><br/>
 
 
 
 <br/>
 
-### 2.3 2D-CNN with LSTM
+### 3.3 2D-CNN with LSTM
 
 Combination of 2D-CNN windows, and tracking frames changes over time should work very well. And for validation, we received even worse result, comparing of RNN. Back to model strucutre, we continue some updates, slowly increasing model complexity, but tests result still not enough to work in this direction. 
 
 
 <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/2.1-2.3/lstm-cnn-sample-over-iteration.png" width="600" height="300" /> 
 
-2.3.1. Velocity of 2D-CNN with LSTM Model on some Preprocessor Combinations.
+3.3.1. Velocity of 2D-CNN with LSTM Model on some Preprocessor Combinations.
 <br/><br/>
 
 
 <br/>
 
-### 2.4 3D-CNN
+### 3.4 3D-CNN
 
 Obviously 3D-CNN takes places in this list. Even this is most recommended types for the features elapsed over time, we came to this Model in last examples. And this Model works noticeably well on validation data. Starting from very simple Model we can see very good results, and continue work on Model complexity and Preprocessor Combinations. You can see how well this Model fit, comparing to other types. 
 
 
 TBD
 
-2.4.1. Velocity of 3D-CNN Model.
+3.4.1. Velocity of 3D-CNN Model.
 <br/><br/>
 
