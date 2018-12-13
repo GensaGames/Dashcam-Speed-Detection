@@ -24,6 +24,45 @@ def save_plot_with(path_to, plot, prefix, model, p_params):
 
 
 ##########################################
+def annot_max(x, y, ax=None):
+    xmax = x[np.argmax(y)]
+    ymax = y.max()
+    text= "x={:.3f}, Max y={:.3f}".format(xmax, ymax)
+    if not ax:
+        ax=plt.gca()
+    bbox_props = dict(boxstyle="square,pad=0.8", fc="w", ec="k", lw=0.72)
+    arrowprops=dict(arrowstyle="->",connectionstyle="angle,angleA=0,angleB=60")
+    kw = dict(xycoords='data',textcoords="axes fraction",
+              arrowprops=arrowprops, bbox=bbox_props, ha="right", va="top")
+    ax.annotate(text, xy=(xmax, ymax), xytext=(0.7, 0.7), **kw)
+
+
+##########################################
+def annot_min(x, y, ax=None):
+    xmin = x[np.argmin(y)]
+    ymin = y.min()
+    text= "x={:.3f}, Min y={:.3f}".format(xmin, ymin)
+    if not ax:
+        ax=plt.gca()
+    bbox_props = dict(boxstyle="square,pad=0.8", fc="w", ec="k", lw=0.4)
+    arrowprops=dict(arrowstyle="->",connectionstyle="angle,angleA=0,angleB=60")
+    kw = dict(xycoords='data',textcoords="axes fraction",
+              arrowprops=arrowprops, bbox=bbox_props, ha="right", va="top")
+    ax.annotate(text, xy=(xmin, ymin), xytext=(0.4, 0.4), **kw)
+
+
+def annot_avr(y, ax=None):
+    y_mean = np.mean(y)
+    text= "Mean ={:.3f}".format(y_mean)
+    if not ax:
+        ax=plt.gca()
+    bbox_props = dict(boxstyle="square,pad=0.8", fc="r", ec="k", lw=0.4)
+    kw = dict(xycoords='data',textcoords="axes fraction",
+              bbox=bbox_props, ha="right", va="top")
+    ax.annotate(text, xy=(0, 0), xytext=(0.1, 0.9), **kw)
+
+
+##########################################
 def save_plot(path_to, plot, prefix):
     if not os.path.exists(path_to):
         os.makedirs(path_to)
