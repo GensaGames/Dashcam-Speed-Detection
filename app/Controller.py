@@ -59,7 +59,7 @@ class MiniBatchWorker:
             return
 
         try:
-            self.model, self.VISUAL, self.C_PARAMS, self.P_PARAMS = \
+            self.model, self.P_PARAMS, self.C_PARAMS, self.VISUAL = \
                 Helper.restore_model_with(
                     '../' + Settings.BUILD, self.C_PARAMS.name)
         except FileNotFoundError:
@@ -134,7 +134,7 @@ class MiniBatchWorker:
                        activation=sigmoid, input_shape=input_shape,
                        padding='valid', data_format='channels_last'))
 
-            self.model.add(Dropout(0.1))
+            self.model.add(Dropout(0.2))
             self.model.add(MaxPooling3D(pool_size=(1, 2, 2)))
 
             self.model.add(
@@ -142,7 +142,7 @@ class MiniBatchWorker:
                        activation=sigmoid, input_shape=input_shape,
                        padding='valid', data_format='channels_last'))
 
-            self.model.add(Dropout(0.1))
+            self.model.add(Dropout(0.2))
             self.model.add(MaxPooling3D(pool_size=(2, 2, 2)))
 
             self.model.add(Flatten())
@@ -225,10 +225,10 @@ if __name__ == "__main__":
     def combine_workers():
         workers = [MiniBatchWorker(
             PreprocessorParams(
-                backward=(0, 1, 2), frame_y_trim=(250, -120),
-                frame_x_trim=(220, -220), frame_scale=1.5),
+                backward=(0, 1, 2), frame_y_trim=(230, -130),
+                frame_x_trim=(220, -220), frame_scale=1.3),
             ControllerParams(
-                'V20-3D-CNN/', baths=10, train_part=0.9,
+                'V21-3D-CNN/', baths=10, train_part=0.9,
                 epochs=1000, step_vis=150, samples=20400))]
         return workers
 

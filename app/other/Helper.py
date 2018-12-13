@@ -48,19 +48,30 @@ def restore_model_with(path_to, name):
     if not os.path.exists(path_to):
         raise FileNotFoundError
 
-    objects = []
+    p_params, c_params, visual = \
+        None, None, None
+
     for i in os.listdir(path_to):
         if i.__eq__(Settings.NAME_MODEL):
             continue
+
         with open(path_to + i, "rb") as file:
             try:
-                objects.append(jsonpickle.decode(
-                    file.read()))
+                decoded = jsonpickle.decode(
+                    file.read())
+                if type(decoded).__name__.__eq__(
+                        'PreprocessorParams'):
+                    p_params = decoded
+                elif type(decoded).__name__.__eq__(
+                        'ControllerParams'):
+                    c_params = decoded
+                else:
+                    visual = decoded
             except UnicodeDecodeError:
-                objects.append(None)
+                pass
 
-    return load_model(path_to + Settings.NAME_MODEL), \
-           objects[0], objects[1], objects[2]
+    return load_model(path_to + Settings.NAME_MODEL),\
+           p_params, c_params, visual
 
 
 ##########################################
