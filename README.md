@@ -29,7 +29,7 @@ Most useful information, it's changes speed over time. You can see, where speed 
 
 <br/>
 
-<img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/speed-changes-mean-previous.png" width="900" height="250" /> 
+<img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/speed-changes-with-previous.png" width="900" height="250" /> 
 
 1.1.1. Delta Speed changes over previous frame. 
 <br/> <br/>
@@ -39,10 +39,27 @@ Above Image explains how Speed may change from the previous. Even one Video is n
 
 <br/>
 
-<img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/speed-changes-mean-20-frame.png" width="900" height="250" /> 
+<img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/speed-changes-delta-20-frame.png" width="900" height="250" /> 
 
 1.1.1. Delta Speed changes over previous 20 Frames.
 <br/> <br/>
+
+
+
+
+<br/>
+
+<img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/frame-momentum-same-direction.png" width="900" height="250" /> 
+
+1.1.1. Delta Speed changes over previous 20 Frames.
+<br/> <br/>
+
+
+<br/>
+
+### Error and Troubleshooting
+
+So far, we didn't have work on this, but still keeping in mind about possible errors a) Errors on resolving Frames during turning the car. b) Error on road hills and pits. For both problems, we might think about some floating Working Area which will move in random directions (x, y) during training process, to cover most cases in the next validation phase. Right now we will skipp this point. 
 
 
 
@@ -146,13 +163,6 @@ TBD
 In general it's very simple process, where we just shared all thoughts during Preprocessing. For some model, we should take Frames Timeline on Working Area and Normilize inputs. However we came up with several different options: Preprocessor Combinations, which we should investigate (combination of all possible parameters, also marked above). 
 
 Well known other algorithms might be used for feature extraction on Images. Some of them like `SIFT`, `ORB`, `HOG` and other, might work very well, but doesn't suite for our problem. Main reason covers in performance of our model, and such actions takes huge time for computing.
-
-
-<br/>
-
-### Bonus Errors
-
-So far, we didn't have work on this, but still keeping in mind about possible errors a) Errors on resolving Frames during turning the car. b) Error on road hills and pits. For both problems, we might think about some floating Working Area which will move in random directions (x, y) during training process, to cover most cases in the next validation phase. Right now we will skipp this point. 
 
 
 
