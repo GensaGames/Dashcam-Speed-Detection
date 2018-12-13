@@ -3,15 +3,18 @@
 <br/>
 
 
-## 1. Preprocessing
+## 1. Analyze
+
+<br/>
+
+We have 17 min training video, with 20 frames per second. It's 20400 frames, where we have speed on each frame. From the initial description, we can start with some basics on it. 1. Features taken from Images 2. Features elapsed over time. We will include all work we had, and other possible thoughts.
+
+
 
 -----------------
 
 
 ## 2. Preprocessing
-
-We have 17 min training video, with 20 frames per second. It's 20400 frames, where we have speed on each frame. From the initial description, we can start with some basics on it. 1. Features taken from Images 2. Features elapsed over time. We will include all work we had, and other possible thoughts.
-
 
 
 <br/>
