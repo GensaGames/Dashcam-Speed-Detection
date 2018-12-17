@@ -16,6 +16,7 @@ opencv-python = "*"
 rx = "*"
 jsonpickle = "*"
 pydot = "*"
+scikit-image = "*"
 
 [requires]
 python_version = "3.6"

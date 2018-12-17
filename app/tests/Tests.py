@@ -24,11 +24,11 @@ def test1():
 
 
 def test2():
-    image1 = cv2.imread('../' + TEST_FRAMES + '/88.jpg', cv2.IMREAD_COLOR)
+    image1 = cv2.imread('../' + TEST_FRAMES + '/540.jpg', cv2.IMREAD_COLOR)
     image2 = cv2.imread('../' + TEST_FRAMES + '/46.jpg', cv2.IMREAD_COLOR)
 
     frm = image1.mean(axis=2)
-    frm = frm[190:-190, 220:-220]
+    frm = frm[230:-130, 220:-220]
     frm = cv2.resize(frm, (320, 160))
 
     # image1 = image1[220:350, 0:640]
@@ -40,6 +40,8 @@ def test2():
     cv2.imwrite('sift_keypoints2.jpg', frm)
     # cv2.imwrite('sift_keypoints1.jpg', image2)
 
+
+test2()
 
 def test3():
     items = loadtxt(
@@ -80,7 +82,6 @@ def test3():
 
     plt.savefig('plot.png')
 
-test3()
 
 
 def test4():

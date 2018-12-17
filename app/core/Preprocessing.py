@@ -1,15 +1,15 @@
 from __future__ import division
 
 import logging
+from operator import itemgetter
 from pathlib import Path
-from numpy import loadtxt
+
 import cv2
 import numpy as np
-import app.Settings as Setting
+from numpy import loadtxt
 from rx import Observable
-from operator import itemgetter
-from collections.abc import Iterable
 
+import app.Settings as Setting
 from app.core.Parameters import PreprocessorParams
 
 logging.basicConfig(level=logging.INFO)
@@ -60,10 +60,23 @@ class Preprocessor:
         assert isinstance(frames, list) and \
                isinstance(frames[0], np.ndarray)
 
+        # Apply random floating Area Shift
+        def shift():
+            return np.random.randint(
+                low=-1 * self.PARAMS.area_float,
+                high=self.PARAMS.area_float)
+
+        x_shift = shift()
+        y_shift = shift()
+
         for idx, frame in enumerate(frames):
-            frames[idx] = frame[
-                          self.PARAMS.frame_y_trim[0]:self.PARAMS.frame_y_trim[1],
-                          self.PARAMS.frame_x_trim[0]:self.PARAMS.frame_x_trim[1]]
+            frames[idx] = \
+                frame[
+                self.PARAMS.frame_y_trim[0] + y_shift:
+                self.PARAMS.frame_y_trim[1] + y_shift,
+
+                self.PARAMS.frame_x_trim[0] + x_shift:
+                self.PARAMS.frame_x_trim[1] + x_shift]
         return frames
 
     def __map_scale(self, frames):

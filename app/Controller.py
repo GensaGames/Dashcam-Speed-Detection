@@ -226,9 +226,9 @@ if __name__ == "__main__":
         workers = [MiniBatchWorker(
             PreprocessorParams(
                 backward=(0, 1, 2), frame_y_trim=(230, -130),
-                frame_x_trim=(220, -220), frame_scale=1.3),
+                frame_x_trim=(220, -220), frame_scale=1.5),
             ControllerParams(
-                'V21-3D-CNN/', baths=10, train_part=0.9,
+                'V31-3D-CNN/', baths=10, train_part=0.9,
                 epochs=1000, step_vis=150, samples=20400))]
         return workers
 
