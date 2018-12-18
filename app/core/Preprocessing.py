@@ -66,17 +66,21 @@ class Preprocessor:
                 low=-1 * self.PARAMS.area_float,
                 high=self.PARAMS.area_float)
 
-        x_shift = shift()
-        y_shift = shift()
+        step = len(self.PARAMS.backward)
+        assert len(frames) % step == 0
 
-        for idx, frame in enumerate(frames):
-            frames[idx] = \
-                frame[
-                self.PARAMS.frame_y_trim[0] + y_shift:
-                self.PARAMS.frame_y_trim[1] + y_shift,
+        for timeline in range(0, len(frames), step):
+            x_shift = shift()
+            y_shift = shift()
 
-                self.PARAMS.frame_x_trim[0] + x_shift:
-                self.PARAMS.frame_x_trim[1] + x_shift]
+            for idx in range (timeline, timeline + step):
+                frames[idx] = \
+                    frames[idx][
+                    self.PARAMS.frame_y_trim[0] + y_shift:
+                    self.PARAMS.frame_y_trim[1] + y_shift,
+
+                    self.PARAMS.frame_x_trim[0] + x_shift:
+                    self.PARAMS.frame_x_trim[1] + x_shift]
         return frames
 
     def __map_scale(self, frames):
@@ -112,9 +116,9 @@ class Preprocessor:
         assert len(frames) % timeline == 0
         len_indexes = int(len(frames) / timeline)
 
-        return frames.reshape(
-            (len_indexes, timeline, frames[0].shape[0],
-             frames[0].shape[1], 1))
+        return frames.reshape((
+            len_indexes, timeline, frames[0].shape[0],
+            frames[0].shape[1], 1))
 
     @staticmethod
     def __to_timeline_y(frames):

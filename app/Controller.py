@@ -130,7 +130,7 @@ class MiniBatchWorker:
 
             self.model = Sequential()
             self.model.add(
-                Conv3D(filters=24, kernel_size=(2, 5, 5), strides=(1, 2, 2),
+                Conv3D(filters=32, kernel_size=(2, 5, 5), strides=(1, 2, 2),
                        activation=sigmoid, input_shape=input_shape,
                        padding='valid', data_format='channels_last'))
 

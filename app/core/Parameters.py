@@ -5,7 +5,7 @@ class PreprocessorParams:
 
     def __init__(
             self, backward=(0,), frame_y_trim=(230, 350),
-            frame_x_trim=(140, 380), area_float=15,
+            frame_x_trim=(140, 380), area_float=10,
             frame_scale=0.7):
 
         self._backward = backward
