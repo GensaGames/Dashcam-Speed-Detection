@@ -4,9 +4,7 @@
 
 
 
-<br/>
-
-<br/>
+<br/><br/>
 
 
 ## 1. Analyze
@@ -17,11 +15,13 @@ We have 17 min training video, with 20 frames per second. It's 20400 frames, whe
 Start with checking training video, we will see autobahn for about 70% of the video, and some street roads (30 %). We do have some noises, like low distance between cars, and few turns with very smoothed rotation. Some examples of the frames, you can see below. Nothing special at all. 
 
 <br/> <br/> <br/>
+<br/><br/>
 
 <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/car-normal-ex1-0.gif" width="280" height="170" /> <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/car-normal-ex2-0.gif" width="280" height="170" /> <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/car-normal-ex3-0.gif" width="280" height="170" /> 
 
 1.1.1. Examples of Working Areas in the train set.
-<br/> <br/> <br/>
+<br/> <br/> <br/> 
+<br/><br/>
 
 
 
@@ -30,13 +30,15 @@ However, we have existing video for testing. Test video have 9 min video with th
 So lets describe test set, and what we have.Around 30 % of the driving it's autobahn, and other part it's streen roads. We have a lot of noises, which completely new comparing to the training set. Few of them are - Sharp turns - Car stop - Road steep descent and ascent.
 
 <br/> <br/> <br/>
+<br/><br/>
 
 <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/car-turning-ex1-0.gif" width="280" height="170" /> <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/car-stop-ex1-0.gif" width="280" height="170" />  <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/car-turning-ex2-0.gif" width="280" height="170" /> 
 
 1.1.2. Examples of Working Areas in the test set. LTR Car turning Ex.1 - Car stop - Car turning Ex.2
 <br/> <br/> <br/>
+<br/><br/>
 
- Around First of all, lets check training data and it's changes over time. After tracing initial training video we came up with next information.
+We will start with check training data and it's changes over time. After tracing initial training video we came up with next information.
 
 
 <br/>
@@ -72,23 +74,13 @@ Above Image explains how Speed may change from the previous. Even one Video is n
 
 
 
-<br/>
-
-### 1.1. Error and Troubleshooting
-
-So far, we didn't have work on this, but still keeping in mind about possible errors a) Errors on resolving Frames during turning the car. b) Error on road hills and pits. For both problems, we might think about some floating Working Area which will move in random directions (x, y) during training process, to cover most cases in the next validation phase. Right now we will skipp this point. 
 
 
 
 
 
 
-
-
-
-<br/>
-
-<br/>
+<br/> <br/>
 
 ## 2. Preprocessing
 
@@ -178,6 +170,14 @@ TBD
 
 <br/>
 
+### 2.4 Regularization and Errors
+
+TDB
+
+
+
+<br/>
+
 ### 2.5 Сonclusions
 
 
@@ -191,9 +191,7 @@ Well known other algorithms might be used for feature extraction on Images. Some
 
 
 
-<br/>
-
-<br/>
+<br/> <br/>
 
 
 ## 3. Model.
