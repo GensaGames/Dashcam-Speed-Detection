@@ -14,6 +14,19 @@
 
 We have 17 min training video, with 20 frames per second. It's 20400 frames, where we have speed on each frame. From the initial description, we can start with some basics on it a) Features taken from Images b) Features elapsed over time. We will include all work we had, and other possible thoughts.
 
+Start with checking training video, we will see autobahn for about 70% of the video, and some street roads (30 %). We do have some noises, like low distance between cars, and few turns with very smoothed rotation. Some examples of the frames, you can see below. Nothing special at all. 
+
+
+However, we have existing video for testing. Test video have 9 min video with the same framerate, and will be used for the next model evaluation. As you will see, it's not just usual task, where you need to keep in mind a regularization objective. But think about alternatives for the feature extraction. 
+
+<br/>
+
+<img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/car-stop-ex1-0.gif" width="280" height="170" /> <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/car-turning-ex1-0.gif" width="280" height="170" /> <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/car-turning-ex2-0.gif" width="280" height="170" /> 
+
+2.1.3. Examples of Working Areas in the train set. LTR Car stop - Car turning Ex.1 - Car turning Ex.2
+<br/> <br/>
+
+
 First of all, lets check training data and it's changes over time. After tracing initial training video we came up with next information.
 
 
@@ -55,6 +68,8 @@ Above Image explains how Speed may change from the previous. Even one Video is n
 ### 1.1. Error and Troubleshooting
 
 So far, we didn't have work on this, but still keeping in mind about possible errors a) Errors on resolving Frames during turning the car. b) Error on road hills and pits. For both problems, we might think about some floating Working Area which will move in random directions (x, y) during training process, to cover most cases in the next validation phase. Right now we will skipp this point. 
+
+
 
 
 
