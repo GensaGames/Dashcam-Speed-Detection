@@ -16,38 +16,47 @@ We have 17 min training video, with 20 frames per second. It's 20400 frames, whe
 
 Start with checking training video, we will see autobahn for about 70% of the video, and some street roads (30 %). We do have some noises, like low distance between cars, and few turns with very smoothed rotation. Some examples of the frames, you can see below. Nothing special at all. 
 
+<br/> <br/> <br/>
+
+<img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/car-normal-ex1-0.gif" width="280" height="170" /> <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/car-normal-ex2-0.gif" width="280" height="170" /> <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/car-normal-ex3-0.gif" width="280" height="170" /> 
+
+1.1.1. Examples of Working Areas in the train set.
+<br/> <br/> <br/>
+
+
 
 However, we have existing video for testing. Test video have 9 min video with the same framerate, and will be used for the next model evaluation. As you will see, it's not just usual task, where you need to keep in mind a regularization objective. But think about alternatives for the feature extraction. 
 
-<br/>
+So lets describe test set, and what we have.Around 30 % of the driving it's autobahn, and other part it's streen roads. We have a lot of noises, which completely new comparing to the training set. Few of them are - Sharp turns - Car stop - Road steep descent and ascent.
 
-<img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/car-stop-ex1-0.gif" width="280" height="170" /> <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/car-turning-ex1-0.gif" width="280" height="170" /> <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/car-turning-ex2-0.gif" width="280" height="170" /> 
+<br/> <br/> <br/>
 
-2.1.3. Examples of Working Areas in the train set. LTR Car stop - Car turning Ex.1 - Car turning Ex.2
-<br/> <br/>
+<img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/car-turning-ex1-0.gif" width="280" height="170" /> <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/car-stop-ex1-0.gif" width="280" height="170" />  <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/car-turning-ex2-0.gif" width="280" height="170" /> 
 
+1.1.2. Examples of Working Areas in the test set. LTR Car turning Ex.1 - Car stop - Car turning Ex.2
+<br/> <br/> <br/>
 
-First of all, lets check training data and it's changes over time. After tracing initial training video we came up with next information.
+ Around First of all, lets check training data and it's changes over time. After tracing initial training video we came up with next information.
 
 
 <br/>
 
 <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/speed-changes-with-frame.png" width="900" height="250" /> 
 
-1.1.1. Speed value at Frame index from initial training Video. 
-<br/> <br/>
+1.1.3. Speed value at Frame index from initial training Video. 
+<br/> <br/> <br/>
 
 
 Most useful information, it's changes speed over time. You can see, where speed changes very swift, and we can use it for tracking anomaly detection for the next validation phase (when ever your predictions meet near to unexpected result). 
 
 
 
-<br/>
+<br/> 
 
 <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/speed-changes-with-previous.png" width="900" height="250" /> 
 
-1.1.1. Delta Speed changes over Previous frame. 
-<br/> <br/>
+1.1.4. Delta Speed changes over Previous frame. 
+<br/> <br/> 
 
 
 Above Image explains how Speed may change from the previous. Even one Video is not enough to relay on this value, we can assume this parameter is good for validation and checking anomalies in a prediction. One more sample, of avarage rate of changing Speed, over previous 20 frames (1 second in time). 
@@ -56,7 +65,7 @@ Above Image explains how Speed may change from the previous. Even one Video is n
 
 <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/speed-changes-delta-20-frame.png" width="900" height="250" /> 
 
-1.1.2. Delta Speed changes over Previous 20 frames.
+1.1.5. Delta Speed changes over Previous 20 frames.
 <br/> <br/>
 
 
