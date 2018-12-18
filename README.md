@@ -49,14 +49,6 @@ Above Image explains how Speed may change from the previous. Even one Video is n
 
 
 
-<br/>
-
-<img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/frame-momentum-same-direction.png" width="900" height="250" /> 
-
-1.1.3. Delta Speed changes over previous 20 Frames.
-<br/> <br/>
-
-
 
 <br/>
 
