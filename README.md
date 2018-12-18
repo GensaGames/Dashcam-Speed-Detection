@@ -38,7 +38,9 @@ So lets describe test set, and what we have.Around 30 % of the driving it's auto
 <br/> <br/> <br/>
 <br/><br/>
 
-We will start with check training data and it's changes over time. After tracing initial training video we came up with next information.
+
+
+We will start with check training data and it's changes over time. Most useful information, it's changes speed over time. You can see, where speed changes very swift, and we can use it for tracking anomaly detection for the next validation phase (when ever your predictions meet near to unexpected result). 
 
 
 <br/>
@@ -46,12 +48,7 @@ We will start with check training data and it's changes over time. After tracing
 <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/speed-changes-with-frame.png" width="900" height="250" /> 
 
 1.1.3. Speed value at Frame index from initial training Video. 
-<br/> <br/> <br/>
-
-
-Most useful information, it's changes speed over time. You can see, where speed changes very swift, and we can use it for tracking anomaly detection for the next validation phase (when ever your predictions meet near to unexpected result). 
-
-
+<br/> <br/>
 
 <br/> 
 
