@@ -143,6 +143,14 @@ class MiniBatchWorker:
                        padding='valid', data_format='channels_last'))
 
             self.model.add(Dropout(0.2))
+            self.model.add(MaxPooling3D(pool_size=(1, 2, 2)))
+
+            self.model.add(
+                Conv3D(filters=48, kernel_size=(1, 3, 3), strides=(1, 1, 1),
+                       activation=sigmoid, input_shape=input_shape,
+                       padding='valid', data_format='channels_last'))
+
+            self.model.add(Dropout(0.2))
             self.model.add(MaxPooling3D(pool_size=(2, 2, 2)))
 
             self.model.add(Flatten())
@@ -153,10 +161,6 @@ class MiniBatchWorker:
                            activation=relu))
             self.model \
                 .add(Dense(units=48,
-                           kernel_initializer=he_normal(),
-                           activation=relu))
-            self.model \
-                .add(Dense(units=12,
                            kernel_initializer=he_normal(),
                            activation=relu))
 
@@ -225,8 +229,8 @@ if __name__ == "__main__":
     def combine_workers():
         workers = [MiniBatchWorker(
             PreprocessorParams(
-                backward=(0, 1, 2), frame_y_trim=(230, -130),
-                frame_x_trim=(220, -220), frame_scale=1.5),
+                backward=(0, 1, 2), frame_y_trim=(190, -190),
+                frame_x_trim=(220, -220), frame_scale=1.3),
             ControllerParams(
                 'V31-3D-CNN/', baths=10, train_part=0.9,
                 epochs=1000, step_vis=150, samples=20400))]

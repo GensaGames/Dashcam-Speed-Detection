@@ -1,6 +1,5 @@
 import cv2
 import numpy as np
-from app.Settings import TRAIN_FRAMES, TEST_FRAMES
 from app.other.Helper import *
 from numpy import loadtxt
 import cv2
@@ -11,21 +10,24 @@ import matplotlib.pyplot as plt
 
 def test1():
 
-    start_idx = 380
+    start_idx = 6606
     for idx in range(5):
-        i = cv2.imread('../' + TEST_FRAMES + '/' + str(
+        i = cv2.imread('../../' + Settings.TEST_FRAMES + '/' + str(
             start_idx + idx) + '.jpg', cv2.IMREAD_COLOR)
 
         # scale
         frm = cv2.resize(
-            i[250:-120, 220:-220], (0, 0), fx=1.5, fy=1.5)
+            i[190: -190, 220:-220], (0, 0), fx=1.3, fy=1.3)
 
-        cv2.imwrite('scale-' + str(idx) + '.jpg', frm)
+        cv2.imwrite('car-normal-ex3-' + str(idx) + '.jpg', frm)
+
+
+test1()
 
 
 def test2():
-    image1 = cv2.imread('../' + TEST_FRAMES + '/540.jpg', cv2.IMREAD_COLOR)
-    image2 = cv2.imread('../' + TEST_FRAMES + '/46.jpg', cv2.IMREAD_COLOR)
+    image1 = cv2.imread('../' + Settings.TEST_FRAMES + '/540.jpg', cv2.IMREAD_COLOR)
+    image2 = cv2.imread('../' + Settings.TEST_FRAMES + '/46.jpg', cv2.IMREAD_COLOR)
 
     frm = image1.mean(axis=2)
     frm = frm[230:-130, 220:-220]
@@ -40,8 +42,6 @@ def test2():
     cv2.imwrite('sift_keypoints2.jpg', frm)
     # cv2.imwrite('sift_keypoints1.jpg', image2)
 
-
-test2()
 
 def test3():
     items = loadtxt(

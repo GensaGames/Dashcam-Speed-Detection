@@ -17,6 +17,7 @@ rx = "*"
 jsonpickle = "*"
 pydot = "*"
 scikit-image = "*"
+imgaug = "*"
 
 [requires]
 python_version = "3.6"
