@@ -62,6 +62,9 @@ class Preprocessor:
 
         # Apply random floating Area Shift
         def shift():
+            if self.PARAMS.area_float is 0:
+                return 0
+
             return np.random.randint(
                 low=-1 * self.PARAMS.area_float,
                 high=self.PARAMS.area_float)

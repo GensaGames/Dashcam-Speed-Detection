@@ -86,6 +86,7 @@ class MiniBatchWorker:
     def __split_indexes(self):
         indexes = np.arange(
             max(self.P_PARAMS.backward), self.C_PARAMS.samples)
+        np.random.shuffle(indexes)
 
         assert 0 < self \
             .C_PARAMS.train_part < 1
@@ -134,7 +135,6 @@ class MiniBatchWorker:
                        activation=sigmoid, input_shape=input_shape,
                        padding='valid', data_format='channels_last'))
 
-            self.model.add(Dropout(0.2))
             self.model.add(MaxPooling3D(pool_size=(1, 2, 2)))
 
             self.model.add(
@@ -142,17 +142,17 @@ class MiniBatchWorker:
                        activation=sigmoid, input_shape=input_shape,
                        padding='valid', data_format='channels_last'))
 
-            self.model.add(Dropout(0.2))
-            self.model.add(MaxPooling3D(pool_size=(1, 2, 2)))
+            self.model.add(
+                Conv3D(filters=48, kernel_size=(1, 3, 3), strides=(1, 1, 1),
+                       activation=sigmoid, input_shape=input_shape,
+                       padding='valid', data_format='channels_last'))
 
             self.model.add(
                 Conv3D(filters=48, kernel_size=(1, 3, 3), strides=(1, 1, 1),
                        activation=sigmoid, input_shape=input_shape,
                        padding='valid', data_format='channels_last'))
 
-            self.model.add(Dropout(0.2))
             self.model.add(MaxPooling3D(pool_size=(2, 2, 2)))
-
             self.model.add(Flatten())
 
             self.model \
@@ -230,9 +230,10 @@ if __name__ == "__main__":
         workers = [MiniBatchWorker(
             PreprocessorParams(
                 backward=(0, 1, 2), frame_y_trim=(190, -190),
-                frame_x_trim=(220, -220), frame_scale=1.3),
+                frame_x_trim=(220, -220), frame_scale=1.3,
+                area_float=0),
             ControllerParams(
-                'V31-3D-CNN/', baths=10, train_part=0.9,
+                'V33-3D-CNN/', baths=10, train_part=0.6,
                 epochs=1000, step_vis=150, samples=20400))]
         return workers
 

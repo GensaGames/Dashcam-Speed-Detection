@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+
 from app.other.Helper import *
 from numpy import loadtxt
 import cv2
@@ -20,9 +21,6 @@ def test1():
             i[190: -190, 220:-220], (0, 0), fx=1.3, fy=1.3)
 
         cv2.imwrite('car-normal-ex3-' + str(idx) + '.jpg', frm)
-
-
-test1()
 
 
 def test2():
@@ -83,7 +81,6 @@ def test3():
     plt.savefig('plot.png')
 
 
-
 def test4():
     items = loadtxt(
         '../' + Settings.TRAIN_Y, delimiter=" ",
@@ -116,6 +113,36 @@ def test4():
     plt.savefig('plot.png')
 
 
+def test5():
+    image = cv2.imread(
+        '../' + Settings.TEST_FRAMES + '/540.jpg', cv2.IMREAD_GRAYSCALE)
+
+    from imgaug.augmenters import Sequential
+    from imgaug.augmenters import Fliplr
+    from imgaug.augmenters import GaussianBlur
+    from imgaug.augmenters import GammaContrast
+    from imgaug.augmenters import Invert
+    from imgaug.augmenters import CoarseSalt
+    from imgaug.augmenters import PerspectiveTransform
+    from imgaug.augmenters import ElasticTransformation
+    seq = Sequential([
+        Fliplr(1.0), # to do
+        GammaContrast(0.3), # from to
+        Invert(1.0), # to do
+        CoarseSalt(0.05, size_percent=0.3), # from to
+        PerspectiveTransform(scale=0.12) # from to
+    ])
+
+    a_t = seq.to_deterministic()
+    image_n = a_t.augment_image(image)
+    image = a_t.augment_image(image)
+
+    cv2.imshow('image_n.jpg', image_n)
+    cv2.imshow('image.jpg', image)
+    cv2.waitKey(0)
+
+
+test5()
 
 
 
