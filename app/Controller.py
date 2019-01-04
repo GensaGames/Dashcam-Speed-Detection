@@ -147,20 +147,19 @@ class MiniBatchWorker:
                        activation=sigmoid, input_shape=input_shape,
                        padding='valid', data_format='channels_last'))
 
-            self.model.add(
-                Conv3D(filters=48, kernel_size=(1, 3, 3), strides=(1, 1, 1),
-                       activation=sigmoid, input_shape=input_shape,
-                       padding='valid', data_format='channels_last'))
-
             self.model.add(MaxPooling3D(pool_size=(2, 2, 2)))
             self.model.add(Flatten())
 
             self.model \
-                .add(Dense(units=96,
+                .add(Dense(units=256,
                            kernel_initializer=he_normal(),
                            activation=relu))
             self.model \
-                .add(Dense(units=48,
+                .add(Dense(units=128,
+                           kernel_initializer=he_normal(),
+                           activation=relu))
+            self.model \
+                .add(Dense(units=64,
                            kernel_initializer=he_normal(),
                            activation=relu))
 
@@ -172,9 +171,9 @@ class MiniBatchWorker:
                 .compile(loss=mean_squared_error,
                          optimizer=Adam(lr=0.001))
 
-            # from keras.utils import plot_model
-            # plot_model(self.model, to_file='model_plot1.png',
-            #            show_shapes=True, show_layer_names=True)
+            from keras.utils import plot_model
+            plot_model(self.model, to_file='model_plot1.png',
+                       show_shapes=True, show_layer_names=True)
 
         value = self.model.train_on_batch(x_y[0], x_y[1])
         logger.debug('Training Batch loss: {}'
@@ -229,11 +228,11 @@ if __name__ == "__main__":
     def combine_workers():
         workers = [MiniBatchWorker(
             PreprocessorParams(
-                backward=(0, 1, 2), frame_y_trim=(190, -190),
+                backward=(0, 1, 2, 3), frame_y_trim=(190, -190),
                 frame_x_trim=(220, -220), frame_scale=1.3,
-                area_float=0),
+                area_float=4),
             ControllerParams(
-                'V33-3D-CNN/', baths=10, train_part=0.6,
+                'V36-3D-CNN/', baths=10, train_part=0.6,
                 epochs=1000, step_vis=150, samples=20400))]
         return workers
 
@@ -257,7 +256,7 @@ if __name__ == "__main__":
     def start_train():
         for worker in combine_workers():
             worker.restore_backup()
-            worker.start_epochs()
+            # worker.start_epochs()
             # worker.show_evaluation()
             # worker_plot(worker)
 
