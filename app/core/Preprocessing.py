@@ -9,7 +9,7 @@ import numpy as np
 from numpy import loadtxt
 from rx import Observable
 
-import app.Settings as Setting
+from app import Settings
 from app.core.Parameters import PreprocessorParams
 
 logging.basicConfig(level=logging.INFO)
@@ -158,6 +158,6 @@ if __name__ == "__main__":
 
     Preprocessor(PreprocessorParams(
         (0, 1, 2), frame_scale=1.5)).build(
-        '../../' + Setting.TRAIN_FRAMES,
-        '../../' + Setting.TRAIN_Y, [2, 10, 86]) \
+        '../../' + Settings.TRAIN_FRAMES,
+        '../../' + Settings.TRAIN_Y, [2, 10, 86]) \
         .subscribe(__assert)

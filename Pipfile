@@ -19,5 +19,9 @@ pydot = "*"
 scikit-image = "*"
 imgaug = "*"
 
+# For solving Win issues
+wheel = "*"
+shapely = "==1.6.4.post1"
+
 [requires]
 python_version = "3.6"

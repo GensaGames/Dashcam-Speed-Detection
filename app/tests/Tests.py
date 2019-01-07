@@ -115,7 +115,7 @@ def test4():
 
 def test5():
     image = cv2.imread(
-        '../' + Settings.TEST_FRAMES + '/540.jpg', cv2.IMREAD_GRAYSCALE)
+        '../../' + Settings.TRAIN_FRAMES + '/540.jpg', cv2.IMREAD_GRAYSCALE)
 
     from imgaug.augmenters import Sequential
     from imgaug.augmenters import Fliplr
@@ -123,22 +123,32 @@ def test5():
     from imgaug.augmenters import GammaContrast
     from imgaug.augmenters import Invert
     from imgaug.augmenters import CoarseSalt
-    from imgaug.augmenters import PerspectiveTransform
-    from imgaug.augmenters import ElasticTransformation
+    from imgaug.augmenters import PiecewiseAffine
+    from imgaug.augmenters import CoarsePepper
+
     seq = Sequential([
         Fliplr(1.0), # to do
-        GammaContrast(0.3), # from to
-        Invert(1.0), # to do
-        CoarseSalt(0.05, size_percent=0.3), # from to
-        PerspectiveTransform(scale=0.12) # from to
+        GammaContrast(0.3), # from tow
+        #Invert(1.0), # to do
+        CoarsePepper(0.05, size_percent=0.3), # from to
+        # CoarseSalt(0.05, size_percent=0.3), # from to
+    ])
+    seq1 = Sequential([
+        Fliplr(1.0), # to do
+        GammaContrast(0.3), # from tow
+        #Invert(1.0), # to do
+        CoarsePepper(0.2, size_percent=0.3), # from to
+        # CoarseSalt(0.05, size_percent=0.3), # from to
     ])
 
     a_t = seq.to_deterministic()
     image_n = a_t.augment_image(image)
-    image = a_t.augment_image(image)
+
+    a_t1 = seq1.to_deterministic()
+    image_n1 = a_t1.augment_image(image)
 
     cv2.imshow('image_n.jpg', image_n)
-    cv2.imshow('image.jpg', image)
+    cv2.imshow('image.jpg', image_n1)
     cv2.waitKey(0)
 
 
