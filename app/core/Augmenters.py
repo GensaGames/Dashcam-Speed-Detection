@@ -26,14 +26,14 @@ class AugmenterModel:
     @staticmethod
     def get_new_aug():
         return Sequential([
-            GammaContrast(gamma=(0.2, 1.2)),
+            GammaContrast(gamma=(0.3, 1.0)),
             Fliplr(p=0.5),
             Invert(p=0.2),
             SomeOf((0, 1), [
                 CoarsePepper(
-                    p=(0.05, 0.2), size_percent=(0.1, 0.5)),
+                    p=(0.05, 0.2), size_percent=(0.1, 0.3)),
                 CoarseSalt(
-                    p=(0.05, 0.2), size_percent=(0.1, 0.5)),
+                    p=(0.05, 0.2), size_percent=(0.1, 0.3)),
             ]),
         ])
 
