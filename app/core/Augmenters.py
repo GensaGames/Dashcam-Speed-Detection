@@ -1,36 +1,34 @@
 import logging
+import time
 
 import cv2
 
 logging.basicConfig(level=logging.INFO)
 
 from imgaug.augmenters import Sequential
+from imgaug.augmenters import ia
 from imgaug.augmenters import Fliplr
-from imgaug.augmenters import GaussianBlur
 from imgaug.augmenters import GammaContrast
 from imgaug.augmenters import Invert
 from imgaug.augmenters import CoarseSalt
-from imgaug.augmenters import PerspectiveTransform
 from imgaug.augmenters import CoarsePepper
 from imgaug.augmenters import SomeOf
-from imgaug.augmenters import Sometimes
 
 from app import Settings
-from app.core.Preprocessing import Preprocessor
-from app.core.Parameters import PreprocessorParams
 
 
 class AugmenterModel:
 
     def __init__(self):
+        ia.seed(int(time.time()))
         self._aug_model = self.get_new_aug()
 
     @staticmethod
     def get_new_aug():
         return Sequential([
-            GammaContrast(gamma=(0.3, 1.0)),
+            GammaContrast(gamma=(0.2, 1.2)),
             Fliplr(p=0.5),
-            Invert(p=0.1),
+            Invert(p=0.2),
             SomeOf((0, 1), [
                 CoarsePepper(
                     p=(0.05, 0.2), size_percent=(0.1, 0.5)),

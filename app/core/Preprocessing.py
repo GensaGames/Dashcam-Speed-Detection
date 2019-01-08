@@ -10,6 +10,7 @@ from numpy import loadtxt
 from rx import Observable
 
 from app import Settings
+from app.core.Augmenters import AugmenterModel
 from app.core.Parameters import PreprocessorParams
 
 logging.basicConfig(level=logging.INFO)
@@ -17,10 +18,11 @@ logging.basicConfig(level=logging.INFO)
 
 class Preprocessor:
 
-    def __init__(self, params):
+    def __init__(self, params, augmenter):
         self.PARAMS = params
+        self.AUGMETER = augmenter
 
-    def __map_paths_y(self, path_indexes):
+    def __load_y(self, path_indexes):
         assert min(path_indexes[1]) - \
                max(self.PARAMS.backward) >= 0
 
@@ -32,7 +34,7 @@ class Preprocessor:
             items, (len(items), 1))
         return items
 
-    def __map_start_x(self, path_indexes):
+    def __load_x(self, path_indexes):
         assert min(path_indexes[1]) - \
                max(self.PARAMS.backward) >= 0
 
@@ -47,10 +49,14 @@ class Preprocessor:
             looking_back = list(map(
                 lambda x: i - x, self.PARAMS.backward))
 
+            state = self.AUGMETER.model.to_deterministic()
+
             list_paths = itemgetter(*looking_back)(complete_path)
             for path in np.flipud(np.array([list_paths]).flatten()):
-                items.append(cv2.imread(
-                    str(path), cv2.IMREAD_GRAYSCALE))
+
+                image = cv2.imread(
+                    str(path), cv2.IMREAD_GRAYSCALE)
+                items.append(state.augment_image(image))
 
         assert len(path_indexes[1]) * (
             len(self.PARAMS.backward)) == len(items)
@@ -132,14 +138,14 @@ class Preprocessor:
     def build(self, path_x, path_y, indexes):
 
         obs_x = Observable.of((path_x, indexes)) \
-            .map(self.__map_start_x) \
+            .map(self.__load_x) \
             .map(self.__map_crop) \
             .map(self.__map_scale) \
             .map(self.__map_normalize) \
             .map(self.__to_timeline_x)
 
         obs_y = Observable.of((path_y, indexes)) \
-            .map(self.__map_paths_y) \
+            .map(self.__load_y) \
             .map(self.__to_timeline_y)
 
         return Observable.zip(
@@ -157,7 +163,7 @@ if __name__ == "__main__":
 
 
     Preprocessor(PreprocessorParams(
-        (0, 1, 2), frame_scale=1.5)).build(
+        (0, 1, 2), frame_scale=1.5), AugmenterModel()).build(
         '../../' + Settings.TRAIN_FRAMES,
         '../../' + Settings.TRAIN_Y, [2, 10, 86]) \
         .subscribe(__assert)

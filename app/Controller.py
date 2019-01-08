@@ -13,6 +13,7 @@ from keras.optimizers import Adam
 
 import app.Settings as Settings
 import app.other.Helper as Helper
+from app.core.Augmenters import AugmenterModel
 from app.core.Parameters import ControllerParams, \
     VisualHolder, PreprocessorParams
 from app.core.Preprocessing import Preprocessor
@@ -47,7 +48,7 @@ class MiniBatchWorker:
 
         while True:
             np.random.shuffle(validation)
-            Preprocessor(self.P_PARAMS).build(
+            Preprocessor(self.P_PARAMS, AugmenterModel()).build(
                 '../' + Settings.TRAIN_FRAMES,
                 '../' + Settings.TRAIN_Y, validation[:150]) \
                 .subscribe(local_evaluate)
@@ -101,7 +102,7 @@ class MiniBatchWorker:
                indexes[max_train_index:]
 
     def __step_process(self, step, indexes):
-        obs = Preprocessor(self.P_PARAMS).build(
+        obs = Preprocessor(self.P_PARAMS, AugmenterModel()).build(
             '../' + Settings.TRAIN_FRAMES,
             '../' + Settings.TRAIN_Y, indexes) \
             .publish()
@@ -193,7 +194,7 @@ class MiniBatchWorker:
                 "Value: {}".format(len(x_y[0]), evaluation))
             self.VISUAL.add_evaluation(evaluation)
 
-        Preprocessor(self.P_PARAMS).build(
+        Preprocessor(self.P_PARAMS, AugmenterModel()).build(
             '../' + Settings.TRAIN_FRAMES,
             '../' + Settings.TRAIN_Y, validation[:150]) \
             .subscribe(local_save)
@@ -230,9 +231,9 @@ if __name__ == "__main__":
             PreprocessorParams(
                 backward=(0, 1, 2, 3), frame_y_trim=(190, -190),
                 frame_x_trim=(220, -220), frame_scale=1.3,
-                area_float=4),
+                area_float=5),
             ControllerParams(
-                'V36-3D-CNN/', baths=10, train_part=0.6,
+                'V38-3D-CNN/', baths=10, train_part=0.6,
                 epochs=1000, step_vis=150, samples=20400))]
         return workers
 
@@ -256,7 +257,7 @@ if __name__ == "__main__":
     def start_train():
         for worker in combine_workers():
             worker.restore_backup()
-            # worker.start_epochs()
+            worker.start_epochs()
             # worker.show_evaluation()
             # worker_plot(worker)
 
