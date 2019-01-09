@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 
+from app.core.Augmenters import AugmenterModel
 from app.other.Helper import *
 from numpy import loadtxt
 import cv2
@@ -115,7 +116,7 @@ def test4():
 
 def test5():
     image = cv2.imread(
-        '../../' + Settings.TRAIN_FRAMES + '/540.jpg', cv2.IMREAD_GRAYSCALE)
+        '../' + Settings.TEST_FRAMES + '/540.jpg', cv2.IMREAD_GRAYSCALE)
 
     from imgaug.augmenters import Sequential
     from imgaug.augmenters import Fliplr
@@ -128,14 +129,14 @@ def test5():
 
     seq = Sequential([
         Fliplr(1.0), # to do
-        GammaContrast(0.3), # from tow
+        GammaContrast(0.2), # from tow
         #Invert(1.0), # to do
-        CoarsePepper(0.05, size_percent=0.3), # from to
+        CoarsePepper(0.05, size_percent=0.1), # from to
         # CoarseSalt(0.05, size_percent=0.3), # from to
     ])
     seq1 = Sequential([
         Fliplr(1.0), # to do
-        GammaContrast(0.3), # from tow
+        GammaContrast(1.2), # from tow
         #Invert(1.0), # to do
         CoarsePepper(0.2, size_percent=0.3), # from to
         # CoarseSalt(0.05, size_percent=0.3), # from to
@@ -152,7 +153,25 @@ def test5():
     cv2.waitKey(0)
 
 
-test5()
+def test6():
+
+    aug_model = AugmenterModel()
+
+    start_index = 3490
+    for _ in range(0, 20400, 1000):
+
+        state = aug_model.model.to_deterministic()
+        for i in range(_, _ + 10):
+            image = cv2.imread(
+                '../../' + Settings.TRAIN_FRAMES + '/'
+                + str(start_index + i) + '.jpg', cv2.IMREAD_GRAYSCALE)
+
+            cv2.imshow('Augmented', state.augment_image(image))
+            cv2.imshow('Original', image)
+            cv2.waitKey(0)
+
+
+test6()
 
 
 

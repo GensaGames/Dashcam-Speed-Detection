@@ -49,7 +49,7 @@ class Preprocessor:
             looking_back = list(map(
                 lambda x: i - x, self.PARAMS.backward))
 
-            state = self.AUGMETER.model.to_deterministic()
+            state = self.AUGMETER.model
 
             list_paths = itemgetter(*looking_back)(complete_path)
             for path in np.flipud(np.array([list_paths]).flatten()):
