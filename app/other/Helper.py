@@ -51,6 +51,7 @@ def annot_min(x, y, ax=None):
     ax.annotate(text, xy=(xmin, ymin), xytext=(0.4, 0.4), **kw)
 
 
+##########################################
 def annot_avr(y, ax=None):
     y_mean = np.mean(y)
     text= "Mean ={:.3f}".format(y_mean)
@@ -63,6 +64,31 @@ def annot_avr(y, ax=None):
 
 
 ##########################################
+def clear_built_test(path_to, backward):
+    file = path_to + '/' + Settings.BUILT_TEST
+
+    if not os.path.exists(path_to):
+        os.makedirs(path_to)
+
+    if os.path.isfile(file):
+        os.remove(file)
+        with open(file, "wb") as file:
+            np.savetxt(file, backward, delimiter="\n")
+
+
+##########################################
+def add_built_test(path_to, values):
+    file = path_to + '/' + Settings.BUILT_TEST
+
+    if not os.path.exists(path_to):
+        os.makedirs(path_to)
+
+    with open(file, "ab") as file:
+        np.savetxt(file, np.round(
+            values, 6), delimiter="\n")
+
+
+##########################################
 def save_plot(path_to, plot, prefix):
     if not os.path.exists(path_to):
         os.makedirs(path_to)
@@ -71,7 +97,8 @@ def save_plot(path_to, plot, prefix):
 
 ##########################################
 def backup_model_with(path_to, name, model, *args):
-    path_to = path_to + '/' + name + '/'
+    path_to = path_to + '/' + Settings.MODELS\
+              + '/' + name + '/'
     if not os.path.exists(path_to):
         os.makedirs(path_to)
 
@@ -83,7 +110,8 @@ def backup_model_with(path_to, name, model, *args):
 
 ##########################################
 def restore_model_with(path_to, name):
-    path_to = path_to + '/' + name + '/'
+    path_to = path_to + '/' + Settings.MODELS \
+              + '/' + name + '/'
     if not os.path.exists(path_to):
         raise FileNotFoundError
 

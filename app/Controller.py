@@ -53,6 +53,35 @@ class MiniBatchWorker:
                 '../' + Settings.TRAIN_Y, validation[:150]) \
                 .subscribe(local_evaluate)
 
+    def make_test(self):
+        samples = np.arange(
+            max(self.P_PARAMS.backward), 10798)
+
+        Helper.clear_built_test(
+            '../' + Settings.BUILD,
+            self.P_PARAMS.backward)
+
+        def local_evaluate(x_y):
+            predictions = self.model \
+                .predict(x_y[0])
+
+            Helper.add_built_test(
+                '../' + Settings.BUILD,
+                predictions)
+
+        baths = 120
+
+        for i in range(0, len(samples), baths):
+            logger.info('Moving to next Step-Idx {}.'
+                        .format(str(i)))
+            samples_step = samples[list(range(
+                i, i + baths))]
+
+            Preprocessor(self.P_PARAMS, None)\
+                .build('../' + Settings.TEST_FRAMES, None,
+                       samples_step)\
+                .subscribe(local_evaluate)
+
     def restore_backup(self):
         if self.model is not None:
             logging.error(
@@ -200,6 +229,7 @@ class MiniBatchWorker:
             .subscribe(local_save)
 
 
+
 #####################################
 if __name__ == "__main__":
 
@@ -221,6 +251,11 @@ if __name__ == "__main__":
         handler.setLevel(logging.DEBUG)
         handler.setFormatter(formatter)
 
+        handler1 = logging.StreamHandler()
+        handler1.setLevel(logging.DEBUG)
+        handler1.setFormatter(formatter)
+
+        log.addHandler(handler1)
         log.addHandler(handler)
         return log
 
@@ -253,12 +288,12 @@ if __name__ == "__main__":
             + '/' + Settings.NAME_MODEL_PLOT)
         return plt
 
-
     def start_train():
         for worker in combine_workers():
             worker.restore_backup()
-            worker.start_epochs()
+            # worker.start_epochs()
             # worker.show_evaluation()
+            worker.make_test()
             # worker_plot(worker)
 
 

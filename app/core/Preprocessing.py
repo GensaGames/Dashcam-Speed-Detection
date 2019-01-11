@@ -13,8 +13,6 @@ from app import Settings
 from app.core.Augmenters import AugmenterModel
 from app.core.Parameters import PreprocessorParams
 
-logging.basicConfig(level=logging.INFO)
-
 
 class Preprocessor:
 
@@ -23,6 +21,8 @@ class Preprocessor:
         self.AUGMETER = augmenter
 
     def __load_y(self, path_indexes):
+        if path_indexes[0] is None:
+            return None
         assert min(path_indexes[1]) - \
                max(self.PARAMS.backward) >= 0
 
@@ -134,6 +134,8 @@ class Preprocessor:
 
     @staticmethod
     def __to_timeline_y(frames):
+        if frames is None:
+            return None
         assert isinstance(frames, np.ndarray)
         return frames.reshape(len(frames), 1)
 
@@ -157,6 +159,8 @@ class Preprocessor:
 
 #####################################
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+
     def __assert(x_y):
         logging.info('X shape {}'.format(x_y[0].shape))
         logging.info('Y shape {}'.format(x_y[1].shape))

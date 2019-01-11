@@ -3,7 +3,6 @@ import time
 
 import cv2
 
-logging.basicConfig(level=logging.INFO)
 
 from imgaug.augmenters import Sequential
 from imgaug.augmenters import ia
@@ -42,5 +41,7 @@ class AugmenterModel:
 
 #####################################
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+
     aug_model = AugmenterModel()
     assert aug_model.model is not None
