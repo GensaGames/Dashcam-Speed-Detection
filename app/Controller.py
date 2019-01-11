@@ -74,9 +74,10 @@ class MiniBatchWorker:
         for i in range(0, len(samples), baths):
             logger.info('Moving to next Step-Idx {}.'
                         .format(str(i)))
-            samples_step = samples[list(range(
-                i, i + baths))]
+            step = i + baths if i + baths < len(
+                samples) else len(samples)
 
+            samples_step = samples[list(range(i, step))]
             Preprocessor(self.P_PARAMS, None)\
                 .build('../' + Settings.TEST_FRAMES, None,
                        samples_step)\

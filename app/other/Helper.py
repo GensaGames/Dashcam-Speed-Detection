@@ -84,8 +84,9 @@ def add_built_test(path_to, values):
         os.makedirs(path_to)
 
     with open(file, "ab") as file:
-        np.savetxt(file, np.round(
-            values, 6), delimiter="\n")
+        np.savetxt(
+            file, np.round(values, 8), fmt='%.8f',
+            delimiter="\n")
 
 
 ##########################################
