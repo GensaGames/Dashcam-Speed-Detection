@@ -6,42 +6,36 @@ import cv2
 
 from imgaug.augmenters import Sequential
 from imgaug.augmenters import ia
-from imgaug.augmenters import Fliplr
+from imgaug.augmenters import Sometimes
 from imgaug.augmenters import GammaContrast
-from imgaug.augmenters import Invert
+from imgaug.augmenters import Emboss
 from imgaug.augmenters import CoarseSalt
-from imgaug.augmenters import CoarsePepper
+from imgaug.augmenters import CoarseDropout
 from imgaug.augmenters import SomeOf
 
 from app import Settings
 
 
-class AugmenterModel:
+def get_new_training():
+    ia.seed(int(time.time()))
 
-    def __init__(self):
-        ia.seed(int(time.time()))
-        self._aug_model = self.get_new_aug()
+    return Sequential([
+        Emboss(1, strength=0.5),
+        GammaContrast(gamma=(0.2, 1)),
+        Sometimes(0.3, CoarseDropout(
+            p=(0.05, 0.2), size_percent=(0.1, 0.3))),
+    ])
 
-    @staticmethod
-    def get_new_aug():
-        return Sequential([
-            GammaContrast(gamma=(0.2, 1.2)),
-            SomeOf((0, 1), [
-                CoarsePepper(
-                    p=(0.05, 0.2), size_percent=(0.1, 0.3)),
-                CoarseSalt(
-                    p=(0.05, 0.2), size_percent=(0.1, 0.3)),
-            ]),
-        ])
 
-    @property
-    def model(self):
-        return self._aug_model
+def get_new_validation():
+
+    return Sequential([
+        Emboss(alpha=1, strength=0.5),
+        GammaContrast(gamma=0.4),
+    ])
 
 
 #####################################
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-
-    aug_model = AugmenterModel()
-    assert aug_model.model is not None
+    assert get_new_training() is not None

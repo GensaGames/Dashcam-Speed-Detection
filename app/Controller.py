@@ -13,7 +13,7 @@ from keras.optimizers import Adam
 
 import app.Settings as Settings
 import app.other.Helper as Helper
-from app.core.Augmenters import AugmenterModel
+from app.core import Augmenters
 from app.core.Parameters import ControllerParams, \
     VisualHolder, PreprocessorParams
 from app.core.Preprocessing import Preprocessor
@@ -48,7 +48,7 @@ class MiniBatchWorker:
 
         while True:
             np.random.shuffle(validation)
-            Preprocessor(self.P_PARAMS, AugmenterModel()).build(
+            Preprocessor(self.P_PARAMS, Augmenters.get_new_validation()).build(
                 '../' + Settings.TRAIN_FRAMES,
                 '../' + Settings.TRAIN_Y, validation[:150]) \
                 .subscribe(local_evaluate)
@@ -128,11 +128,11 @@ class MiniBatchWorker:
             max_train_index / self.C_PARAMS.baths)
 
         train = indexes[:max_train_index]
-        return train, \
-               indexes[max_train_index:]
+        return train, indexes[max_train_index:]
 
     def __step_process(self, step, indexes):
-        obs = Preprocessor(self.P_PARAMS, AugmenterModel()).build(
+        obs = Preprocessor(self.P_PARAMS,
+                           Augmenters.get_new_training()).build(
             '../' + Settings.TRAIN_FRAMES,
             '../' + Settings.TRAIN_Y, indexes) \
             .publish()
@@ -224,11 +224,11 @@ class MiniBatchWorker:
                 "Value: {}".format(len(x_y[0]), evaluation))
             self.VISUAL.add_evaluation(evaluation)
 
-        Preprocessor(self.P_PARAMS, AugmenterModel()).build(
+        Preprocessor(self.P_PARAMS,
+                     Augmenters.get_new_training()).build(
             '../' + Settings.TRAIN_FRAMES,
             '../' + Settings.TRAIN_Y, validation[:150]) \
             .subscribe(local_save)
-
 
 
 #####################################

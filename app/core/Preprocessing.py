@@ -10,7 +10,7 @@ from numpy import loadtxt
 from rx import Observable
 
 from app import Settings
-from app.core.Augmenters import AugmenterModel
+from app.core import Augmenters
 from app.core.Parameters import PreprocessorParams
 
 
@@ -85,7 +85,7 @@ class Preprocessor:
             x_shift = shift()
             y_shift = shift()
 
-            for idx in range (timeline, timeline + step):
+            for idx in range(timeline, timeline + step):
                 frames[idx] = \
                     frames[idx][
                     self.PARAMS.frame_y_trim[0] + y_shift:
@@ -170,7 +170,8 @@ if __name__ == "__main__":
 
 
     Preprocessor(PreprocessorParams(
-        (0, 1, 2), frame_scale=1.5), AugmenterModel()).build(
+        (0, 1, 2), frame_scale=1.5),
+    Augmenters.get_new_training()).build(
         '../../' + Settings.TRAIN_FRAMES,
         '../../' + Settings.TRAIN_Y, [2, 10, 86]) \
         .subscribe(__assert)
