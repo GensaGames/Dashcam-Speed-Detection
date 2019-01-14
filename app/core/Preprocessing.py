@@ -49,16 +49,13 @@ class Preprocessor:
             looking_back = list(map(
                 lambda x: i - x, self.PARAMS.backward))
 
-            state = self.AUGMETER.model if \
-                self.AUGMETER is not None else None
-
             list_paths = itemgetter(*looking_back)(complete_path)
             for path in np.flipud(np.array([list_paths]).flatten()):
 
                 image = cv2.imread(
-                    str(path), cv2.IMREAD_GRAYSCALE)
-                image = state.augment_image(image) if \
-                    state is not None else image
+                    str(path), cv2.IMREAD_COLOR)
+                image = self.AUGMETER.augment_image(image) if \
+                    self.AUGMETER is not None else image
                 items.append(image)
 
         assert len(path_indexes[1]) * (
@@ -108,6 +105,51 @@ class Preprocessor:
                 fy=self.PARAMS.frame_scaler)
         return frames
 
+    def __build_optical_flow(self, frames):
+
+        timeline = len(self.PARAMS.backward)
+        assert len(frames) % timeline == 0
+
+        # Main function for optical flow detection
+        def get_flow_change(img1, img2):
+            flow = cv2.calcOpticalFlowFarneback(
+                cv2.cvtColor(img1,cv2.COLOR_RGB2GRAY),
+                cv2.cvtColor(img2,cv2.COLOR_RGB2GRAY), None,
+                0.5, 3, 15, 3, 5, 1.2, 0)
+
+            mag, ang = cv2.cartToPolar(
+                flow[..., 0], flow[..., 1])
+
+            hsv = np.zeros_like(img1)
+            hsv[:, :, 1] = cv2.cvtColor(
+                img2, cv2.COLOR_RGB2HSV)[:, :, 1]
+
+            hsv[..., 0] = ang * (180 / np.pi / 2)
+            hsv[..., 2] = cv2.normalize(
+                mag, None, 0, 255, cv2.NORM_MINMAX)
+
+            hsv = np.asarray(hsv, dtype=np.float32)
+
+            # Comment/Uncomment for showing each image
+            # moving optical flow.
+
+            # cv2.imshow('Original', cv2.cvtColor(
+            #     hsv, cv2.COLOR_HSV2BGR))
+            # cv2.waitKey(0)
+            return cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
+
+        flow_frames = []
+        for line in range(0, len(frames), timeline):
+
+            for idx in range(line, line + timeline - 1):
+                image_current = frames[idx]
+                image_next = frames[idx + 1]
+
+                flow_frames.append(get_flow_change(
+                    image_current, image_next))
+
+        return flow_frames
+
     @staticmethod
     def __map_normalize(frames):
         assert isinstance(frames, list) and \
@@ -116,21 +158,20 @@ class Preprocessor:
         for idx, val in enumerate(frames):
             frames[idx] = val / 256.0
 
-        frames = np.array(frames)
         return frames
 
     # Merging previous Frames to the Timeline
     # With 3D array of Samples * Timeline * Features
     def __to_timeline_x(self, frames):
-        assert isinstance(frames, np.ndarray)
-
-        timeline = len(self.PARAMS.backward)
+        timeline = len(self.PARAMS.backward) -1
         assert len(frames) % timeline == 0
-        len_indexes = int(len(frames) / timeline)
 
-        return frames.reshape((
-            len_indexes, timeline, frames[0].shape[0],
-            frames[0].shape[1], 1))
+        delta_len = int(len(
+            frames) / timeline)
+
+        return np.array(frames).reshape((
+            delta_len, timeline, frames[0].shape[0],
+            frames[0].shape[1], 3))
 
     @staticmethod
     def __to_timeline_y(frames):
@@ -146,7 +187,7 @@ class Preprocessor:
             .map(self.__load_x) \
             .map(self.__map_crop) \
             .map(self.__map_scale) \
-            .map(self.__map_normalize) \
+            .map(self.__build_optical_flow) \
             .map(self.__to_timeline_x)
 
         obs_y = Observable.of((path_y, indexes)) \
@@ -170,8 +211,10 @@ if __name__ == "__main__":
 
 
     Preprocessor(PreprocessorParams(
-        (0, 1, 2), frame_scale=1.5),
-    Augmenters.get_new_training()).build(
+        (0, 1, 2), frame_scale=1.5, frame_x_trim=(0, 640),
+        frame_y_trim=(0, 480), area_float=0),
+
+        Augmenters.get_new_validation()).build(
         '../../' + Settings.TRAIN_FRAMES,
-        '../../' + Settings.TRAIN_Y, [2, 10, 86]) \
+        '../../' + Settings.TRAIN_Y, [10, 86, 170]) \
         .subscribe(__assert)

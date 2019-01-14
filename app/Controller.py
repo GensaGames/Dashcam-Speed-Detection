@@ -78,7 +78,7 @@ class MiniBatchWorker:
                 samples) else len(samples)
 
             samples_step = samples[list(range(i, step))]
-            Preprocessor(self.P_PARAMS, None)\
+            Preprocessor(self.P_PARAMS, Augmenters.get_new_validation())\
                 .build('../' + Settings.TEST_FRAMES, None,
                        samples_step)\
                 .subscribe(local_evaluate)
@@ -157,8 +157,8 @@ class MiniBatchWorker:
     def __step_model(self, x_y):
         if self.model is None:
             input_shape = (
-                len(self.P_PARAMS.backward),
-                x_y[0].shape[2], x_y[0].shape[3], 1)
+                len(self.P_PARAMS.backward) - 1,
+                x_y[0].shape[2], x_y[0].shape[3], 3)
 
             self.model = Sequential()
             self.model.add(
@@ -202,9 +202,12 @@ class MiniBatchWorker:
                 .compile(loss=mean_squared_error,
                          optimizer=Adam(lr=0.001))
 
-            from keras.utils import plot_model
-            plot_model(self.model, to_file='model_plot1.png',
-                       show_shapes=True, show_layer_names=True)
+            # Comment/Uncomment for showing detailed
+            # info about Model Structure.
+
+            # from keras.utils import plot_model
+            # plot_model(self.model, to_file='model_plot1.png',
+            #            show_shapes=True, show_layer_names=True)
 
         value = self.model.train_on_batch(x_y[0], x_y[1])
         logger.debug('Training Batch loss: {}'
@@ -227,7 +230,7 @@ class MiniBatchWorker:
         Preprocessor(self.P_PARAMS,
                      Augmenters.get_new_training()).build(
             '../' + Settings.TRAIN_FRAMES,
-            '../' + Settings.TRAIN_Y, validation[:150]) \
+            '../' + Settings.TRAIN_Y, validation[:100]) \
             .subscribe(local_save)
 
 
@@ -251,13 +254,16 @@ if __name__ == "__main__":
             filename=path_to + Settings.NAME_LOGS)
         handler.setLevel(logging.DEBUG)
         handler.setFormatter(formatter)
-
-        handler1 = logging.StreamHandler()
-        handler1.setLevel(logging.DEBUG)
-        handler1.setFormatter(formatter)
-
-        log.addHandler(handler1)
         log.addHandler(handler)
+
+        # Comment/Uncomment in case of
+        # issue with logging into system
+
+        # handler1 = logging.StreamHandler()
+        # handler1.setLevel(logging.DEBUG)
+        # handler1.setFormatter(formatter)
+        # log.addHandler(handler1)
+
         return log
 
     logger = set_logger()
@@ -265,11 +271,11 @@ if __name__ == "__main__":
     def combine_workers():
         workers = [MiniBatchWorker(
             PreprocessorParams(
-                backward=(0, 1, 2, 3), frame_y_trim=(190, -190),
-                frame_x_trim=(220, -220), frame_scale=1.3,
-                area_float=5),
+                backward=(0, 1, 2, 3), frame_y_trim=(180, -180),
+                frame_x_trim=(200, -200), frame_scale=1.3,
+                area_float=2),
             ControllerParams(
-                'V38-3D-CNN/', baths=10, train_part=0.6,
+                'OPT-V1-3D-CNN/', baths=10, train_part=0.6,
                 epochs=1000, step_vis=150, samples=20400))]
         return workers
 
@@ -292,9 +298,9 @@ if __name__ == "__main__":
     def start_train():
         for worker in combine_workers():
             worker.restore_backup()
-            # worker.start_epochs()
+            worker.start_epochs()
             # worker.show_evaluation()
-            worker.make_test()
+            # worker.make_test()
             # worker_plot(worker)
 
 

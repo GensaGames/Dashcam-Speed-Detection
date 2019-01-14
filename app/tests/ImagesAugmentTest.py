@@ -51,18 +51,17 @@ def test5():
     cv2.waitKey(0)
 
 
-
 ##################################################################
 # Showing Timeline, where one source Frame and one
 # Augmented, using current model from Project.
 def test6():
 
-    aug_model = Augmenters.get_new_training()
+    aug_model = Augmenters.get_new_validation()
 
     start_index = 3490
     for _ in range(0, 20400, 1000):
 
-        state = aug_model.model.to_deterministic()
+        state = aug_model.to_deterministic()
         for i in range(_, _ + 10):
             image = cv2.imread(
                 '../../' + Settings.TRAIN_FRAMES + '/'
@@ -71,8 +70,7 @@ def test6():
             cv2.imshow('Augmented', state.augment_image(image))
             cv2.imshow('Original', image)
             cv2.waitKey(0)
-
-
+test6()
 
 def test8():
     img = cv2.imread(

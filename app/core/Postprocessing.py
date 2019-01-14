@@ -10,11 +10,8 @@ from app import Settings
 
 class Postprocessor:
 
-    def __init__(self):
-        pass
-
     @staticmethod
-    def smooth(x, window, threshold):
+    def smooth_aggressive(x, window, threshold):
         for idx, val in enumerate(x):
             if idx < window:
                 continue
@@ -26,13 +23,18 @@ class Postprocessor:
                 x[idx] = avr + (sign * threshold)
 
 
+    @staticmethod
+    def change_known_issue(x, window, threshold):
+        pass
+
+
 #####################################
 if __name__ == "__main__":
     values = loadtxt(
         '../../' + Settings.BUILD + '/' +
         Settings.BUILT_TEST, delimiter=" ",
         unpack=False)
-    Postprocessor.smooth(values, 20, 2)
+    Postprocessor.smooth_aggressive(values, 20, 2)
 
     path_to = '../../' + Settings.BUILD + '/' +\
               Settings.BUILT_TEST_PR1
