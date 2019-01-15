@@ -74,7 +74,6 @@ def test_opencv_optical_source():
 
     return rgb_flow
 
-test_opencv_optical_source()
 
 
 def test_opencv_optical1():
@@ -113,16 +112,22 @@ def test_opencv_optical_moving():
     for _ in range(0, 20400, 1000):
 
         for i in range(_, _ + 10):
+            ia = Augmenters.get_new_validation()
+
             frame1 = cv2.imread(
                 '../../' + Settings.TRAIN_FRAMES + '/'
                 + str(start_index + i) + '.jpg', cv2.IMREAD_COLOR)
+            frame1 = ia.augment_image(frame1)
 
             image_current = cv2.imread(
                 '../../' + Settings.TRAIN_FRAMES + '/'
                 + str(start_index + i) + '.jpg', cv2.IMREAD_GRAYSCALE)
+            image_current = ia.augment_image(image_current)
+
             image_next = cv2.imread(
                 '../../' + Settings.TRAIN_FRAMES + '/'
                 + str(start_index + i + 1) + '.jpg', cv2.IMREAD_GRAYSCALE)
+            image_next = ia.augment_image(image_next)
 
             flow = cv2.calcOpticalFlowFarneback(
                 image_current,image_next, None,
@@ -142,3 +147,4 @@ def test_opencv_optical_moving():
             cv2.waitKey(0)
 
 
+test_opencv_optical_moving()

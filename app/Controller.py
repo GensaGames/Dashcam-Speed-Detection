@@ -257,7 +257,7 @@ if __name__ == "__main__":
         log.addHandler(handler)
 
         # Comment/Uncomment in case of
-        # issue with logging into system
+        # issue with logging to system
 
         # handler1 = logging.StreamHandler()
         # handler1.setLevel(logging.DEBUG)
@@ -291,8 +291,8 @@ if __name__ == "__main__":
         ax.grid()
 
         plt.savefig(
-            '../' + Settings.BUILD + '/' + worker.C_PARAMS.name
-            + '/' + Settings.NAME_MODEL_PLOT)
+            '../' + Settings.BUILD + '/' + Settings.MODELS + '/'
+            + worker.C_PARAMS.name + '/' + Settings.NAME_MODEL_PLOT)
         return plt
 
     def start_train():

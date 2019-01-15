@@ -128,8 +128,6 @@ class Preprocessor:
             hsv[..., 2] = cv2.normalize(
                 mag, None, 0, 255, cv2.NORM_MINMAX)
 
-            hsv = np.asarray(hsv, dtype=np.float32)
-
             # Comment/Uncomment for showing each image
             # moving optical flow.
 
