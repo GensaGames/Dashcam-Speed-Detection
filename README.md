@@ -157,12 +157,6 @@ For testing purpose, we created Preprocessor objects, which can retrive Timeline
 In out testing, we might check dependencies between frames '(0, 1)' or '(0, 1, 2, 3, 4)' and some variations in this range.   And even more complicated behavior, Timeline with different steps (ex. with step 2, we will have '(0, 2, 4)'), where frame changes will be more visible. So action items for this mapping is **a) Check different Frame Timelines.**
 
 
-<br/>
-
-### 2.4 Frames Augmentation
-
-TBD
-
 
 
 <br/>
@@ -171,11 +165,18 @@ TBD
 
 As you can see from the Analyze above, we should care enough about Regularization. And model should be well rounded to cover most cases. We seperate all regularization objective into several points. 
 
-- We have model above with Frames Augmentation and `CoarseDropout` and `GammaContrast` work for our cases. Only few layers enough for the retaining most of the usefull features in the video, without overfitting. 
+- We have model above with Frames Augmentation and `CoarseDropout` and `GammaContrast` work for our cases. Only few layers enough for the retaining most of the usefull features in the video, without overfitting. Some of examples, you can see below. 
+
+<br/><br/>
+
+<img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/2.4-2/aug-image-1.jpg" width="280" height="170" /> <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/2.4-2/aug-image-2.jpg" width="280" height="170" /> <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/2.4-2/aug-image-3.jpg" width="280" height="170" /> 
+
+1.1.1. Examples of Working Areas in the train set.
+<br/> <br/>
 
 - Floating area in the working frames. We steep descent and ascent, which effect Camera angle and cause different frame representation. To cover such cases we added few functions, which produce floating area, during training phase. 
 
-- Model Regularization. 
+- Model. 
 
 
 
