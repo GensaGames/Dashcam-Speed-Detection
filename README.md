@@ -12,7 +12,7 @@
 
 We have 17 min training video, with 20 frames per second. It's 20400 frames, where we have speed on each frame. From the initial description, we can start with some basics on it a) Features taken from Images b) Features elapsed over time. We will include all work we had, and other possible thoughts.
 
-Start with checking training video, we will see autobahn for about 70% of the video, and some street roads (30 %). We do have some noises, like low distance between cars, and few turns with very smoothed rotation. Some examples of the frames, you can see below. Nothing special at all. 
+Start with checking training video, we will see highway varience 70% of the video, and street about 30 %. We do have some noises, like low distance between cars, and few turns with very smoothed rotation. Some examples of the frames, you can see below. Nothing special at all. 
 
 <br/> <br/> <br/>
 <br/><br/>
@@ -27,7 +27,7 @@ Start with checking training video, we will see autobahn for about 70% of the vi
 
 However, we have existing video for testing. Test video have 9 min video with the same framerate, and will be used for the next model evaluation. As you will see, it's not just usual task, where you need to keep in mind a regularization objective. But think about alternatives for the feature extraction. 
 
-So lets describe test set, and what we have.Around 30 % of the driving it's autobahn, and other part it's streen roads. We have a lot of noises, which completely new comparing to the training set. Few of them are - Sharp turns - Car stop - Road steep descent and ascent.
+So lets describe test set, and what we have. Only 30% of varience from the highway. We have a lot of noises, which completely new comparing to the training set. Few of them are - Sharp turns - Car stop - Road steep descent and ascent.
 
 <br/> <br/> <br/>
 <br/><br/>
@@ -101,7 +101,7 @@ But we have another interesting question here. As you can see, we have Working A
 2.1.2. Frame changes updates in different way, based on Angle of a Camera. 
 <br/> <br/>
 
-At this point, we have few variants, for next preprocessing steps. We will use this options in the next phases. - Using Far Sub Area. - Using Mid Sub Area. - Using Close Sub Area, and so on.
+At this point, we have few variants, for next preprocessing steps. We will use this options in the next phases. - Using Far Sub Area. - Using Close Sub Area, and so on.
 
 *Note. It's very important to reduce number of Inputs, especialy in such cases, where we working with Video, and features elapsed over time. One wrong step will cause your model to have the Curse of Dimensionality. That is why we suppose to avoid last variant with using complete Working Area.*
 
@@ -180,7 +180,7 @@ TDB
 
 In general it's very simple process, where we just shared all thoughts during Preprocessing. For some model, we should take Frames Timeline on Working Area and Normilize inputs. However we came up with several different options: Preprocessor Combinations, which we should investigate (combination of all possible parameters, also marked above). 
 
-Well known other algorithms might be used for feature extraction on Images. Some of them like `SIFT`, `ORB`, `HOG` and other, might work very well, but doesn't suite for our problem. Main reason covers in performance of our model, and such actions takes huge time for computing.
+Well known other algorithms might be used for feature extraction on Images. Some of them like `SIFT`, `ORB`, `HOG` and other, could work very well, but they don't. During validation and testing, patterns between their changes, doesn't work for speed. And other reasons related to the performance of a model, and such actions require huge time for computing.
 
 
 
@@ -204,22 +204,20 @@ Below you will find some graphics and Model structures. No Models (or it's struc
 
 Even from the initial sentence of the task (with processing video), which gives us hint to move in RNN directions, we had few examples of MLP. In our examples, we might represent features as delta changes between frames, where tried to achive some kind of Compressing during Timeline.
 
-After some minor updates in Preprocessing behavior, we used different types of MLP, with different structure. However, this work, didn't effect model learning, and it was hard to resolve pattern in delta changes over time. Even with no Regularization, model didn't fit training samples. No Graphics here. No Samples.
-
-Why 2D-CNN also included here, because we supposed to have such model, with Convolution over Delta changes. Comparing to previous MLP where we might have few Frames on Timeline (which Flatten into row of features), for this case, we had only one delta Frame over previous. Again in our testing it seems real to find correct Windows for Convolution in delta changes over time. But not so good after validation.
+After some minor updates in Preprocessing behavior, we used different types of MLP, with different structure. However, this work, didn't effect model learning, and it was hard to resolve pattern in delta changes over time. Even with no Regularization, model didn't fit training samples. As for 2D-CNN, Convolution over Delta changes might work too. For the testing, it find correct Windows for patterns in delta changes over time, and not so good for a validation.
 
 
 <br/>
 
 ### 3.2 RNN and LSTM
 
-Back to initial thoughts, RNN should have enough velocity on data over time. One more pros here, it's number of the inputs. Comparing to the previous methods, where we Flatten few frames (based on Timeline) into one blob features, here we can consume frames one by one. And finally we can see some progress in Model validation. It was good for next steps, but we didn't enough for working solution. 
+Back to initial thoughts, RNN should have enough velocity on data over time. One more pros here, it's number of the inputs. Comparing to the previous methods, where we Flatten few frames (based on Timeline) into one blob features, here we can consume frames one by one. But for validation this model doesn't suite at all, even Plot below seems to be fine. 
 
 
 
 <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/2.1-2.3/lstm-sample-over-iteration.png" width="600" height="300" /> 
 
-3.2.1. Velocity of RNN model on some Preprocessor Combinations.
+3.2.1. Velocity of RNN model on some Preprocessor Combinations. TYPO. By `Number of Iter(I)` there is Number of Samples, during bath minibatch learning. 
 <br/><br/>
 
 
@@ -228,12 +226,12 @@ Back to initial thoughts, RNN should have enough velocity on data over time. One
 
 ### 3.3 2D-CNN with LSTM
 
-Combination of 2D-CNN windows, and tracking frames changes over time should work very well. And for validation, we received even worse result, comparing of RNN. Back to model strucutre, we continue some updates, slowly increasing model complexity, but tests result still not enough to work in this direction. 
+Combination of 2D-CNN windows, and tracking frames changes over time might work very well. Back to model strucutre, we continue some updates, slowly increasing model complexity, but validation results still not enough to work in this direction. 
 
 
 <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/2.1-2.3/lstm-cnn-sample-over-iteration.png" width="600" height="300" /> 
 
-3.3.1. Velocity of 2D-CNN with LSTM Model on some Preprocessor Combinations.
+3.3.1. Velocity of 2D-CNN with LSTM Model on some Preprocessor Combinations. TYPO. By `Number of Iter(I)` there is Number of Samples, during bath minibatch learning. 
 <br/><br/>
 
 
@@ -246,6 +244,6 @@ Obviously 3D-CNN takes places in this list. Even this is most recommended types 
 
 TBD
 
-3.4.1. Velocity of 3D-CNN Model.
+3.4.1. Velocity of 3D-CNN Model.Note. Comparing to previous Plots, this X direction represents epoches over all samples. Since this model was better, we continue training. 
 <br/><br/>
 
