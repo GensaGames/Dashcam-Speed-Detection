@@ -108,30 +108,30 @@ def test_opencv_optical1():
 
 
 def test_opencv_optical_moving():
-    start_index = 10
+    start_index = 2000
     for _ in range(0, 20400, 1000):
 
         for i in range(_, _ + 10):
             ia = Augmenters.get_new_validation()
 
             frame1 = cv2.imread(
-                '../../' + Settings.TRAIN_FRAMES + '/'
+                '../../' + Settings.TEST_FRAMES + '/'
                 + str(start_index + i) + '.jpg', cv2.IMREAD_COLOR)
             frame1 = ia.augment_image(frame1)
 
             image_current = cv2.imread(
-                '../../' + Settings.TRAIN_FRAMES + '/'
+                '../../' + Settings.TEST_FRAMES + '/'
                 + str(start_index + i) + '.jpg', cv2.IMREAD_GRAYSCALE)
             image_current = ia.augment_image(image_current)
 
             image_next = cv2.imread(
-                '../../' + Settings.TRAIN_FRAMES + '/'
+                '../../' + Settings.TEST_FRAMES + '/'
                 + str(start_index + i + 1) + '.jpg', cv2.IMREAD_GRAYSCALE)
             image_next = ia.augment_image(image_next)
 
             flow = cv2.calcOpticalFlowFarneback(
                 image_current,image_next, None,
-                0.5, 3, 15, 3, 5, 1.2, 0)
+                0.5, 3, 5, 3, 5, 1.2, 0)
 
             hsv = np.zeros_like(frame1)
             hsv[...,1] = 255
@@ -140,7 +140,7 @@ def test_opencv_optical_moving():
 
             hsv[...,0] = ang*(180/np.pi/2)
             hsv[...,2] = cv2.normalize(mag,None,0,255,cv2.NORM_MINMAX)
-            hsv = np.asarray(hsv, dtype= np.float32)
+            # hsv = np.asarray(hsv, dtype= np.float32)
             bgr = cv2.cvtColor(hsv,cv2.COLOR_HSV2BGR)
 
             cv2.imshow('frame2',bgr)
