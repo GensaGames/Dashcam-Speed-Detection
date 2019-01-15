@@ -167,9 +167,17 @@ TBD
 
 <br/>
 
-### 2.4 Regularization and Errors
+### 2.4 Regularization
 
-TDB
+As you can see from the Analyze above, we should care enough about Regularization. And model should be well rounded to cover most cases. We seperate all regularization objective into several points. 
+
+- We have model above with Frames Augmentation and `CoarseDropout` and `GammaContrast` work for our cases. Only few layers enough for the retaining most of the usefull features in the video, without overfitting. 
+
+- Floating area in the working frames. We steep descent and ascent, which effect Camera angle and cause different frame representation. To cover such cases we added few functions, which produce floating area, during training phase. 
+
+- Model Regularization. 
+
+
 
 
 
@@ -217,7 +225,7 @@ Back to initial thoughts, RNN should have enough velocity on data over time. One
 
 <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/2.1-2.3/lstm-sample-over-iteration.png" width="600" height="300" /> 
 
-3.2.1. Velocity of RNN model on some Preprocessor Combinations. TYPO. By `Number of Iter(I)` there is Number of Samples, during bath minibatch learning. 
+3.2.1. Velocity of RNN model on some Preprocessor Combinations. TYPO. By `Number of Iter(I)` there is Number of Samples, during minibatch learning. 
 <br/><br/>
 
 
@@ -231,7 +239,7 @@ Combination of 2D-CNN windows, and tracking frames changes over time might work 
 
 <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/2.1-2.3/lstm-cnn-sample-over-iteration.png" width="600" height="300" /> 
 
-3.3.1. Velocity of 2D-CNN with LSTM Model on some Preprocessor Combinations. TYPO. By `Number of Iter(I)` there is Number of Samples, during bath minibatch learning. 
+3.3.1. Velocity of 2D-CNN with LSTM Model on some Preprocessor Combinations. TYPO. By `Number of Iter(I)` there is Number of Samples, during minibatch learning. 
 <br/><br/>
 
 
