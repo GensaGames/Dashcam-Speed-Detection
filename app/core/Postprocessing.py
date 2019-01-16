@@ -22,7 +22,6 @@ class Postprocessor:
                 sign = math.copysign(1, val - avr)
                 x[idx] = avr + (sign * threshold)
 
-
     @staticmethod
     def change_known_issue(x, window, threshold):
         pass

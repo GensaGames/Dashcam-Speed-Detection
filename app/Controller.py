@@ -178,7 +178,7 @@ class MiniBatchWorker:
                        activation=sigmoid, input_shape=input_shape,
                        padding='valid', data_format='channels_last'))
 
-            self.model.add(MaxPooling3D(pool_size=(2, 2, 2)))
+            self.model.add(MaxPooling3D(pool_size=(1, 2, 2)))
             self.model.add(Flatten())
 
             self.model \
@@ -250,11 +250,13 @@ if __name__ == "__main__":
         if not os.path.exists(path_to):
             os.makedirs(path_to)
 
-        handler = logging.FileHandler(
-            filename=path_to + Settings.NAME_LOGS)
-        handler.setLevel(logging.DEBUG)
-        handler.setFormatter(formatter)
-        log.addHandler(handler)
+        # Comment/Uncomment in case of
+        # using loggin in files
+        # handler = logging.FileHandler(
+        #     filename=path_to + Settings.NAME_LOGS)
+        # handler.setLevel(logging.DEBUG)
+        # handler.setFormatter(formatter)
+        # log.addHandler(handler)
 
         # Comment/Uncomment in case of
         # issue with logging to system
@@ -271,12 +273,12 @@ if __name__ == "__main__":
     def combine_workers():
         workers = [MiniBatchWorker(
             PreprocessorParams(
-                backward=(0, 1, 2, 3), frame_y_trim=(180, -180),
+                backward=(0, 1, 2), frame_y_trim=(180, -180),
                 frame_x_trim=(200, -200), frame_scale=1.3,
-                area_float=2),
+                area_float=3),
             ControllerParams(
-                'OPT-V2-3D-CNN/', baths=10, train_part=0.6,
-                epochs=1000, step_vis=150, samples=20400))]
+                'V4-OPT-3D-CNN/', baths=20, train_part=0.6,
+                epochs=1000, step_vis=200, samples=20400))]
         return workers
 
     def worker_plot(worker):

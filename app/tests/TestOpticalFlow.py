@@ -114,36 +114,52 @@ def test_opencv_optical_moving():
         for i in range(_, _ + 10):
             ia = Augmenters.get_new_validation()
 
-            frame1 = cv2.imread(
-                '../../' + Settings.TEST_FRAMES + '/'
-                + str(start_index + i) + '.jpg', cv2.IMREAD_COLOR)
-            frame1 = ia.augment_image(frame1)
-
             image_current = cv2.imread(
                 '../../' + Settings.TEST_FRAMES + '/'
-                + str(start_index + i) + '.jpg', cv2.IMREAD_GRAYSCALE)
+                + str(start_index + i) + '.jpg', cv2.IMREAD_COLOR)
             image_current = ia.augment_image(image_current)
 
             image_next = cv2.imread(
                 '../../' + Settings.TEST_FRAMES + '/'
-                + str(start_index + i + 1) + '.jpg', cv2.IMREAD_GRAYSCALE)
+                + str(start_index + i + 1) + '.jpg', cv2.IMREAD_COLOR)
             image_next = ia.augment_image(image_next)
 
+            hsv = np.zeros(image_current.shape)
+            # set saturation
+            hsv[:,:,1] = cv2.cvtColor(image_next, cv2.COLOR_RGB2HSV)[:,:,1]
+
+            # Flow Parameters
+            flow_mat = None
+            image_scale = 0.5
+            nb_images = 3
+            win_size = 2
+            nb_iterations = 2
+            deg_expansion = 5
+            STD = 1.3
+
+            # obtain dense optical flow paramters
             flow = cv2.calcOpticalFlowFarneback(
-                image_current,image_next, None,
-                0.5, 3, 5, 3, 5, 1.2, 0)
+                cv2.cvtColor(image_current, cv2.COLOR_RGB2GRAY),
+                cv2.cvtColor(image_next, cv2.COLOR_RGB2GRAY),
 
-            hsv = np.zeros_like(frame1)
-            hsv[...,1] = 255
+                flow_mat, image_scale, nb_images, win_size, nb_iterations,
+                deg_expansion, STD, 0)
 
-            mag, ang = cv2.cartToPolar(flow[...,0], flow[...,1])
+            # convert from cartesian to polar
+            mag, ang = cv2.cartToPolar(flow[..., 0], flow[..., 1])
 
-            hsv[...,0] = ang*(180/np.pi/2)
-            hsv[...,2] = cv2.normalize(mag,None,0,255,cv2.NORM_MINMAX)
-            # hsv = np.asarray(hsv, dtype= np.float32)
-            bgr = cv2.cvtColor(hsv,cv2.COLOR_HSV2BGR)
+            # hue corresponds to direction
+            hsv[:,:,0] = ang * (180/ np.pi / 2)
 
-            cv2.imshow('frame2',bgr)
+            # value corresponds to magnitude
+            hsv[:,:,2] = cv2.normalize(mag,None,0,255,cv2.NORM_MINMAX)
+
+            # convert HSV to float32's
+            hsv = np.asarray(hsv, dtype= np.float32)
+
+            hsv = cv2.cvtColor(hsv,cv2.COLOR_HSV2RGB)
+
+            cv2.imshow('frame2',hsv)
             cv2.waitKey(0)
 
 
