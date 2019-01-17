@@ -115,13 +115,13 @@ class Preprocessor:
 
             hsv = np.zeros_like(img1)
             # set saturation
-            hsv[:,:,1] = cv2.cvtColor(
+            hsv[:, :, 1] = cv2.cvtColor(
                 image_next, cv2.COLOR_RGB2HSV)[:, :, 1]
 
             flow = cv2.calcOpticalFlowFarneback(
                 cv2.cvtColor(img1,cv2.COLOR_RGB2GRAY),
                 cv2.cvtColor(img2,cv2.COLOR_RGB2GRAY), None,
-                0.5, 3, 5, 2, 5, 1.3, 0)
+                0.5, 3, 10, 2, 5, 1.3, 0)
 
             # convert from cartesian to polar
             mag, ang = cv2.cartToPolar(
@@ -135,14 +135,14 @@ class Preprocessor:
                 mag, None, 0, 255, cv2.NORM_MINMAX)
 
             # Сonvert HSV to float32's
-            hsv = np.asarray(hsv, dtype= np.float32)
+            # hsv = np.asarray(hsv, dtype= np.float32)
             hsv = cv2.cvtColor(hsv,cv2.COLOR_HSV2RGB)
 
             # Comment/Uncomment for showing each image
             # moving optical flow.
 
-            # cv2.imshow('Original', hsv)
-            # cv2.waitKey(0)
+            cv2.imshow('Original', hsv)
+            cv2.waitKey(0)
             return hsv
 
         flow_frames = []

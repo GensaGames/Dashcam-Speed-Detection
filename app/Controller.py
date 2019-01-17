@@ -69,12 +69,12 @@ class MiniBatchWorker:
                 '../' + Settings.BUILD,
                 predictions)
 
-        baths = 120
+        BATCHES = 120
 
-        for i in range(0, len(samples), baths):
+        for i in range(0, len(samples), BATCHES):
             logger.info('Moving to next Step-Idx {}.'
                         .format(str(i)))
-            step = i + baths if i + baths < len(
+            step = i + BATCHES if i + BATCHES < len(
                 samples) else len(samples)
 
             samples_step = samples[list(range(i, step))]
@@ -225,7 +225,6 @@ class MiniBatchWorker:
         model.add(Dense(10, kernel_initializer='he_normal', name='fc3'))
         model.add(ELU())
 
-        # do not put activation at the end because we want to exact output, not a class identifier
         model.add(Dense(1, name='output', kernel_initializer='he_normal'))
 
         adam = Adam(lr=1e-4, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
@@ -294,10 +293,10 @@ if __name__ == "__main__":
         workers = [MiniBatchWorker(
             PreprocessorParams(
                 backward=(0, 1), frame_y_trim=(180, -180),
-                frame_x_trim=(200, -200), frame_scale=1.3,
+                frame_x_trim=(195, -195), frame_scale=1.3,
                 area_float=3),
             ControllerParams(
-                'V1-NV-OPT-3D-CNN/', baths=20, train_part=0.6,
+                'V2-NV-OPT-3D-CNN/', baths=20, train_part=0.6,
                 epochs=1000, step_vis=200, samples=20400))]
         return workers
 

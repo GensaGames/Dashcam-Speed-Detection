@@ -131,8 +131,8 @@ def test_opencv_optical_moving():
             # Flow Parameters
             flow_mat = None
             image_scale = 0.5
-            nb_images = 3
-            win_size = 2
+            nb_images = 1
+            win_size = 15
             nb_iterations = 2
             deg_expansion = 5
             STD = 1.3
