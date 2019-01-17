@@ -113,7 +113,7 @@ class Preprocessor:
         # Main function for optical flow detection
         def get_flow_change(img1, img2):
 
-            hsv = np.zeros(image_current.shape)
+            hsv = np.zeros_like(img1)
             # set saturation
             hsv[:,:,1] = cv2.cvtColor(
                 image_next, cv2.COLOR_RGB2HSV)[:, :, 1]
@@ -121,7 +121,7 @@ class Preprocessor:
             flow = cv2.calcOpticalFlowFarneback(
                 cv2.cvtColor(img1,cv2.COLOR_RGB2GRAY),
                 cv2.cvtColor(img2,cv2.COLOR_RGB2GRAY), None,
-                0.5, 3, 10, 2, 5, 1.3, 0)
+                0.5, 3, 5, 2, 5, 1.3, 0)
 
             # convert from cartesian to polar
             mag, ang = cv2.cartToPolar(
@@ -131,10 +131,10 @@ class Preprocessor:
             hsv[:, :, 0] = ang * (180 / np.pi / 2)
 
             # value corresponds to magnitude
-            hsv[:, :,2] = cv2.normalize(
+            hsv[:, :, 2] = cv2.normalize(
                 mag, None, 0, 255, cv2.NORM_MINMAX)
 
-            # convert HSV to float32's
+            # Сonvert HSV to float32's
             hsv = np.asarray(hsv, dtype= np.float32)
             hsv = cv2.cvtColor(hsv,cv2.COLOR_HSV2RGB)
 
@@ -177,7 +177,7 @@ class Preprocessor:
             frames) / timeline)
 
         return np.array(frames).reshape((
-            delta_len, timeline, frames[0].shape[0],
+            delta_len, frames[0].shape[0],
             frames[0].shape[1], 3))
 
     @staticmethod
@@ -213,12 +213,12 @@ if __name__ == "__main__":
         logging.info('X shape {}'.format(x_y[0].shape))
         logging.info('Y shape {}'.format(x_y[1].shape))
 
-        assert x_y[0].ndim == 5 and x_y[1].ndim == 2 \
+        assert x_y[0].ndim == 4 and x_y[1].ndim == 2 \
                and x_y[0].shape[0] == x_y[1].shape[0]
 
 
     Preprocessor(PreprocessorParams(
-        (0, 1, 2), frame_scale=1.5, frame_x_trim=(0, 640),
+        (0, 1), frame_scale=1.5, frame_x_trim=(0, 640),
         frame_y_trim=(0, 480), area_float=0),
 
         Augmenters.get_new_validation()).build(

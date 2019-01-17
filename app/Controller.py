@@ -7,7 +7,7 @@ import numpy as np
 from keras import Sequential
 from keras.activations import linear, sigmoid, relu
 from keras.initializers import he_normal
-from keras.layers import Dense, Flatten, Dropout, Conv3D, MaxPooling3D
+from keras.layers import Dense, Flatten, Dropout, Conv3D, MaxPooling3D, Lambda, Convolution2D, ELU
 from keras.losses import mean_squared_error
 from keras.optimizers import Adam
 
@@ -156,51 +156,12 @@ class MiniBatchWorker:
 
     def __step_model(self, x_y):
         if self.model is None:
+
             input_shape = (
-                len(self.P_PARAMS.backward) - 1,
-                x_y[0].shape[2], x_y[0].shape[3], 3)
+                x_y[0].shape[1], x_y[0].shape[2],
+                x_y[0].shape[3])
 
-            self.model = Sequential()
-            self.model.add(
-                Conv3D(filters=32, kernel_size=(2, 5, 5), strides=(1, 2, 2),
-                       activation=sigmoid, input_shape=input_shape,
-                       padding='valid', data_format='channels_last'))
-
-            self.model.add(MaxPooling3D(pool_size=(1, 2, 2)))
-
-            self.model.add(
-                Conv3D(filters=48, kernel_size=(1, 3, 3), strides=(1, 1, 1),
-                       activation=sigmoid, input_shape=input_shape,
-                       padding='valid', data_format='channels_last'))
-
-            self.model.add(
-                Conv3D(filters=48, kernel_size=(1, 3, 3), strides=(1, 1, 1),
-                       activation=sigmoid, input_shape=input_shape,
-                       padding='valid', data_format='channels_last'))
-
-            self.model.add(MaxPooling3D(pool_size=(1, 2, 2)))
-            self.model.add(Flatten())
-
-            self.model \
-                .add(Dense(units=256,
-                           kernel_initializer=he_normal(),
-                           activation=relu))
-            self.model \
-                .add(Dense(units=128,
-                           kernel_initializer=he_normal(),
-                           activation=relu))
-            self.model \
-                .add(Dense(units=64,
-                           kernel_initializer=he_normal(),
-                           activation=relu))
-
-            self.model \
-                .add(Dense(units=1,
-                           kernel_initializer=he_normal(),
-                           activation=linear))
-            self.model \
-                .compile(loss=mean_squared_error,
-                         optimizer=Adam(lr=0.001))
+            self.model = self.nvidia_model(input_shape)
 
             # Comment/Uncomment for showing detailed
             # info about Model Structure.
@@ -212,6 +173,65 @@ class MiniBatchWorker:
         value = self.model.train_on_batch(x_y[0], x_y[1])
         logger.debug('Training Batch loss: {}'
                      .format(value))
+
+    @staticmethod
+    def nvidia_model(input_shape):
+
+        model = Sequential()
+        # normalization
+        # perform custom normalization before lambda layer in network
+        model.add(Lambda(lambda x: x / 127.5 - 1, input_shape=input_shape))
+
+        model.add(Convolution2D(24, (5, 5),
+                                strides=(2, 2),
+                                padding='valid',
+                                kernel_initializer='he_normal',
+                                name='conv1'))
+
+        model.add(ELU())
+        model.add(Convolution2D(36, (5, 5),
+                                strides=(2, 2),
+                                padding='valid',
+                                kernel_initializer='he_normal',
+                                name='conv2'))
+
+        model.add(ELU())
+        model.add(Convolution2D(48, (5, 5),
+                                strides=(2, 2),
+                                padding='valid',
+                                kernel_initializer='he_normal',
+                                name='conv3'))
+        model.add(ELU())
+        model.add(Dropout(0.5))
+        model.add(Convolution2D(64, (3, 3),
+                                strides=(1, 1),
+                                padding='valid',
+                                kernel_initializer='he_normal',
+                                name='conv4'))
+
+        model.add(ELU())
+        model.add(Convolution2D(64, (3, 3),
+                                strides=(1, 1),
+                                padding='valid',
+                                kernel_initializer='he_normal',
+                                name='conv5'))
+
+        model.add(Flatten(name='flatten'))
+        model.add(ELU())
+        model.add(Dense(100, kernel_initializer='he_normal', name='fc1'))
+        model.add(ELU())
+        model.add(Dense(50, kernel_initializer='he_normal', name='fc2'))
+        model.add(ELU())
+        model.add(Dense(10, kernel_initializer='he_normal', name='fc3'))
+        model.add(ELU())
+
+        # do not put activation at the end because we want to exact output, not a class identifier
+        model.add(Dense(1, name='output', kernel_initializer='he_normal'))
+
+        adam = Adam(lr=1e-4, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
+        model.compile(optimizer=adam, loss='mse')
+
+        return model
 
     def __evaluate(self, validation):
         np.random.shuffle(validation)
@@ -273,11 +293,11 @@ if __name__ == "__main__":
     def combine_workers():
         workers = [MiniBatchWorker(
             PreprocessorParams(
-                backward=(0, 1, 2), frame_y_trim=(180, -180),
+                backward=(0, 1), frame_y_trim=(180, -180),
                 frame_x_trim=(200, -200), frame_scale=1.3,
                 area_float=3),
             ControllerParams(
-                'V4-OPT-3D-CNN/', baths=20, train_part=0.6,
+                'V1-NV-OPT-3D-CNN/', baths=20, train_part=0.6,
                 epochs=1000, step_vis=200, samples=20400))]
         return workers
 
