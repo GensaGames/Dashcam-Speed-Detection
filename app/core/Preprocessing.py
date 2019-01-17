@@ -141,8 +141,8 @@ class Preprocessor:
             # Comment/Uncomment for showing each image
             # moving optical flow.
 
-            cv2.imshow('Original', hsv)
-            cv2.waitKey(0)
+            # cv2.imshow('Original', hsv)
+            # cv2.waitKey(0)
             return hsv
 
         flow_frames = []
