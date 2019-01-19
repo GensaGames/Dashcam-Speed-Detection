@@ -113,9 +113,9 @@ class Preprocessor:
         # Main function for optical flow detection
         def get_flow_change(img1, img2):
 
-            hsv = np.zeros(image_current.shape)
+            hsv = np.zeros_like(img1)
             # set saturation
-            hsv[:,:,1] = cv2.cvtColor(
+            hsv[:, :, 1] = cv2.cvtColor(
                 image_next, cv2.COLOR_RGB2HSV)[:, :, 1]
 
             flow = cv2.calcOpticalFlowFarneback(
@@ -131,10 +131,10 @@ class Preprocessor:
             hsv[:, :, 0] = ang * (180 / np.pi / 2)
 
             # value corresponds to magnitude
-            hsv[:, :,2] = cv2.normalize(
+            hsv[:, :, 2] = cv2.normalize(
                 mag, None, 0, 255, cv2.NORM_MINMAX)
 
-            # convert HSV to float32's
+            # Сonvert HSV to float32's
             hsv = np.asarray(hsv, dtype= np.float32)
             hsv = cv2.cvtColor(hsv,cv2.COLOR_HSV2RGB)
 
