@@ -136,7 +136,7 @@ class Preprocessor:
 
             # Сonvert HSV to float32's
             # hsv = np.asarray(hsv, dtype= np.float32)
-            # hsv = cv2.cvtColor(hsv,cv2.COLOR_HSV2RGB)
+            hsv = cv2.cvtColor(hsv,cv2.COLOR_HSV2RGB)
 
             # Comment/Uncomment for showing each image
             # moving optical flow.
