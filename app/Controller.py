@@ -48,7 +48,7 @@ class MiniBatchWorker:
 
         while True:
             np.random.shuffle(validation)
-            Preprocessor(self.P_PARAMS, Augmenters.get_new_validation()).build(
+            Preprocessor(self.P_PARAMS, Augmenters.get_new_training()).build(
                 '../' + Settings.TRAIN_FRAMES,
                 '../' + Settings.TRAIN_Y, validation[:150]) \
                 .subscribe(local_evaluate)
@@ -117,7 +117,7 @@ class MiniBatchWorker:
     def __split_indexes(self):
         indexes = np.arange(
             max(self.P_PARAMS.backward), self.C_PARAMS.samples)
-        np.random.shuffle(indexes)
+        # np.random.shuffle(indexes)
 
         assert 0 < self \
             .C_PARAMS.train_part < 1
@@ -164,7 +164,12 @@ class MiniBatchWorker:
             self.model.add(
                 Conv3D(filters=32, kernel_size=(2, 5, 5), strides=(1, 2, 2),
                        activation=sigmoid, input_shape=input_shape,
-                       padding='valid', data_format='channels_last'))
+                       padding='same', data_format='channels_last'))
+
+            self.model.add(
+                Conv3D(filters=48, kernel_size=(2, 5, 5), strides=(1, 2, 2),
+                       activation=sigmoid, input_shape=input_shape,
+                       padding='same', data_format='channels_last'))
 
             self.model.add(MaxPooling3D(pool_size=(1, 2, 2)))
 
@@ -175,6 +180,11 @@ class MiniBatchWorker:
 
             self.model.add(
                 Conv3D(filters=48, kernel_size=(1, 3, 3), strides=(1, 1, 1),
+                       activation=sigmoid, input_shape=input_shape,
+                       padding='valid', data_format='channels_last'))
+
+            self.model.add(
+                Conv3D(filters=64, kernel_size=(1, 2, 2), strides=(1, 1, 1),
                        activation=sigmoid, input_shape=input_shape,
                        padding='valid', data_format='channels_last'))
 
@@ -228,7 +238,7 @@ class MiniBatchWorker:
             self.VISUAL.add_evaluation(evaluation)
 
         Preprocessor(self.P_PARAMS,
-                     Augmenters.get_new_training()).build(
+                     Augmenters.get_new_validation()).build(
             '../' + Settings.TRAIN_FRAMES,
             '../' + Settings.TRAIN_Y, validation[:100]) \
             .subscribe(local_save)
@@ -274,10 +284,10 @@ if __name__ == "__main__":
         workers = [MiniBatchWorker(
             PreprocessorParams(
                 backward=(0, 1, 2), frame_y_trim=(180, -180),
-                frame_x_trim=(200, -200), frame_scale=1.3,
+                frame_x_trim=(190, -190), frame_scale=1.3,
                 area_float=3),
             ControllerParams(
-                'V4-OPT-3D-CNN/', baths=20, train_part=0.6,
+                'OPT-V3-OPT-3D-CNN/', baths=20, train_part=0.8,
                 epochs=1000, step_vis=200, samples=20400))]
         return workers
 
