@@ -287,7 +287,7 @@ if __name__ == "__main__":
                 frame_x_trim=(190, -190), frame_scale=1.3,
                 area_float=3),
             ControllerParams(
-                'OPT-V3-OPT-3D-CNN/', baths=20, train_part=0.8,
+                'OPT-V4-OPT-3D-CNN/', baths=20, train_part=0.8,
                 epochs=1000, step_vis=200, samples=20400))]
         return workers
 

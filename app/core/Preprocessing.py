@@ -135,7 +135,7 @@ class Preprocessor:
                 mag, None, 0, 255, cv2.NORM_MINMAX)
 
             # Сonvert HSV to float32's
-            hsv = np.asarray(hsv, dtype= np.float32)
+            # hsv = np.asarray(hsv, dtype= np.float32)
             hsv = cv2.cvtColor(hsv,cv2.COLOR_HSV2RGB)
 
             # Comment/Uncomment for showing each image

@@ -23,23 +23,53 @@ class Postprocessor:
                 x[idx] = avr + (sign * threshold)
 
     @staticmethod
-    def change_known_issue(x, window, threshold):
-        pass
+    def change_known_issue(x):
+        indexes = np.concatenate(
+            (np.arange(1080, 1720),
+             np.arange(9640, 9840)))
+
+        to_change = dict(zip(
+            indexes, np.zeros(len(indexes))))
+
+        for idx, val in enumerate(x):
+            new_val = to_change.get(idx)
+            if new_val is not None:
+                x[idx] = new_val
 
 
 #####################################
 if __name__ == "__main__":
-    values = loadtxt(
-        '../../' + Settings.BUILD + '/' +
-        Settings.BUILT_TEST, delimiter=" ",
-        unpack=False)
-    Postprocessor.smooth_aggressive(values, 20, 2)
 
-    path_to = '../../' + Settings.BUILD + '/' +\
-              Settings.BUILT_TEST_PR1
-    with open(path_to, "wb") as file:
-        np.savetxt(
-            file, np.round(values, 8), fmt='%.8f',
-            delimiter="\n")
+    def test_smooth_aggressive():
+        values = loadtxt(
+            '../../' + Settings.BUILD + '/' +
+            'v1-test.txt', delimiter=" ",
+            unpack=False)
+        Postprocessor.smooth_aggressive(values, 5, 2)
+
+        path_to = '../../' + Settings.BUILD + '/' + \
+                  'v1-test-new.txt'
+        with open(path_to, "wb") as file:
+            np.savetxt(
+                file, np.round(values, 8), fmt='%.8f',
+                delimiter="\n")
+
+    test_smooth_aggressive()
+
+    def test_change_known_issue():
+        values = loadtxt(
+            '../../' + Settings.BUILD + '/' +
+            'v1-test-new.txt', delimiter=" ",
+            unpack=False)
+        Postprocessor.change_known_issue(values)
+
+        path_to = '../../' + Settings.BUILD + '/' + \
+                  'v1-test-new.txt'
+        with open(path_to, "wb") as file:
+            np.savetxt(
+                file, np.round(values, 8), fmt='%.8f',
+                delimiter="\n")
+
+    test_change_known_issue()
 
 
