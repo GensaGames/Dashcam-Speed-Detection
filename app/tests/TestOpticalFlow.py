@@ -124,7 +124,7 @@ def test_opencv_optical_moving():
                 + str(start_index + i + 1) + '.jpg', cv2.IMREAD_COLOR)
             image_next = ia.augment_image(image_next)
 
-            hsv = np.zeros(image_current.shape)
+            hsv = np.zeros_like(image_current)
             # set saturation
             hsv[:,:,1] = cv2.cvtColor(image_next, cv2.COLOR_RGB2HSV)[:,:,1]
 
@@ -132,7 +132,7 @@ def test_opencv_optical_moving():
             flow_mat = None
             image_scale = 0.5
             nb_images = 3
-            win_size = 2
+            win_size = 15
             nb_iterations = 2
             deg_expansion = 5
             STD = 1.3
