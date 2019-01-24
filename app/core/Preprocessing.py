@@ -50,12 +50,13 @@ class Preprocessor:
                 lambda x: i - x, self.PARAMS.backward))
 
             list_paths = itemgetter(*looking_back)(complete_path)
+            augmenter = self.AUGMETER.to_deterministic()
+
             for path in np.flipud(np.array([list_paths]).flatten()):
 
                 image = cv2.imread(
                     str(path), cv2.IMREAD_COLOR)
-                image = self.AUGMETER.augment_image(image) if \
-                    self.AUGMETER is not None else image
+                image = augmenter.augment_image(image)
                 items.append(image)
 
         assert len(path_indexes[1]) * (
@@ -221,7 +222,7 @@ if __name__ == "__main__":
         (0, 1), frame_scale=1.5, frame_x_trim=(0, 640),
         frame_y_trim=(0, 480), area_float=0),
 
-        Augmenters.get_new_validation()).build(
+        Augmenters.get_new_training()).build(
         '../../' + Settings.TRAIN_FRAMES,
         '../../' + Settings.TRAIN_Y, [10, 86, 170]) \
         .subscribe(__assert)

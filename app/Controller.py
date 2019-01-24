@@ -50,7 +50,7 @@ class MiniBatchWorker:
             np.random.shuffle(validation)
             Preprocessor(self.P_PARAMS, Augmenters.get_new_validation()).build(
                 '../' + Settings.TRAIN_FRAMES,
-                '../' + Settings.TRAIN_Y, validation[:150]) \
+                '../' + Settings.TRAIN_Y, validation[:100]) \
                 .subscribe(local_evaluate)
 
     def make_test(self):
@@ -218,16 +218,16 @@ class MiniBatchWorker:
 
         model.add(Flatten(name='flatten'))
         model.add(ELU())
-        model.add(Dense(100, kernel_initializer='he_normal', name='fc1'))
+        model.add(Dense(128, kernel_initializer='he_normal', name='fc1'))
         model.add(ELU())
-        model.add(Dense(50, kernel_initializer='he_normal', name='fc2'))
+        model.add(Dense(64, kernel_initializer='he_normal', name='fc2'))
         model.add(ELU())
-        model.add(Dense(10, kernel_initializer='he_normal', name='fc3'))
+        model.add(Dense(16, kernel_initializer='he_normal', name='fc3'))
         model.add(ELU())
 
         model.add(Dense(1, name='output', kernel_initializer='he_normal'))
 
-        adam = Adam(lr=1e-4, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
+        adam = Adam(lr=1e-4)
         model.compile(optimizer=adam, loss='mse')
 
         return model
@@ -293,10 +293,10 @@ if __name__ == "__main__":
         workers = [MiniBatchWorker(
             PreprocessorParams(
                 backward=(0, 1), frame_y_trim=(180, -180),
-                frame_x_trim=(195, -195), frame_scale=1.3,
-                area_float=3),
+                frame_x_trim=(160, -160), frame_scale=1.3,
+                area_float=5),
             ControllerParams(
-                'NV-OPT-V2-2D-CNN/', baths=20, train_part=0.6,
+                'NV-OPT-V3-2D-CNN/', baths=10, train_part=0.85,
                 epochs=1000, step_vis=200, samples=20400))]
         return workers
 

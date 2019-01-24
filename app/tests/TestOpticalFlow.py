@@ -112,7 +112,8 @@ def test_opencv_optical_moving():
     for _ in range(0, 20400, 1000):
 
         for i in range(_, _ + 10):
-            ia = Augmenters.get_new_validation()
+            ia = Augmenters.get_new_training()
+            ia = ia.to_deterministic()
 
             image_current = cv2.imread(
                 '../../' + Settings.TEST_FRAMES + '/'
@@ -124,15 +125,15 @@ def test_opencv_optical_moving():
                 + str(start_index + i + 1) + '.jpg', cv2.IMREAD_COLOR)
             image_next = ia.augment_image(image_next)
 
-            hsv = np.zeros(image_current.shape)
+            hsv = np.zeros_like(image_current)
             # set saturation
             hsv[:,:,1] = cv2.cvtColor(image_next, cv2.COLOR_RGB2HSV)[:,:,1]
 
             # Flow Parameters
             flow_mat = None
             image_scale = 0.5
-            nb_images = 1
-            win_size = 15
+            nb_images = 3
+            win_size = 10
             nb_iterations = 2
             deg_expansion = 5
             STD = 1.3
@@ -155,7 +156,7 @@ def test_opencv_optical_moving():
             hsv[:,:,2] = cv2.normalize(mag,None,0,255,cv2.NORM_MINMAX)
 
             # convert HSV to float32's
-            hsv = np.asarray(hsv, dtype= np.float32)
+            # hsv = np.asarray(hsv, dtype= np.float32)
 
             hsv = cv2.cvtColor(hsv,cv2.COLOR_HSV2RGB)
 

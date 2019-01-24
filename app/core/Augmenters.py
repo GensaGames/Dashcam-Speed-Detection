@@ -22,7 +22,7 @@ def get_new_training():
     return Sequential([
         GammaContrast(gamma=(0.2, 1)),
         Sometimes(0.3, CoarseDropout(
-            p=(0.05, 0.2), size_percent=(0.1, 0.3))),
+            p=(0.05, 0.15), size_percent=(0.02, 0.08))),
     ])
 
 

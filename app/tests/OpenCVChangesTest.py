@@ -19,7 +19,7 @@ def test_image_resize():
 
         # scale
         frm = cv2.resize(
-            i[190: -190, 220:-220], (0, 0), fx=1.3, fy=1.3)
+            i[180: -180, 160:-160], (0, 0), fx=1.3, fy=1.3)
 
         cv2.imwrite('car-normal-ex3-' + str(idx) + '.jpg', frm)
 
@@ -42,4 +42,4 @@ def test_image_resize_mean():
     # cv2.imwrite('sift_keypoints1.jpg', image2)
 
 
-test_image_resize_mean()
+test_image_resize()
