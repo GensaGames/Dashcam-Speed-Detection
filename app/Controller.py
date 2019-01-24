@@ -292,11 +292,11 @@ if __name__ == "__main__":
     def combine_workers():
         workers = [MiniBatchWorker(
             PreprocessorParams(
-                backward=(0, 1), frame_y_trim=(180, -180),
-                frame_x_trim=(160, -160), frame_scale=1.3,
+                backward=(0, 1), frame_y_trim=(170, -180),
+                frame_x_trim=(150, -150), frame_scale=1,
                 area_float=5),
             ControllerParams(
-                'NV-OPT-V3-2D-CNN/', baths=10, train_part=0.85,
+                'NV-OPT-V4-2D-CNN/', baths=10, train_part=0.85,
                 epochs=1000, step_vis=200, samples=20400))]
         return workers
 
