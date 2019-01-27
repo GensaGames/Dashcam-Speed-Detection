@@ -280,10 +280,10 @@ if __name__ == "__main__":
         # Comment/Uncomment in case of
         # issue with logging to system
 
-        # handler1 = logging.StreamHandler()
-        # handler1.setLevel(logging.DEBUG)
-        # handler1.setFormatter(formatter)
-        # log.addHandler(handler1)
+        handler1 = logging.StreamHandler()
+        handler1.setLevel(logging.DEBUG)
+        handler1.setFormatter(formatter)
+        log.addHandler(handler1)
 
         return log
 
@@ -319,9 +319,9 @@ if __name__ == "__main__":
     def start_train():
         for worker in combine_workers():
             worker.restore_backup()
-            worker.start_epochs()
+            # worker.start_epochs()
             # worker.show_evaluation()
-            # worker.make_test()
+            worker.make_test()
             # worker_plot(worker)
 
 
