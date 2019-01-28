@@ -7,7 +7,7 @@ import numpy as np
 from keras import Sequential
 from keras.activations import linear, sigmoid, relu
 from keras.initializers import he_normal
-from keras.layers import Dense, Flatten, Dropout, Conv3D, MaxPooling3D
+from keras.layers import Dense, Flatten, Dropout, Conv3D, MaxPooling3D, Lambda, Convolution2D, ELU
 from keras.losses import mean_squared_error
 from keras.optimizers import Adam
 
@@ -48,9 +48,9 @@ class MiniBatchWorker:
 
         while True:
             np.random.shuffle(validation)
-            Preprocessor(self.P_PARAMS, Augmenters.get_new_training()).build(
+            Preprocessor(self.P_PARAMS, Augmenters.get_new_validation()).build(
                 '../' + Settings.TRAIN_FRAMES,
-                '../' + Settings.TRAIN_Y, validation[:150]) \
+                '../' + Settings.TRAIN_Y, validation[:100]) \
                 .subscribe(local_evaluate)
 
     def make_test(self):
@@ -69,12 +69,12 @@ class MiniBatchWorker:
                 '../' + Settings.BUILD,
                 predictions)
 
-        baths = 120
+        BATCHES = 120
 
-        for i in range(0, len(samples), baths):
+        for i in range(0, len(samples), BATCHES):
             logger.info('Moving to next Step-Idx {}.'
                         .format(str(i)))
-            step = i + baths if i + baths < len(
+            step = i + BATCHES if i + BATCHES < len(
                 samples) else len(samples)
 
             samples_step = samples[list(range(i, step))]
@@ -117,7 +117,7 @@ class MiniBatchWorker:
     def __split_indexes(self):
         indexes = np.arange(
             max(self.P_PARAMS.backward), self.C_PARAMS.samples)
-        # np.random.shuffle(indexes)
+        np.random.shuffle(indexes)
 
         assert 0 < self \
             .C_PARAMS.train_part < 1
@@ -156,53 +156,58 @@ class MiniBatchWorker:
 
     def __step_model(self, x_y):
         if self.model is None:
+
             input_shape = (
                 len(self.P_PARAMS.backward) - 1,
-                x_y[0].shape[2], x_y[0].shape[3], 3)
+                x_y[0].shape[2], x_y[0].shape[3], x_y[0].shape[4])
 
             self.model = Sequential()
             self.model.add(
-                Conv3D(filters=32, kernel_size=(2, 5, 5), strides=(1, 2, 2),
-                       activation=sigmoid, input_shape=input_shape,
-                       padding='same', data_format='channels_last'))
+                Conv3D(filters=32, kernel_size=(3, 5, 5), strides=(1, 2, 2),
+                       input_shape=input_shape, padding='same',
+                       kernel_initializer=he_normal(),
+                       data_format='channels_last'))
 
+            self.model.add(ELU())
             self.model.add(
-                Conv3D(filters=48, kernel_size=(2, 5, 5), strides=(1, 2, 2),
-                       activation=sigmoid, input_shape=input_shape,
-                       padding='same', data_format='channels_last'))
+                Conv3D(filters=48, kernel_size=(3, 5, 5), strides=(1, 2, 2),
+                       input_shape=input_shape, padding='same',
+                       kernel_initializer=he_normal(),
+                       data_format='channels_last'))
 
-            self.model.add(MaxPooling3D(pool_size=(1, 2, 2)))
-
+            self.model.add(Dropout(0.3))
+            self.model.add(ELU())
             self.model.add(
-                Conv3D(filters=48, kernel_size=(1, 3, 3), strides=(1, 1, 1),
-                       activation=sigmoid, input_shape=input_shape,
-                       padding='valid', data_format='channels_last'))
+                Conv3D(filters=48, kernel_size=(3, 3, 3), strides=(1, 1, 1),
+                       input_shape=input_shape, padding='valid',
+                       kernel_initializer=he_normal(),
+                       data_format='channels_last'))
 
+            self.model.add(ELU())
             self.model.add(
-                Conv3D(filters=48, kernel_size=(1, 3, 3), strides=(1, 1, 1),
-                       activation=sigmoid, input_shape=input_shape,
-                       padding='valid', data_format='channels_last'))
+                Conv3D(filters=64, kernel_size=(1, 3, 3), strides=(1, 1, 1),
+                       input_shape=input_shape, padding='valid',
+                       kernel_initializer=he_normal(),
+                       data_format='channels_last'))
 
-            self.model.add(
-                Conv3D(filters=64, kernel_size=(1, 2, 2), strides=(1, 1, 1),
-                       activation=sigmoid, input_shape=input_shape,
-                       padding='valid', data_format='channels_last'))
-
+            self.model.add(ELU())
             self.model.add(MaxPooling3D(pool_size=(1, 2, 2)))
             self.model.add(Flatten())
 
             self.model \
                 .add(Dense(units=256,
-                           kernel_initializer=he_normal(),
-                           activation=relu))
+                           kernel_initializer=he_normal()))
+            self.model.add(ELU())
+
             self.model \
                 .add(Dense(units=128,
-                           kernel_initializer=he_normal(),
-                           activation=relu))
+                           kernel_initializer=he_normal()))
+            self.model.add(ELU())
+
             self.model \
                 .add(Dense(units=64,
-                           kernel_initializer=he_normal(),
-                           activation=relu))
+                           kernel_initializer=he_normal()))
+            self.model.add(ELU())
 
             self.model \
                 .add(Dense(units=1,
@@ -238,7 +243,7 @@ class MiniBatchWorker:
             self.VISUAL.add_evaluation(evaluation)
 
         Preprocessor(self.P_PARAMS,
-                     Augmenters.get_new_validation()).build(
+                     Augmenters.get_new_training()).build(
             '../' + Settings.TRAIN_FRAMES,
             '../' + Settings.TRAIN_Y, validation[:100]) \
             .subscribe(local_save)
@@ -271,10 +276,10 @@ if __name__ == "__main__":
         # Comment/Uncomment in case of
         # issue with logging to system
 
-        # handler1 = logging.StreamHandler()
-        # handler1.setLevel(logging.DEBUG)
-        # handler1.setFormatter(formatter)
-        # log.addHandler(handler1)
+        handler1 = logging.StreamHandler()
+        handler1.setLevel(logging.DEBUG)
+        handler1.setFormatter(formatter)
+        log.addHandler(handler1)
 
         return log
 
@@ -283,11 +288,11 @@ if __name__ == "__main__":
     def combine_workers():
         workers = [MiniBatchWorker(
             PreprocessorParams(
-                backward=(0, 1, 2), frame_y_trim=(180, -180),
-                frame_x_trim=(190, -190), frame_scale=1.3,
+                backward=(0, 1, 2, 3), frame_y_trim=(180, -180),
+                frame_x_trim=(160, -160), frame_scale=1,
                 area_float=3),
             ControllerParams(
-                'OPT-V4-OPT-3D-CNN/', baths=20, train_part=0.8,
+                'OPT-V4-OPT-3D-CNN/', baths=20, train_part=0.7,
                 epochs=1000, step_vis=200, samples=20400))]
         return workers
 
