@@ -175,7 +175,6 @@ class MiniBatchWorker:
                        kernel_initializer=he_normal(),
                        data_format='channels_last'))
 
-            self.model.add(Dropout(0.3))
             self.model.add(ELU())
             self.model.add(
                 Conv3D(filters=48, kernel_size=(3, 3, 3), strides=(1, 1, 1),
@@ -215,7 +214,7 @@ class MiniBatchWorker:
                            activation=linear))
             self.model \
                 .compile(loss=mean_squared_error,
-                         optimizer=Adam(lr=0.001))
+                         optimizer=Adam(lr=1e-4))
 
             # Comment/Uncomment for showing detailed
             # info about Model Structure.
@@ -288,11 +287,11 @@ if __name__ == "__main__":
     def combine_workers():
         workers = [MiniBatchWorker(
             PreprocessorParams(
-                backward=(0, 1, 2, 3), frame_y_trim=(180, -180),
-                frame_x_trim=(160, -160), frame_scale=1,
-                area_float=3),
+                backward=(0, 1, 2, 3), frame_y_trim=(170, -170),
+                frame_x_trim=(150, -150), frame_scale=0.9,
+                area_float=5),
             ControllerParams(
-                'OPT-V4-OPT-3D-CNN/', baths=20, train_part=0.7,
+                'OPT-V6-OPT-3D-CNN/', baths=20, train_part=0.8,
                 epochs=1000, step_vis=200, samples=20400))]
         return workers
 
