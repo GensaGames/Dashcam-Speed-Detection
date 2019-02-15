@@ -37,6 +37,20 @@ class Postprocessor:
         return x
 
     @staticmethod
+    def change_known_issue(x):
+        indexes = np.concatenate(
+            (np.arange(1080, 1720),
+             np.arange(9640, 9840)))
+
+        to_change = dict(zip(
+            indexes, np.zeros(len(indexes))))
+
+        for idx, val in enumerate(x):
+            new_val = to_change.get(idx)
+            if new_val is not None:
+                x[idx] = new_val
+
+    @staticmethod
     def map_to_mean(x, window):
         new_x = []
         for idx, val in enumerate(x):
@@ -76,22 +90,11 @@ if __name__ == "__main__":
     # TODO(Postprocessing): Move to RX Actions
 
     test_map(
-        'test.txt', 'v1-test-new-1.txt',
+        '02-02-test.txt', 'v1-test-new-1.txt',
         Postprocessor.fix_negative)
 
     test_map(
-        'v1-test-new-1.txt', 'v1-test-new-2.txt',
-        functools.partial(
-            Postprocessor.smooth_aggressive, window=5, threshold=2,
-            remove=True))
-
-    test_map(
-        'v1-test-new-2.txt', 'v1-test-new-3.txt',
-        functools.partial(
-            Postprocessor.smooth_aggressive, window=5, threshold=1))
-
-    test_map(
-        'v1-test-new-4.txt', 'v1-test-new-5.txt',
+        'v1-test-new-1.txt', 'v1-test-new-5.txt',
         Postprocessor.smooth_gaussian)
 
 

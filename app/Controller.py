@@ -117,7 +117,6 @@ class MiniBatchWorker:
     def __split_indexes(self):
         indexes = np.arange(
             max(self.P_PARAMS.backward), self.C_PARAMS.samples)
-        np.random.shuffle(indexes)
 
         assert 0 < self \
             .C_PARAMS.train_part < 1
@@ -287,12 +286,12 @@ if __name__ == "__main__":
     def combine_workers():
         workers = [MiniBatchWorker(
             PreprocessorParams(
-                backward=(0, 1, 2, 3), frame_y_trim=(170, -170),
-                frame_x_trim=(150, -150), frame_scale=0.9,
+                backward=(0, 1, 2, 3), frame_y_trim=(160, -160),
+                frame_x_trim=(140, -140), frame_scale=0.8,
                 area_float=5),
             ControllerParams(
-                'OPT-V6-OPT-3D-CNN/', baths=20, train_part=0.8,
-                epochs=1000, step_vis=200, samples=20400))]
+                'OPT-V7-OPT-3D-CNN/', baths=20, train_part=0.6,
+                epochs=6, step_vis=200, samples=20400))]
         return workers
 
     def worker_plot(worker):
