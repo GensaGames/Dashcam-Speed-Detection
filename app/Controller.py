@@ -288,7 +288,7 @@ if __name__ == "__main__":
             PreprocessorParams(
                 backward=(0, 1, 2, 3), frame_y_trim=(160, -160),
                 frame_x_trim=(140, -140), frame_scale=0.8,
-                area_float=5),
+                area_float=6),
             ControllerParams(
                 'OPT-V7-OPT-3D-CNN/', baths=20, train_part=0.6,
                 epochs=6, step_vis=200, samples=20400))]
@@ -313,10 +313,10 @@ if __name__ == "__main__":
     def start_train():
         for worker in combine_workers():
             worker.restore_backup()
-            worker.start_epochs()
+            # worker.start_epochs()
             # worker.show_evaluation()
             # worker.make_test()
-            # worker_plot(worker)
+            worker_plot(worker)
 
 
     start_train()
