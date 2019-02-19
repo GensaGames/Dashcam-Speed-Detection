@@ -50,7 +50,7 @@ class MiniBatchWorker:
             np.random.shuffle(validation)
             Preprocessor(self.P_PARAMS, Augmenters.get_new_validation()).build(
                 '../' + Settings.TRAIN_FRAMES,
-                '../' + Settings.TRAIN_Y, validation[:150]) \
+                '../' + Settings.TRAIN_Y, validation[:100]) \
                 .subscribe(local_evaluate)
 
     def make_test(self):
@@ -230,7 +230,7 @@ class MiniBatchWorker:
         Preprocessor(self.P_PARAMS,
                      Augmenters.get_new_training()).build(
             '../' + Settings.TRAIN_FRAMES,
-            '../' + Settings.TRAIN_Y, validation[:150]) \
+            '../' + Settings.TRAIN_Y, validation[:100]) \
             .subscribe(local_save)
 
 
@@ -275,10 +275,10 @@ if __name__ == "__main__":
             PreprocessorParams(
                 backward=(0, 1, 2, 3), frame_y_trim=(190, -190),
                 frame_x_trim=(220, -220), frame_scale=1.3,
-                area_float=5),
+                area_float=6),
             ControllerParams(
                 'V39-3D-CNN/', baths=20, train_part=0.6,
-                epochs=15, step_vis=150, samples=20400))]
+                epochs=15, step_vis=200, samples=20400))]
         return workers
 
     def worker_plot(worker):
@@ -300,9 +300,9 @@ if __name__ == "__main__":
     def start_train():
         for worker in combine_workers():
             worker.restore_backup()
-            # worker.start_epochs()
+            worker.start_epochs()
             # worker.show_evaluation()
-            worker.make_test()
+            # worker.make_test()
             # worker_plot(worker)
 
 

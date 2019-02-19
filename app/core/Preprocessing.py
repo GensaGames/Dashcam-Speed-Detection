@@ -55,7 +55,7 @@ class Preprocessor:
             for path in np.flipud(np.array([list_paths]).flatten()):
 
                 image = cv2.imread(
-                    str(path), cv2.IMREAD_COLOR)
+                    str(path), cv2.IMREAD_GRAYSCALE)
                 image = augmenter.augment_image(image)
                 items.append(image)
 
@@ -127,7 +127,7 @@ class Preprocessor:
 
         return np.array(frames).reshape((
             delta_len, timeline, frames[0].shape[0],
-            frames[0].shape[1], frames[0].shape[2]))
+            frames[0].shape[1], 1))
 
     @staticmethod
     def __to_timeline_y(frames):
