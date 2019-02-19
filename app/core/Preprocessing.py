@@ -49,16 +49,14 @@ class Preprocessor:
             looking_back = list(map(
                 lambda x: i - x, self.PARAMS.backward))
 
-            state = self.AUGMETER.model if \
-                self.AUGMETER is not None else None
-
             list_paths = itemgetter(*looking_back)(complete_path)
+            augmenter = self.AUGMETER.to_deterministic()
+
             for path in np.flipud(np.array([list_paths]).flatten()):
 
                 image = cv2.imread(
-                    str(path), cv2.IMREAD_GRAYSCALE)
-                image = state.augment_image(image) if \
-                    state is not None else image
+                    str(path), cv2.IMREAD_COLOR)
+                image = augmenter.augment_image(image)
                 items.append(image)
 
         assert len(path_indexes[1]) * (
@@ -116,21 +114,20 @@ class Preprocessor:
         for idx, val in enumerate(frames):
             frames[idx] = val / 256.0
 
-        frames = np.array(frames)
         return frames
 
     # Merging previous Frames to the Timeline
     # With 3D array of Samples * Timeline * Features
     def __to_timeline_x(self, frames):
-        assert isinstance(frames, np.ndarray)
-
         timeline = len(self.PARAMS.backward)
         assert len(frames) % timeline == 0
-        len_indexes = int(len(frames) / timeline)
 
-        return frames.reshape((
-            len_indexes, timeline, frames[0].shape[0],
-            frames[0].shape[1], 1))
+        delta_len = int(len(
+            frames) / timeline)
+
+        return np.array(frames).reshape((
+            delta_len, timeline, frames[0].shape[0],
+            frames[0].shape[1], frames[0].shape[2]))
 
     @staticmethod
     def __to_timeline_y(frames):

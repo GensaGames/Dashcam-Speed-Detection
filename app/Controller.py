@@ -7,7 +7,7 @@ import numpy as np
 from keras import Sequential
 from keras.activations import linear, sigmoid, relu
 from keras.initializers import he_normal
-from keras.layers import Dense, Flatten, Dropout, Conv3D, MaxPooling3D
+from keras.layers import Dense, Flatten, Conv3D, MaxPooling3D
 from keras.losses import mean_squared_error
 from keras.optimizers import Adam
 
@@ -69,16 +69,16 @@ class MiniBatchWorker:
                 '../' + Settings.BUILD,
                 predictions)
 
-        baths = 120
+        BATCHES = 120
 
-        for i in range(0, len(samples), baths):
+        for i in range(0, len(samples), BATCHES):
             logger.info('Moving to next Step-Idx {}.'
                         .format(str(i)))
-            step = i + baths if i + baths < len(
+            step = i + BATCHES if i + BATCHES < len(
                 samples) else len(samples)
 
             samples_step = samples[list(range(i, step))]
-            Preprocessor(self.P_PARAMS, None)\
+            Preprocessor(self.P_PARAMS, Augmenters.get_new_validation())\
                 .build('../' + Settings.TEST_FRAMES, None,
                        samples_step)\
                 .subscribe(local_evaluate)
@@ -202,9 +202,12 @@ class MiniBatchWorker:
                 .compile(loss=mean_squared_error,
                          optimizer=Adam(lr=0.001))
 
-            from keras.utils import plot_model
-            plot_model(self.model, to_file='model_plot1.png',
-                       show_shapes=True, show_layer_names=True)
+            # Comment/Uncomment for showing detailed
+            # info about Model Structure.
+
+            # from keras.utils import plot_model
+            # plot_model(self.model, to_file='model_plot1.png',
+            #            show_shapes=True, show_layer_names=True)
 
         value = self.model.train_on_batch(x_y[0], x_y[1])
         logger.debug('Training Batch loss: {}'
@@ -247,17 +250,22 @@ if __name__ == "__main__":
         if not os.path.exists(path_to):
             os.makedirs(path_to)
 
-        handler = logging.FileHandler(
-            filename=path_to + Settings.NAME_LOGS)
-        handler.setLevel(logging.DEBUG)
-        handler.setFormatter(formatter)
+        # Comment/Uncomment in case of
+        # using loggin in files
+        # handler = logging.FileHandler(
+        #     filename=path_to + Settings.NAME_LOGS)
+        # handler.setLevel(logging.DEBUG)
+        # handler.setFormatter(formatter)
+        # log.addHandler(handler)
+
+        # Comment/Uncomment in case of
+        # issue with logging to system
 
         handler1 = logging.StreamHandler()
         handler1.setLevel(logging.DEBUG)
         handler1.setFormatter(formatter)
-
         log.addHandler(handler1)
-        log.addHandler(handler)
+
         return log
 
     logger = set_logger()
@@ -269,8 +277,8 @@ if __name__ == "__main__":
                 frame_x_trim=(220, -220), frame_scale=1.3,
                 area_float=5),
             ControllerParams(
-                'V38-3D-CNN/', baths=10, train_part=0.6,
-                epochs=1000, step_vis=150, samples=20400))]
+                'V39-3D-CNN/', baths=20, train_part=0.6,
+                epochs=15, step_vis=150, samples=20400))]
         return workers
 
     def worker_plot(worker):
@@ -285,8 +293,8 @@ if __name__ == "__main__":
         ax.grid()
 
         plt.savefig(
-            '../' + Settings.BUILD + '/' + worker.C_PARAMS.name
-            + '/' + Settings.NAME_MODEL_PLOT)
+            '../' + Settings.BUILD + '/' + Settings.MODELS + '/'
+            + worker.C_PARAMS.name + '/' + Settings.NAME_MODEL_PLOT)
         return plt
 
     def start_train():
