@@ -117,7 +117,6 @@ class MiniBatchWorker:
     def __split_indexes(self):
         indexes = np.arange(
             max(self.P_PARAMS.backward), self.C_PARAMS.samples)
-        np.random.shuffle(indexes)
 
         assert 0 < self \
             .C_PARAMS.train_part < 1
