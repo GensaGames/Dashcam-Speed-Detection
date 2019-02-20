@@ -117,6 +117,7 @@ class MiniBatchWorker:
     def __split_indexes(self):
         indexes = np.arange(
             max(self.P_PARAMS.backward), self.C_PARAMS.samples)
+        np.random.shuffle(indexes)
 
         assert 0 < self \
             .C_PARAMS.train_part < 1
@@ -287,7 +288,7 @@ if __name__ == "__main__":
         workers = [MiniBatchWorker(
             PreprocessorParams(
                 backward=(0, 1, 2, 3), frame_y_trim=(160, -160),
-                frame_x_trim=(110, -110), frame_scale=0.8,
+                frame_x_trim=(100, -100), frame_scale=0.8,
                 area_float=6),
             ControllerParams(
                 'OPT-V7-OPT-3D-CNN/', baths=20, train_part=0.65,
