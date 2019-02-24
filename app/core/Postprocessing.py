@@ -21,26 +21,38 @@ class Postprocessor:
         return x
 
     @staticmethod
-    def smooth_aggressive(x, window, threshold, remove=False):
+    def smooth_aggressive(x, window, threshold):
         for idx, val in enumerate(x):
             if idx < window:
                 continue
             avr = np.mean(
                 x[idx-window:idx])
 
-            if abs(val - avr) > threshold:
-                sign = math.copysign(1, val - avr)
-                if remove:
-                    x[idx] = avr
-                else:
-                    x[idx] = avr + (sign * threshold / 2)
+            changes = val - avr
+            if abs(changes) > threshold:
+                x[idx] = avr + (changes / 1.8)
         return x
 
     @staticmethod
-    def map_to_mean(x, window):
+    def change_known_issue(x):
+        indexes = np.concatenate(
+            (np.arange(1080, 1720),
+             np.arange(9640, 9840)))
+
+        to_change = dict(zip(
+            indexes, np.zeros(len(indexes))))
+
+        for idx, val in enumerate(x):
+            new_val = to_change.get(idx)
+            if new_val is not None:
+                x[idx] = new_val
+        return x
+
+    @staticmethod
+    def smooth(x, window):
         new_x = []
         for idx, val in enumerate(x):
-            assert window % 2 != 0
+            assert window % 2 == 0
             side = int(window / 2)
 
             if idx < side or idx + side + 1 > len(x):
@@ -76,23 +88,23 @@ if __name__ == "__main__":
     # TODO(Postprocessing): Move to RX Actions
 
     test_map(
-        'test.txt', 'v1-test-new-1.txt',
+        '02-02-test.txt', 'v1-test-new-1.txt',
         Postprocessor.fix_negative)
 
     test_map(
         'v1-test-new-1.txt', 'v1-test-new-2.txt',
         functools.partial(
-            Postprocessor.smooth_aggressive, window=5, threshold=2,
-            remove=True))
+            Postprocessor.smooth_aggressive, window=10, threshold=4))
 
     test_map(
         'v1-test-new-2.txt', 'v1-test-new-3.txt',
-        functools.partial(
-            Postprocessor.smooth_aggressive, window=5, threshold=1))
+        Postprocessor.change_known_issue)
 
     test_map(
-        'v1-test-new-4.txt', 'v1-test-new-5.txt',
-        Postprocessor.smooth_gaussian)
+        'v1-test-new-3.txt', 'v1-test-new-4.txt',
+        functools.partial(
+            Postprocessor.smooth, window=10))
+
 
 
 
