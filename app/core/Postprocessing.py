@@ -88,7 +88,7 @@ if __name__ == "__main__":
     # TODO(Postprocessing): Move to RX Actions
 
     test_map(
-        '02-02-test.txt', 'v1-test-new-1.txt',
+        '02-02-optical-3d-cnn-v8-source.txt', 'v1-test-new-1.txt',
         Postprocessor.fix_negative)
 
     test_map(
