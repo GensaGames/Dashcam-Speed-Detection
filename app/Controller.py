@@ -7,7 +7,7 @@ import numpy as np
 from keras import Sequential
 from keras.activations import linear, sigmoid, relu
 from keras.initializers import he_normal
-from keras.layers import Dense, Flatten, Dropout, Conv3D, MaxPooling3D, Lambda, Convolution2D, ELU
+from keras.layers import Dense, Flatten, Dropout, Conv3D, MaxPooling3D, Lambda, Convolution2D, ELU, BatchNormalization
 from keras.losses import mean_squared_error
 from keras.optimizers import Adam
 
@@ -170,6 +170,7 @@ class MiniBatchWorker:
 
             self.model.add(ELU())
             self.model.add(Dropout(0.2))
+            self.model.add(BatchNormalization())
             self.model.add(
                 Conv3D(filters=48, kernel_size=(3, 5, 5), strides=(1, 2, 2),
                        input_shape=input_shape, padding='same',
@@ -184,6 +185,7 @@ class MiniBatchWorker:
                        data_format='channels_last'))
 
             self.model.add(ELU())
+            self.model.add(BatchNormalization())
             self.model.add(
                 Conv3D(filters=64, kernel_size=(1, 3, 3), strides=(1, 1, 1),
                        input_shape=input_shape, padding='valid',
@@ -293,7 +295,7 @@ if __name__ == "__main__":
                 frame_x_trim=(100, -100), frame_scale=0.8,
                 area_float=6),
             ControllerParams(
-                'OPT-V10-OPT-3D-CNN/', baths=20, train_part=0.65,
+                'OPT-V11-OPT-3D-CNN/', baths=20, train_part=0.65,
                 epochs=15, step_vis=200, samples=20400))]
         return workers
 
