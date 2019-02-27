@@ -163,7 +163,7 @@ class MiniBatchWorker:
 
             self.model = Sequential()
             self.model.add(
-                Conv3D(filters=32, kernel_size=(3, 5, 5), strides=(1, 2, 2),
+                Conv3D(filters=48, kernel_size=(3, 5, 5), strides=(1, 2, 2),
                        input_shape=input_shape, padding='same',
                        kernel_initializer=he_normal(),
                        data_format='channels_last'))
@@ -179,6 +179,7 @@ class MiniBatchWorker:
 
             self.model.add(ELU())
             self.model.add(BatchNormalization())
+            self.model.add(Dropout(0.1))
             self.model.add(
                 Conv3D(filters=64, kernel_size=(3, 3, 3), strides=(1, 1, 1),
                        input_shape=input_shape, padding='valid',
@@ -187,6 +188,7 @@ class MiniBatchWorker:
 
             self.model.add(ELU())
             self.model.add(BatchNormalization())
+            self.model.add(Dropout(0.3))
             self.model.add(
                 Conv3D(filters=64, kernel_size=(1, 3, 3), strides=(1, 1, 1),
                        input_shape=input_shape, padding='valid',
@@ -194,7 +196,6 @@ class MiniBatchWorker:
                        data_format='channels_last'))
 
             self.model.add(ELU())
-            self.model.add(Dropout(0.3))
             self.model.add(BatchNormalization())
 
             self.model.add(MaxPooling3D(pool_size=(1, 2, 2)))
@@ -295,10 +296,10 @@ if __name__ == "__main__":
         workers = [MiniBatchWorker(
             PreprocessorParams(
                 backward=(0, 1, 2, 3), frame_y_trim=(160, -160),
-                frame_x_trim=(100, -100), frame_scale=0.7,
+                frame_x_trim=(100, -100), frame_scale=0.8,
                 area_float=6),
             ControllerParams(
-                'OPT-V15-OPT-3D-CNN/', baths=20, train_part=0.65,
+                'OPT-V16-OPT-3D-CNN/', baths=20, train_part=0.65,
                 epochs=15, step_vis=200, samples=20400))]
         return workers
 
