@@ -29,8 +29,8 @@ def test_image_resize_mean():
     image2 = cv2.imread('../../' + Settings.TEST_FRAMES + '/46.jpg', cv2.IMREAD_COLOR)
 
     # frm = image1.mean(axis=2)
-    frm = image1[230:-130, 220:-220]
-    frm = cv2.resize(frm, (320, 160))
+    frm = image2[140:-160, 90:-90]
+    # frm = cv2.resize(frm, (320, 160))
 
     # image1 = image1[220:350, 0:640]
     # image2 = image2[220:350, 0:640]
@@ -38,8 +38,8 @@ def test_image_resize_mean():
     list1 = np.array([1, 2, 3, 4, 5, 6])
     print(list1[2:-2])
 
-    cv2.imwrite('sift_keypoints2.jpg', Augmenters.get_new_training().augment_image(frm))
-    # cv2.imwrite('sift_keypoints1.jpg', image2)
+    # cv2.imwrite('sift_keypoints2.jpg', Augmenters.get_new_training().augment_image(frm))
+    cv2.imwrite('sift_keypoints3.jpg', frm)
 
 
 test_image_resize_mean()
