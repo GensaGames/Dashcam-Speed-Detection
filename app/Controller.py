@@ -161,7 +161,7 @@ class MiniBatchWorker:
 
             self.model = Sequential()
             self.model.add(
-                Conv3D(filters=32, kernel_size=(3, 5, 5), strides=(1, 2, 2),
+                Conv3D(filters=48, kernel_size=(3, 5, 5), strides=(1, 2, 2),
                        input_shape=input_shape, padding='same',
                        kernel_initializer=he_normal(),
                        data_format='channels_last'))
@@ -308,7 +308,7 @@ if __name__ == "__main__":
                 frame_x_trim=(90, -90), frame_scale=0.7,
                 area_float=6),
             ControllerParams(
-                'OPT-V40-OPT-3D-CNN/', baths=30, train_part=0.65,
+                'OPT-V60-OPT-3D-CNN/', baths=30, train_part=0.65,
                 epochs=15, step_vis=100, samples=20400))]
         return workers
 
