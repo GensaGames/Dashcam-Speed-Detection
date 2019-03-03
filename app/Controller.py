@@ -167,7 +167,7 @@ class MiniBatchWorker:
                        data_format='channels_last'))
 
             self.model.add(ELU())
-            self.model.add(Dropout(0.2))
+            self.model.add(Dropout(0.3))
             self.model.add(BatchNormalization())
 
             self.model.add(
@@ -177,7 +177,7 @@ class MiniBatchWorker:
                        data_format='channels_last'))
 
             self.model.add(ELU())
-            self.model.add(Dropout(0.1))
+            self.model.add(Dropout(0.2))
             self.model.add(BatchNormalization())
 
             self.model.add(
@@ -187,7 +187,7 @@ class MiniBatchWorker:
                        data_format='channels_last'))
 
             self.model.add(ELU())
-            self.model.add(Dropout(0.1))
+            self.model.add(Dropout(0.2))
             self.model.add(BatchNormalization())
 
             self.model.add(
@@ -308,7 +308,7 @@ if __name__ == "__main__":
                 frame_x_trim=(90, -90), frame_scale=0.7,
                 area_float=6),
             ControllerParams(
-                'OPT-V60-OPT-3D-CNN/', baths=30, train_part=0.65,
+                'OPT-V61-OPT-3D-CNN/', baths=30, train_part=0.65,
                 epochs=15, step_vis=100, samples=20400))]
         return workers
 
