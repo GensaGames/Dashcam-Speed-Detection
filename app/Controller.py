@@ -306,9 +306,9 @@ if __name__ == "__main__":
             PreprocessorParams(
                 backward=(0, 1, 2, 3), frame_y_trim=(145, -160),
                 frame_x_trim=(90, -90), frame_scale=0.7,
-                area_float=6),
+                area_float=8),
             ControllerParams(
-                'OPT-V70-OPT-3D-CNN/', baths=30, train_part=0.35,
+                'OPT-V71-OPT-3D-CNN/', baths=30, train_part=0.45,
                 epochs=15, step_vis=100, samples=20400))]
         return workers
 
