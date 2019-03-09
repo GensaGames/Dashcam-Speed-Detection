@@ -28,7 +28,7 @@ class MiniBatchWorker:
 
     def start_epochs(self):
         train, validation = \
-            self.__split_indexes()
+            self.__split_with_important()
 
         for e in range(self.C_PARAMS.epochs):
             logger.info('Starting {} Training Epoch!'
@@ -37,7 +37,7 @@ class MiniBatchWorker:
 
     def show_evaluation(self):
         train, validation = \
-            self.__split_indexes()
+            self.__split_with_important()
 
         def local_evaluate(x_y):
             cost = self.model \
@@ -70,12 +70,12 @@ class MiniBatchWorker:
                 '../' + Settings.BUILD,
                 predictions)
 
-        BATCHES = 120
+        BATCHS = 120
 
-        for i in range(0, len(samples), BATCHES):
+        for i in range(0, len(samples), BATCHS):
             logger.info('Moving to next Step-Idx {}.'
                         .format(str(i)))
-            step = i + BATCHES if i + BATCHES < len(
+            step = i + BATCHS if i + BATCHS < len(
                 samples) else len(samples)
 
             samples_step = samples[list(range(i, step))]
@@ -122,21 +122,38 @@ class MiniBatchWorker:
             self.model, self.P_PARAMS, self.C_PARAMS, self.VISUAL)
         pass
 
-    def __split_indexes(self):
+    # Take more important data from the resources,
+    # where car was on the street roads, and has more
+    # variance
+    def __split_with_important(self):
         indexes = np.arange(
             max(self.P_PARAMS.backward), self.C_PARAMS.samples)
-        np.random.shuffle(indexes)
 
-        assert 0 < self \
-            .C_PARAMS.train_part < 1
-        max_train_index = int(
-            self.C_PARAMS.train_part * len(indexes))
+        END_PART = 0.3
 
-        max_train_index = self.C_PARAMS.baths * int(
-            max_train_index / self.C_PARAMS.baths)
+        slice_important_idx = int(
+            END_PART * len(indexes))
 
-        train = indexes[:max_train_index]
-        return train, indexes[max_train_index:]
+        # Just to align with baths
+        slice_important_idx = self.C_PARAMS.baths * int(
+            slice_important_idx / self.C_PARAMS.baths)
+
+        train_variance = indexes[-slice_important_idx:]
+
+        # Adding the rest part of samples, based on
+        # configuration parameters
+        new_indexes = indexes[:len(indexes) - slice_important_idx]
+        np.random.shuffle(new_indexes)
+
+        next_train_idx = int(
+            (self.C_PARAMS.train_part - END_PART) * len(new_indexes))
+
+        # Just to align with baths
+        next_train_idx = self.C_PARAMS.baths * int(
+            next_train_idx / self.C_PARAMS.baths)
+
+        return np.concatenate([new_indexes[:next_train_idx],
+                               train_variance]), new_indexes[next_train_idx:]
 
     def __step_process(self, step, indexes, validation):
         obs = Preprocessor(self.P_PARAMS,
@@ -276,7 +293,7 @@ if __name__ == "__main__":
 
         """
         Comment/Uncomment in case of
-        using loggin in files
+        using logging in files
         """
 
         # handler = logging.FileHandler(
@@ -308,8 +325,8 @@ if __name__ == "__main__":
                 frame_x_trim=(90, -90), frame_scale=0.7,
                 area_float=8),
             ControllerParams(
-                'OPT-V71-OPT-3D-CNN/', baths=30, train_part=0.45,
-                epochs=15, step_vis=100, samples=20400))]
+                'OPT-V80-OPT-3D-CNN/', baths=30, train_part=0.7,
+                epochs=15, step_vis=80, samples=20400))]
         return workers
 
 
