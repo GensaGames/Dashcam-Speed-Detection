@@ -38,6 +38,7 @@ class MiniBatchWorker:
     def show_evaluation(self):
         train, validation = \
             self.__split_with_important()
+        np.random.shuffle(train)
 
         def local_evaluate(x_y):
             cost = self.model \
@@ -128,32 +129,18 @@ class MiniBatchWorker:
     def __split_with_important(self):
         indexes = np.arange(
             max(self.P_PARAMS.backward), self.C_PARAMS.samples)
+        np.random.shuffle(indexes)
 
-        END_PART = 0.3
+        assert 0 < self \
+            .C_PARAMS.train_part < 1
+        max_train_index = int(
+            self.C_PARAMS.train_part * len(indexes))
 
-        slice_important_idx = int(
-            END_PART * len(indexes))
+        max_train_index = self.C_PARAMS.baths * int(
+            max_train_index / self.C_PARAMS.baths)
 
-        # Just to align with baths
-        slice_important_idx = self.C_PARAMS.baths * int(
-            slice_important_idx / self.C_PARAMS.baths)
-
-        train_variance = indexes[-slice_important_idx:]
-
-        # Adding the rest part of samples, based on
-        # configuration parameters
-        new_indexes = indexes[:len(indexes) - slice_important_idx]
-        np.random.shuffle(new_indexes)
-
-        next_train_idx = int(
-            (self.C_PARAMS.train_part - END_PART) * len(new_indexes))
-
-        # Just to align with baths
-        next_train_idx = self.C_PARAMS.baths * int(
-            next_train_idx / self.C_PARAMS.baths)
-
-        return np.concatenate([new_indexes[:next_train_idx],
-                               train_variance]), new_indexes[next_train_idx:]
+        train = indexes[:max_train_index]
+        return train, indexes[max_train_index:]
 
     def __step_process(self, step, indexes, validation):
         obs = Preprocessor(self.P_PARAMS,
@@ -321,11 +308,11 @@ if __name__ == "__main__":
     def combine_workers():
         workers = [MiniBatchWorker(
             PreprocessorParams(
-                backward=(0, 1, 2, 3), frame_y_trim=(145, -160),
+                backward=(0, 1, 2, 3), frame_y_trim=(140, -160),
                 frame_x_trim=(90, -90), frame_scale=0.7,
                 area_float=8),
             ControllerParams(
-                'OPT-V80-OPT-3D-CNN/', baths=30, train_part=0.7,
+                'OPT-V81-OPT-3D-CNN/', baths=30, train_part=0.7,
                 epochs=15, step_vis=80, samples=20400))]
         return workers
 
