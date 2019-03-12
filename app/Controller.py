@@ -294,10 +294,10 @@ if __name__ == "__main__":
         issue with repeated logging
         """
 
-        # handler1 = logging.StreamHandler()
-        # handler1.setLevel(logging.DEBUG)
-        # handler1.setFormatter(formatter)
-        # log.addHandler(handler1)
+        handler1 = logging.StreamHandler()
+        handler1.setLevel(logging.DEBUG)
+        handler1.setFormatter(formatter)
+        log.addHandler(handler1)
 
         return log
 
@@ -310,9 +310,9 @@ if __name__ == "__main__":
             PreprocessorParams(
                 backward=(0, 1, 2, 3), frame_y_trim=(140, -160),
                 frame_x_trim=(90, -90), frame_scale=0.7,
-                area_float=8),
+                area_float=4),
             ControllerParams(
-                'OPT-V81-OPT-3D-CNN/', baths=30, train_part=0.7,
+                'OPT-V81-OPT-3D-CNN/', baths=30, train_part=0.65,
                 epochs=15, step_vis=80, samples=20400))]
         return workers
 
