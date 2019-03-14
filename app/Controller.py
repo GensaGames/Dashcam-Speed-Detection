@@ -7,7 +7,7 @@ import numpy as np
 from keras import Sequential
 from keras.activations import linear, sigmoid, relu
 from keras.initializers import he_normal
-from keras.layers import Dense, Flatten, Dropout, Conv3D, MaxPooling3D, Lambda, Convolution2D, ELU, BatchNormalization
+from keras.layers import Dense, Flatten, Dropout, Conv3D, MaxPooling3D, ELU, BatchNormalization
 from keras.losses import mean_squared_error
 from keras.optimizers import Adam
 
@@ -49,10 +49,12 @@ class MiniBatchWorker:
 
         while True:
             np.random.shuffle(validation)
-            Preprocessor(self.P_PARAMS, Augmenters.get_new_validation()).build(
-                '../' + Settings.TRAIN_FRAMES,
-                '../' + Settings.TRAIN_Y, validation[:100]) \
+            Preprocessor(self.P_PARAMS, Augmenters
+                         .get_new_validation())\
+                .build(validation[:100]) \
                 .subscribe(local_evaluate)
+
+    BATCHES = 120
 
     def make_test(self):
         logger.info("Create model test values.")
@@ -60,7 +62,7 @@ class MiniBatchWorker:
             max(self.P_PARAMS.backward), 10798)
 
         Helper.clear_built_test(
-            '../' + Settings.BUILD,
+            Settings.BUILD,
             self.P_PARAMS.backward)
 
         def local_evaluate(x_y):
@@ -68,21 +70,19 @@ class MiniBatchWorker:
                 .predict(x_y[0])
 
             Helper.add_built_test(
-                '../' + Settings.BUILD,
+                Settings.BUILD,
                 predictions)
 
-        BATCHS = 120
-
-        for i in range(0, len(samples), BATCHS):
+        for i in range(0, len(samples), self.BATCHES):
             logger.info('Moving to next Step-Idx {}.'
                         .format(str(i)))
-            step = i + BATCHS if i + BATCHS < len(
+            step = i + self.BATCHES if i + self.BATCHES < len(
                 samples) else len(samples)
 
             samples_step = samples[list(range(i, step))]
-            Preprocessor(self.P_PARAMS, Augmenters.get_new_validation()) \
-                .build('../' + Settings.TEST_FRAMES, None,
-                       samples_step) \
+            Preprocessor(self.P_PARAMS, Augmenters
+                         .get_new_validation()) \
+                .build(samples_step) \
                 .subscribe(local_evaluate)
 
     def restore_backup(self):
@@ -95,7 +95,7 @@ class MiniBatchWorker:
         try:
             self.model, self.P_PARAMS, self.C_PARAMS, self.VISUAL = \
                 Helper.restore_model_with(
-                    '../' + Settings.BUILD, self.C_PARAMS.name)
+                    Settings.BUILD, self.C_PARAMS.name)
         except FileNotFoundError:
             logging.error(
                 'Do not have Backup! Starting new.')
@@ -119,9 +119,31 @@ class MiniBatchWorker:
     def do_backup(self):
         logger.info("Making Backup...")
         Helper.backup_model_with(
-            '../' + Settings.BUILD, self.C_PARAMS.name,
+            Settings.BUILD, self.C_PARAMS.name,
             self.model, self.P_PARAMS, self.C_PARAMS, self.VISUAL)
         pass
+
+    PREFIX_STOP_SIZE = int(10.e+4)
+
+    # Include special located frames with car
+    # stop and this variance variance
+    def __get_new_stop_frames(self):
+        source_stop_frames = Settings.TRAIN_FRAMES_STOP
+        stop_indexes = []
+
+        for next_dir in os.listdir(source_stop_frames):
+            for idx, file_ in enumerate(os.listdir(
+                    source_stop_frames + '/' + next_dir)):
+
+                if idx < max(self.P_PARAMS.backward):
+                    continue
+
+                # Just use folder as prefix for index, and avoid
+                # collision with initial train indexes from train part
+                idx_ = int(next_dir) * self.PREFIX_STOP_SIZE + idx
+                stop_indexes.append(idx_)
+
+        return stop_indexes
 
     # Take more important data from the resources,
     # where car was on the street roads, and has more
@@ -139,14 +161,14 @@ class MiniBatchWorker:
         max_train_index = self.C_PARAMS.baths * int(
             max_train_index / self.C_PARAMS.baths)
 
-        train = indexes[:max_train_index]
+        train = np.concatenate((
+            indexes[:max_train_index], self.__get_new_stop_frames()))
         return train, indexes[max_train_index:]
 
     def __step_process(self, step, indexes, validation):
-        obs = Preprocessor(self.P_PARAMS,
-                           Augmenters.get_new_training()).build(
-            '../' + Settings.TRAIN_FRAMES,
-            '../' + Settings.TRAIN_Y, indexes) \
+        obs = Preprocessor(self.P_PARAMS, Augmenters
+                           .get_new_training())\
+            .build(indexes) \
             .publish()
 
         obs.subscribe(self.__step_model)
@@ -256,9 +278,9 @@ class MiniBatchWorker:
             self.VISUAL.add_evaluation(evaluation)
 
         Preprocessor(self.P_PARAMS,
-                     Augmenters.get_new_training()).build(
-            '../' + Settings.TRAIN_FRAMES,
-            '../' + Settings.TRAIN_Y, validation[:100]) \
+                     Augmenters
+                     .get_new_training())\
+            .build(validation[:100]) \
             .subscribe(local_save)
 
 
@@ -274,7 +296,7 @@ if __name__ == "__main__":
             os.path.basename(__file__))
         log.setLevel(logging.DEBUG)
 
-        path_to = '../' + Settings.BUILD
+        path_to = Settings.BUILD
         if not os.path.exists(path_to):
             os.makedirs(path_to)
 
@@ -312,7 +334,7 @@ if __name__ == "__main__":
                 frame_x_trim=(90, -90), frame_scale=0.7,
                 area_float=8),
             ControllerParams(
-                'OPT-V84-OPT-3D-CNN/', baths=30, train_part=0.75,
+                'OPT-V90-OPT-3D-CNN/', baths=30, train_part=0.6,
                 epochs=15, step_vis=80, samples=20400))]
         return workers
 
@@ -329,7 +351,7 @@ if __name__ == "__main__":
         ax.grid()
 
         plt.savefig(
-            '../' + Settings.BUILD + '/' + Settings.MODELS + '/'
+            Settings.BUILD + '/' + Settings.MODELS + '/'
             + worker.C_PARAMS.name + '/' + Settings.NAME_MODEL_PLOT)
         return plt
 

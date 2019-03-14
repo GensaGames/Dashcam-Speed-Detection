@@ -90,6 +90,11 @@ def add_built_test(path_to, values):
 
 
 ##########################################
+def is_car_stop_variance(val):
+    from app.Controller import MiniBatchWorker
+    return val > MiniBatchWorker.PREFIX_STOP_SIZE
+
+##########################################
 def save_plot(path_to, plot, prefix):
     if not os.path.exists(path_to):
         os.makedirs(path_to)
