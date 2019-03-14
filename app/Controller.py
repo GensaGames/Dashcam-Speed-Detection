@@ -26,18 +26,93 @@ class MiniBatchWorker:
             = p_params, c_params, VisualHolder()
         self.model = model
 
-    def start_epochs(self):
+    def start_training_epochs(self):
         train, validation = \
-            self.__split_with_important()
+            self.__prepare_training_data()
 
         for e in range(self.C_PARAMS.epochs):
             logger.info('Starting {} Training Epoch!'
                         .format(str(e)))
+
+            np.random.shuffle(train)
             self.__start_train(train, validation)
 
-    def show_evaluation(self):
+    PREFIX_STOP_SIZE = int(10.e+4)
+
+    # Include special located frames with car
+    # stop and this variance variance
+    def __get_new_stop_frames(self):
+        source_stop_frames = Settings.TRAIN_FRAMES_STOP
+        stop_indexes = []
+
+        for next_dir in os.listdir(source_stop_frames):
+            for idx, file_ in enumerate(os.listdir(
+                    source_stop_frames + '/' + next_dir)):
+
+                if idx < max(self.P_PARAMS.backward):
+                    continue
+
+                # Just use folder as prefix for index, and avoid
+                # collision with initial train indexes from train part
+                idx_ = int(next_dir) * self.PREFIX_STOP_SIZE + idx
+                stop_indexes.append(idx_)
+
+        np.random.shuffle(stop_indexes)
+        return stop_indexes
+
+    # Take more important data from the resources,
+    # where car was on the street roads, and has more
+    # variance
+    def __prepare_training_data(self):
+        indexes = np.arange(
+            max(self.P_PARAMS.backward), self.C_PARAMS.samples)
+        np.random.shuffle(indexes)
+
+        assert 0 < self \
+            .C_PARAMS.train_part < 1
+        max_train_index = int(
+            self.C_PARAMS.train_part * len(indexes))
+
+        max_train_index = self.C_PARAMS.baths * int(
+            max_train_index / self.C_PARAMS.baths)
+
+        train = np.concatenate((
+            indexes[:max_train_index], self.__get_new_stop_frames()))
+
+        return train, indexes[max_train_index:]
+
+    def __start_train(self, train, validation):
+        step = 0
+        for i in range(0, len(train), self.C_PARAMS.baths):
+            logger.info("Start Train step: {}.".format(step))
+
+            indexes = train[list(range(
+                i, i + self.C_PARAMS.baths))]
+
+            self.__step_process(
+                step, indexes, validation)
+            step += 1
+
+        logger.info("Epoch training done. Backup.")
+        self.do_backup()
+
+    def __step_process(self, step, indexes, validation):
+        obs = Preprocessor(self.P_PARAMS, Augmenters
+                           .get_new_training()) \
+            .build(indexes) \
+            .publish()
+
+        obs.subscribe(self.__step_model)
+        obs.connect()
+
+        if step > 0 and (
+                step % self.C_PARAMS.step_vis == 0 or
+                step >= self.C_PARAMS.samples - self.C_PARAMS.baths):
+            self.__evaluate(validation)
+
+    def start_evaluation(self):
         train, validation = \
-            self.__split_with_important()
+            self.__prepare_training_data()
         np.random.shuffle(train)
 
         def local_evaluate(x_y):
@@ -56,7 +131,7 @@ class MiniBatchWorker:
 
     BATCHES = 120
 
-    def make_test(self):
+    def create_test_output(self):
         logger.info("Create model test values.")
         samples = np.arange(
             max(self.P_PARAMS.backward), 10798)
@@ -100,84 +175,11 @@ class MiniBatchWorker:
             logging.error(
                 'Do not have Backup! Starting new.')
 
-    def __start_train(self, train, validation):
-        np.random.shuffle(train)
-
-        step = 0
-        for i in range(0, len(train), self.C_PARAMS.baths):
-            logger.info("Start Train step: {}.".format(step))
-
-            indexes = train[list(range(
-                i, i + self.C_PARAMS.baths))]
-
-            self.__step_process(
-                step, indexes, validation)
-            step += 1
-
-        self.do_backup()
-
     def do_backup(self):
         logger.info("Making Backup...")
         Helper.backup_model_with(
             Settings.BUILD, self.C_PARAMS.name,
             self.model, self.P_PARAMS, self.C_PARAMS, self.VISUAL)
-        pass
-
-    PREFIX_STOP_SIZE = int(10.e+4)
-
-    # Include special located frames with car
-    # stop and this variance variance
-    def __get_new_stop_frames(self):
-        source_stop_frames = Settings.TRAIN_FRAMES_STOP
-        stop_indexes = []
-
-        for next_dir in os.listdir(source_stop_frames):
-            for idx, file_ in enumerate(os.listdir(
-                    source_stop_frames + '/' + next_dir)):
-
-                if idx < max(self.P_PARAMS.backward):
-                    continue
-
-                # Just use folder as prefix for index, and avoid
-                # collision with initial train indexes from train part
-                idx_ = int(next_dir) * self.PREFIX_STOP_SIZE + idx
-                stop_indexes.append(idx_)
-
-        return stop_indexes
-
-    # Take more important data from the resources,
-    # where car was on the street roads, and has more
-    # variance
-    def __split_with_important(self):
-        indexes = np.arange(
-            max(self.P_PARAMS.backward), self.C_PARAMS.samples)
-        np.random.shuffle(indexes)
-
-        assert 0 < self \
-            .C_PARAMS.train_part < 1
-        max_train_index = int(
-            self.C_PARAMS.train_part * len(indexes))
-
-        max_train_index = self.C_PARAMS.baths * int(
-            max_train_index / self.C_PARAMS.baths)
-
-        train = np.concatenate((
-            indexes[:max_train_index], self.__get_new_stop_frames()))
-        return train, indexes[max_train_index:]
-
-    def __step_process(self, step, indexes, validation):
-        obs = Preprocessor(self.P_PARAMS, Augmenters
-                           .get_new_training())\
-            .build(indexes) \
-            .publish()
-
-        obs.subscribe(self.__step_model)
-        obs.connect()
-
-        if step > 0 and (
-                step % self.C_PARAMS.step_vis == 0 or
-                step >= self.C_PARAMS.samples - self.C_PARAMS.baths):
-            self.__evaluate(validation)
 
     def __step_model(self, x_y):
         if self.model is None:
@@ -334,8 +336,8 @@ if __name__ == "__main__":
                 frame_x_trim=(90, -90), frame_scale=0.7,
                 area_float=8),
             ControllerParams(
-                'OPT-V90-OPT-3D-CNN/', baths=30, train_part=0.6,
-                epochs=15, step_vis=80, samples=20400))]
+                'OPT-V90-OPT-3D-CNN/', baths=30, train_part=0.65,
+                epochs=12, step_vis=80, samples=20400))]
         return workers
 
 
@@ -359,7 +361,7 @@ if __name__ == "__main__":
     def start_train():
         for worker in combine_workers():
             worker.restore_backup()
-            worker.start_epochs()
+            worker.start_training_epochs()
             # worker.show_evaluation()
             # worker.make_test()
             # worker_plot(worker)
