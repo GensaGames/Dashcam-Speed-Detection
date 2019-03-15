@@ -70,16 +70,19 @@ class MiniBatchWorker:
 
         assert 0 < self \
             .C_PARAMS.train_part < 1
-        max_train_index = int(
+        max_inital_idx = int(
             self.C_PARAMS.train_part * len(indexes))
 
-        max_train_index = self.C_PARAMS.baths * int(
-            max_train_index / self.C_PARAMS.baths)
-
         train = np.concatenate((
-            indexes[:max_train_index], self.__get_new_stop_frames()))
+            indexes[:max_inital_idx], self.__get_new_stop_frames()))
+        np.random.shuffle(train)
 
-        return train, indexes[max_train_index:]
+        # Just align with exact part of batches.
+        max_train_idx = self.C_PARAMS.baths * int(
+            len(train) / self.C_PARAMS.baths)
+        train = train[:max_train_idx]
+
+        return train, indexes[max_inital_idx:]
 
     def __start_train(self, train, validation):
         step = 0
