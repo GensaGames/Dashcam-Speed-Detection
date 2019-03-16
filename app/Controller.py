@@ -198,7 +198,7 @@ class MiniBatchWorker:
                        data_format='channels_last'))
 
             self.model.add(ELU())
-            self.model.add(Dropout(0.2))
+            self.model.add(Dropout(0.3))
             self.model.add(BatchNormalization())
 
             self.model.add(
@@ -208,7 +208,7 @@ class MiniBatchWorker:
                        data_format='channels_last'))
 
             self.model.add(ELU())
-            self.model.add(Dropout(0.1))
+            self.model.add(Dropout(0.2))
             self.model.add(BatchNormalization())
 
             self.model.add(
@@ -218,7 +218,7 @@ class MiniBatchWorker:
                        data_format='channels_last'))
 
             self.model.add(ELU())
-            self.model.add(Dropout(0.1))
+            self.model.add(Dropout(0.2))
             self.model.add(BatchNormalization())
 
             self.model.add(
@@ -228,7 +228,7 @@ class MiniBatchWorker:
                        data_format='channels_last'))
 
             self.model.add(ELU())
-            self.model.add(Dropout(0.2))
+            self.model.add(Dropout(0.3))
 
             self.model.add(MaxPooling3D(pool_size=(1, 2, 2)))
             self.model.add(BatchNormalization())
@@ -283,8 +283,7 @@ class MiniBatchWorker:
             self.VISUAL.add_evaluation(evaluation)
 
         Preprocessor(self.P_PARAMS,
-                     Augmenters
-                     .get_new_training())\
+                     Augmenters.get_new_training())\
             .build(validation[:100]) \
             .subscribe(local_save)
 
@@ -336,10 +335,10 @@ if __name__ == "__main__":
         workers = [MiniBatchWorker(
             PreprocessorParams(
                 backward=(0, 1, 2, 3), frame_y_trim=(140, -160),
-                frame_x_trim=(90, -90), frame_scale=0.7,
+                frame_x_trim=(90, -90), frame_scale=0.75,
                 area_float=8),
             ControllerParams(
-                'OPT-V90-OPT-3D-CNN/', baths=30, train_part=0.65,
+                'OPT-V91-OPT-3D-CNN/', baths=30, train_part=0.7,
                 epochs=12, step_vis=80, samples=20400))]
         return workers
 
@@ -366,7 +365,7 @@ if __name__ == "__main__":
             worker.restore_backup()
             worker.start_training_epochs()
             # worker.show_evaluation()
-            # worker.make_test()
+            # worker.create_test_output()
             # worker_plot(worker)
 
 
