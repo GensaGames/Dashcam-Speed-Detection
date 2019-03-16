@@ -97,7 +97,6 @@ class MiniBatchWorker:
             step += 1
 
         logger.info("Epoch training done. Backup.")
-        self.do_backup()
 
     def __step_process(self, step, indexes, validation):
         obs = Preprocessor(self.P_PARAMS, Augmenters
@@ -112,6 +111,7 @@ class MiniBatchWorker:
                 step % self.C_PARAMS.step_vis == 0 or
                 step >= self.C_PARAMS.samples - self.C_PARAMS.baths):
             self.__evaluate(validation)
+            self.do_backup()
 
     def start_evaluation(self):
         train, validation = \
