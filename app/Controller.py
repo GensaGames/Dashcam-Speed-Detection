@@ -46,7 +46,7 @@ class MiniBatchWorker:
         stop_indexes = []
 
         for next_dir in os.listdir(source_stop_frames):
-            for idx, file_ in enumerate(os.listdir(
+            for idx, _ in enumerate(os.listdir(
                     source_stop_frames + '/' + next_dir)):
 
                 if idx < max(self.P_PARAMS.backward):
@@ -70,11 +70,11 @@ class MiniBatchWorker:
 
         assert 0 < self \
             .C_PARAMS.train_part < 1
-        max_inital_idx = int(
+        max_initial_idx = int(
             self.C_PARAMS.train_part * len(indexes))
 
         train = np.concatenate((
-            indexes[:max_inital_idx], self.__get_new_stop_frames()))
+            indexes[:max_initial_idx], self.__get_new_stop_frames()))
         np.random.shuffle(train)
 
         # Just align with exact part of batches.
@@ -82,7 +82,7 @@ class MiniBatchWorker:
             len(train) / self.C_PARAMS.baths)
         train = train[:max_train_idx]
 
-        return train, indexes[max_inital_idx:]
+        return train, indexes[max_initial_idx:]
 
     def __start_train(self, train, validation):
         step = 0
@@ -193,7 +193,7 @@ class MiniBatchWorker:
             self.model = Sequential()
             self.model.add(
                 Conv3D(filters=48, kernel_size=(3, 5, 5), strides=(1, 2, 2),
-                       input_shape=input_shape, padding='same',
+                       input_shape=input_shape, padding='valid',
                        kernel_initializer=he_normal(),
                        data_format='channels_last'))
 
@@ -203,12 +203,12 @@ class MiniBatchWorker:
 
             self.model.add(
                 Conv3D(filters=48, kernel_size=(3, 5, 5), strides=(1, 2, 2),
-                       input_shape=input_shape, padding='same',
+                       input_shape=input_shape, padding='valid',
                        kernel_initializer=he_normal(),
                        data_format='channels_last'))
 
             self.model.add(ELU())
-            self.model.add(Dropout(0.2))
+            self.model.add(Dropout(0.1))
             self.model.add(BatchNormalization())
 
             self.model.add(
@@ -218,7 +218,7 @@ class MiniBatchWorker:
                        data_format='channels_last'))
 
             self.model.add(ELU())
-            self.model.add(Dropout(0.2))
+            self.model.add(Dropout(0.1))
             self.model.add(BatchNormalization())
 
             self.model.add(
@@ -228,7 +228,7 @@ class MiniBatchWorker:
                        data_format='channels_last'))
 
             self.model.add(ELU())
-            self.model.add(Dropout(0.3))
+            self.model.add(Dropout(0.2))
 
             self.model.add(MaxPooling3D(pool_size=(1, 2, 2)))
             self.model.add(BatchNormalization())
@@ -334,11 +334,11 @@ if __name__ == "__main__":
     def combine_workers():
         workers = [MiniBatchWorker(
             PreprocessorParams(
-                backward=(0, 1, 2, 3), frame_y_trim=(140, -160),
-                frame_x_trim=(90, -90), frame_scale=0.75,
+                backward=(0, 1, 2, 3), frame_y_trim=(135, -160),
+                frame_x_trim=(90, -90), frame_scale=0.6,
                 area_float=8),
             ControllerParams(
-                'OPT-V91-OPT-3D-CNN/', baths=30, train_part=0.7,
+                'OPT-V92-OPT-3D-CNN/', baths=30, train_part=0.6,
                 epochs=12, step_vis=80, samples=20400))]
         return workers
 
