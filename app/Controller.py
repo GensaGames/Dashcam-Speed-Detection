@@ -73,8 +73,7 @@ class MiniBatchWorker:
         max_initial_idx = int(
             self.C_PARAMS.train_part * len(indexes))
 
-        train = np.concatenate((
-            indexes[:max_initial_idx], self.__get_new_stop_frames()))
+        train = indexes[:max_initial_idx]
         np.random.shuffle(train)
 
         # Just align with exact part of batches.
@@ -193,17 +192,17 @@ class MiniBatchWorker:
             self.model = Sequential()
             self.model.add(
                 Conv3D(filters=48, kernel_size=(3, 5, 5), strides=(1, 2, 2),
-                       input_shape=input_shape, padding='valid',
+                       input_shape=input_shape, padding='same',
                        kernel_initializer=he_normal(),
                        data_format='channels_last'))
 
             self.model.add(ELU())
-            self.model.add(Dropout(0.3))
+            self.model.add(Dropout(0.2))
             self.model.add(BatchNormalization())
 
             self.model.add(
                 Conv3D(filters=48, kernel_size=(3, 5, 5), strides=(1, 2, 2),
-                       input_shape=input_shape, padding='valid',
+                       input_shape=input_shape, padding='same',
                        kernel_initializer=he_normal(),
                        data_format='channels_last'))
 
@@ -335,10 +334,10 @@ if __name__ == "__main__":
         workers = [MiniBatchWorker(
             PreprocessorParams(
                 backward=(0, 1, 2, 3), frame_y_trim=(135, -160),
-                frame_x_trim=(90, -90), frame_scale=0.6,
+                frame_x_trim=(90, -90), frame_scale=0.65,
                 area_float=8),
             ControllerParams(
-                'OPT-V92-OPT-3D-CNN/', baths=30, train_part=0.6,
+                'OPT-V100-OPT-3D-CNN/', baths=30, train_part=0.7,
                 epochs=12, step_vis=80, samples=20400))]
         return workers
 
