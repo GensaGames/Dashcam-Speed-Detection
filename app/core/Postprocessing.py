@@ -9,24 +9,83 @@ import scipy as sp
 import scipy.ndimage
 
 from app import Settings
+from app.other.LoggerFactory import get_logger
 
 
 class Postprocessor:
 
     @staticmethod
-    def fix_negative(x):
+    def create_new(source):
+
+        def map_step(path_from, path_to, func):
+            values = loadtxt(path_from, delimiter=" ",
+                unpack=False)
+            values = func(values)
+
+            path_to = '../../' + Settings.BUILD + '/' + path_to
+            with open(path_to, "wb") as file:
+                np.savetxt(
+                    file, np.round(values, 8), fmt='%.8f',
+                    delimiter="\n")
+
+        # TODO(Postprocessing): Move to RX Actions
+
+        name1 = Postprocessor.__fix_negative.\
+                    __name__ + '-1.txt'
+        map_step(source, name1,
+                 Postprocessor.__fix_negative)
+
+        name2 = Postprocessor.__smooth_aggressive.\
+                    __name__ + '-2.txt'
+        map_step(name1, name2,
+                 functools.partial(
+                     Postprocessor.__smooth_aggressive,
+                     window=10, threshold=4))
+
+        name3 = Postprocessor.__change_known_issue.\
+                    __name__ + '-3.txt'
+        map_step(name2, name3,
+                 Postprocessor.__change_known_issue)
+
+        name4 = Postprocessor.__smooth.\
+                    __name__ + '-4.txt'
+        map_step(name3, name4,
+                 functools.partial(
+                     Postprocessor.__smooth, window=10))
+
+    @staticmethod
+    def show_quality_deviation(source):
+        logger = get_logger()
+
+        values = []
+        with open(source) as file:
+            items = list(map(str.rstrip, file.readlines()))
+            items = list(map(float, items))
+
+            step_len = 15
+            for i in range(0, len(items), step_len):
+                val = np.std(items[i:i + step_len])
+                values.append(val)
+
+            logger.info('Mean produced STD: {}'
+                        .format(np.mean(values)))
+        return values
+
+
+    @staticmethod
+    def __fix_negative(x):
         for idx, val in enumerate(x):
             if val < 0:
                 x[idx] = 0
         return x
 
     @staticmethod
-    def smooth_aggressive(x, window, threshold):
+    def __smooth_aggressive(x, window, threshold):
         for idx, val in enumerate(x):
             if idx < window:
                 continue
             avr = np.mean(
-                x[idx-window:idx])
+                x[idx - window:idx])
 
             changes = val - avr
             if abs(changes) > threshold:
@@ -34,7 +93,7 @@ class Postprocessor:
         return x
 
     @staticmethod
-    def change_known_issue(x):
+    def __change_known_issue(x):
         indexes = np.concatenate(
             (np.arange(1080, 1720),
              np.arange(9640, 9840)))
@@ -49,7 +108,7 @@ class Postprocessor:
         return x
 
     @staticmethod
-    def smooth(x, window):
+    def __smooth(x, window):
         new_x = []
         for idx, val in enumerate(x):
             assert window % 2 == 0
@@ -64,47 +123,17 @@ class Postprocessor:
         return new_x
 
     @staticmethod
-    def smooth_gaussian(x):
+    def __smooth_gaussian(x):
         return sp.ndimage.filters.gaussian_filter1d(
             x, 2, mode='constant')
 
 
 #####################################
 if __name__ == "__main__":
-
-    def test_map(path_from, path_to, func):
-        values = loadtxt(
-            '../../' + Settings.BUILD + '/' +
-            path_from, delimiter=" ",
-            unpack=False)
-        values = func(values)
-
-        path_to = '../../' + Settings.BUILD + '/' + path_to
-        with open(path_to, "wb") as file:
-            np.savetxt(
-                file, np.round(values, 8), fmt='%.8f',
-                delimiter="\n")
-
-    # TODO(Postprocessing): Move to RX Actions
-
-    test_map(
-        '02-02-optical-3d-cnn-v8-source.txt', 'v1-test-new-1.txt',
-        Postprocessor.fix_negative)
-
-    test_map(
-        'v1-test-new-1.txt', 'v1-test-new-2.txt',
-        functools.partial(
-            Postprocessor.smooth_aggressive, window=10, threshold=4))
-
-    test_map(
-        'v1-test-new-2.txt', 'v1-test-new-3.txt',
-        Postprocessor.change_known_issue)
-
-    test_map(
-        'v1-test-new-3.txt', 'v1-test-new-4.txt',
-        functools.partial(
-            Postprocessor.smooth, window=10))
-
-
-
-
+    postprocessor = Postprocessor()
+    # postprocessor.create_new(
+    #     Settings.BUILD + '/' + 'optical-3d-v80.txt')
+    postprocessor.show_quality_deviation(
+        Settings.BUILD + '/' + 'optical-3d-v80.txt')
+    postprocessor.show_quality_deviation(
+        Settings.BUILD + '/' + 'optical-3d-v83.txt')

@@ -17,6 +17,7 @@ from app.core import Augmenters
 from app.core.Parameters import ControllerParams, \
     VisualHolder, PreprocessorParams
 from app.core.Preprocessing import Preprocessor
+from app.other.LoggerFactory import get_logger
 
 
 class MiniBatchWorker:
@@ -290,44 +291,7 @@ class MiniBatchWorker:
 #####################################
 if __name__ == "__main__":
 
-    def set_logger():
-        sys.setrecursionlimit(1001001)
-        formatter = logging.Formatter(
-            '%(asctime)-15s %(message)s')
-
-        log = logging.getLogger(
-            os.path.basename(__file__))
-        log.setLevel(logging.DEBUG)
-
-        path_to = Settings.BUILD
-        if not os.path.exists(path_to):
-            os.makedirs(path_to)
-
-        """
-        Comment/Uncomment in case of
-        using logging in files
-        """
-
-        # handler = logging.FileHandler(
-        #     filename=path_to + Settings.NAME_LOGS)
-        # handler.setLevel(logging.DEBUG)
-        # handler.setFormatter(formatter)
-        # log.addHandler(handler)
-
-        """
-        Comment/Uncomment in case of
-        issue with repeated logging
-        """
-
-        handler1 = logging.StreamHandler()
-        handler1.setLevel(logging.DEBUG)
-        handler1.setFormatter(formatter)
-        log.addHandler(handler1)
-
-        return log
-
-
-    logger = set_logger()
+    logger = get_logger()
 
 
     def combine_workers():
