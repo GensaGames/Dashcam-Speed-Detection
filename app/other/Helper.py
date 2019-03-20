@@ -64,8 +64,8 @@ def annot_avr(y, ax=None):
 
 
 ##########################################
-def clear_built_test(path_to, backward):
-    file = path_to + '/' + Settings.BUILT_TEST
+def clear_built_test(path_to, name, backward):
+    file = path_to + '/' + name
 
     if not os.path.exists(path_to):
         os.makedirs(path_to)
@@ -77,8 +77,8 @@ def clear_built_test(path_to, backward):
 
 
 ##########################################
-def add_built_test(path_to, values):
-    file = path_to + '/' + Settings.BUILT_TEST
+def add_built_test(path_to, name, values):
+    file = path_to + '/' + name
 
     if not os.path.exists(path_to):
         os.makedirs(path_to)

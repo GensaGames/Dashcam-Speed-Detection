@@ -14,7 +14,6 @@ TEST_FRAMES = RESOURCE + 'frames-t/'
 NAME_LOGS = 'logs.txt'
 
 BUILD = PROJECT + 'build/'
-BUILT_TEST = 'optical-3d-cnn-v8-source.txt'
 BUILT_TEST_PR1 = 'test-pp1.txt'
 
 MODELS = 'models'

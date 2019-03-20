@@ -74,7 +74,8 @@ class MiniBatchWorker:
         max_initial_idx = int(
             self.C_PARAMS.train_part * len(indexes))
 
-        train = indexes[:max_initial_idx]
+        train = np.concatenate((
+            indexes[:max_initial_idx], self.__get_new_stop_frames()))
         np.random.shuffle(train)
 
         # Just align with exact part of batches.
@@ -101,6 +102,7 @@ class MiniBatchWorker:
     def __step_process(self, step, indexes, validation):
         obs = Preprocessor(self.P_PARAMS, Augmenters
                            .get_new_training()) \
+            .set_source(Settings.TRAIN_FRAMES, Settings.TRAIN_Y) \
             .build(indexes) \
             .publish()
 
@@ -128,7 +130,8 @@ class MiniBatchWorker:
         while True:
             np.random.shuffle(validation)
             Preprocessor(self.P_PARAMS, Augmenters
-                         .get_new_validation())\
+                         .get_new_validation()) \
+                .set_source(Settings.TRAIN_FRAMES, Settings.TRAIN_Y) \
                 .build(validation[:100]) \
                 .subscribe(local_evaluate)
 
@@ -140,7 +143,7 @@ class MiniBatchWorker:
             max(self.P_PARAMS.backward), 10798)
 
         Helper.clear_built_test(
-            Settings.BUILD,
+            Settings.BUILD, self.C_PARAMS.name,
             self.P_PARAMS.backward)
 
         def local_evaluate(x_y):
@@ -148,7 +151,7 @@ class MiniBatchWorker:
                 .predict(x_y[0])
 
             Helper.add_built_test(
-                Settings.BUILD,
+                Settings.BUILD, self.C_PARAMS.name,
                 predictions)
 
         for i in range(0, len(samples), self.BATCHES):
@@ -160,6 +163,7 @@ class MiniBatchWorker:
             samples_step = samples[list(range(i, step))]
             Preprocessor(self.P_PARAMS, Augmenters
                          .get_new_validation()) \
+                .set_source(Settings.TEST_FRAMES, None) \
                 .build(samples_step) \
                 .subscribe(local_evaluate)
 
@@ -283,7 +287,8 @@ class MiniBatchWorker:
             self.VISUAL.add_evaluation(evaluation)
 
         Preprocessor(self.P_PARAMS,
-                     Augmenters.get_new_training())\
+                     Augmenters.get_new_training()) \
+            .set_source(Settings.TRAIN_FRAMES, Settings.TRAIN_Y) \
             .build(validation[:100]) \
             .subscribe(local_save)
 
@@ -298,7 +303,7 @@ if __name__ == "__main__":
         workers = [MiniBatchWorker(
             PreprocessorParams(
                 backward=(0, 1, 2, 3), frame_y_trim=(135, -160),
-                frame_x_trim=(90, -90), frame_scale=0.65,
+                frame_x_trim=(90, -90), frame_scale=0.7,
                 area_float=8),
             ControllerParams(
                 'OPT-V100-OPT-3D-CNN/', baths=30, train_part=0.7,

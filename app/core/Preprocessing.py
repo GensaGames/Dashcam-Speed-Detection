@@ -21,9 +21,10 @@ class Preprocessor:
     def __init__(self, params, augmenter=None):
         self.PARAMS = params
         self.AUGMETER = augmenter
+        self.source_x_y = None
 
     def __load_y(self, indexes):
-        train_y_paths = Settings.TRAIN_Y
+        train_y_paths = self.source_x_y[1]
 
         assert min(indexes) - \
                max(self.PARAMS.backward) >= 0
@@ -70,14 +71,13 @@ class Preprocessor:
         return itemgetter(*looking_back)(path)
 
     def __load_x(self, indexes):
-        train_frames_paths = Settings.TRAIN_FRAMES
+        frames_paths = self.source_x_y[0]
 
         assert min(indexes) - max(
             self.PARAMS.backward) >= 0
 
         complete_path = sorted(Path(
-            train_frames_paths).glob('*'),
-                               key=lambda x: float(x.stem))
+            frames_paths).glob('*'), key=lambda x: float(x.stem))
 
         items = []
         for i in indexes:
@@ -227,6 +227,10 @@ class Preprocessor:
         assert isinstance(frames, np.ndarray)
         return frames.reshape(len(frames), 1)
 
+    def set_source(self, x, y):
+        self.source_x_y = (x, y)
+        return self
+
     # noinspection PyUnresolvedReferences
     def build(self, indexes):
 
@@ -259,11 +263,15 @@ if __name__ == "__main__":
     Preprocessor(PreprocessorParams(
         (0, 1, 2), frame_scale=1.5, frame_x_trim=(0, 640),
         frame_y_trim=(0, 480), area_float=0),
-        Augmenters.get_new_training()).build([10, 86, 170]) \
+        Augmenters.get_new_training())\
+        .set_source(Settings.TRAIN_FRAMES, Settings.TRAIN_Y)\
+        .build([10, 86, 170]) \
         .subscribe(__assert)
 
     Preprocessor(PreprocessorParams(
         (0, 1, 2), frame_scale=1.5, frame_x_trim=(0, 640),
         frame_y_trim=(0, 480), area_float=0),
-        Augmenters.get_new_training()).build([18, 100006, 23]) \
+        Augmenters.get_new_training()) \
+        .set_source(Settings.TRAIN_FRAMES, Settings.TRAIN_Y) \
+        .build([18, 100006, 23]) \
         .subscribe(__assert)
