@@ -136,4 +136,4 @@ if __name__ == "__main__":
     postprocessor.show_quality_deviation(
         Settings.BUILD + '/' + 'optical-3d-v80.txt')
     postprocessor.show_quality_deviation(
-        Settings.BUILD + '/' + 'optical-3d-v83.txt')
+        Settings.BUILD + '/' + 'optical-3d-v120.txt')

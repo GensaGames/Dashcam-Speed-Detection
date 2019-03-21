@@ -303,10 +303,10 @@ if __name__ == "__main__":
         workers = [MiniBatchWorker(
             PreprocessorParams(
                 backward=(0, 1, 2, 3), frame_y_trim=(135, -160),
-                frame_x_trim=(90, -90), frame_scale=0.65,
+                frame_x_trim=(85, -85), frame_scale=0.65,
                 area_float=8),
             ControllerParams(
-                'OPT-V120-OPT-3D-CNN', baths=30, train_part=0.6,
+                'OPT-V121-OPT-3D-CNN', baths=30, train_part=0.65,
                 epochs=12, step_vis=80, samples=20400))]
         return workers
 
