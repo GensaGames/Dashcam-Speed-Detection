@@ -25,6 +25,8 @@ class Preprocessor:
 
     def __load_y(self, indexes):
         train_y_paths = self.source_x_y[1]
+        if train_y_paths is None:
+            return None
 
         assert min(indexes) - \
                max(self.PARAMS.backward) >= 0

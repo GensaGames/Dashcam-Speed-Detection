@@ -15,6 +15,7 @@ NAME_LOGS = 'logs.txt'
 
 BUILD = PROJECT + 'build/'
 BUILT_TEST_PR1 = 'test-pp1.txt'
+BUILT_TEST_FORMAT = '.txt'
 
 MODELS = 'models'
 NAME_MODEL = 'model-view.h5'
