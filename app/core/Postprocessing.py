@@ -22,7 +22,6 @@ class Postprocessor:
                 unpack=False)
             values = func(values)
 
-            path_to = '../../' + Settings.BUILD + '/' + path_to
             with open(path_to, "wb") as file:
                 np.savetxt(
                     file, np.round(values, 8), fmt='%.8f',
@@ -30,28 +29,29 @@ class Postprocessor:
 
         # TODO(Postprocessing): Move to RX Actions
 
-        name1 = Postprocessor.__fix_negative.\
-                    __name__ + '-1.txt'
+        name1 = Settings.BUILD + '/' + Postprocessor.\
+            __fix_negative.__name__ + '1.txt'
         map_step(source, name1,
                  Postprocessor.__fix_negative)
 
-        name2 = Postprocessor.__smooth_aggressive.\
-                    __name__ + '-2.txt'
+        name2 = Settings.BUILD + '/' + Postprocessor. \
+            __change_known_issue.__name__ + '2.txt'
+        print('Local N1: ' + str(name1) + ' N2: ' + str(name2))
         map_step(name1, name2,
-                 functools.partial(
-                     Postprocessor.__smooth_aggressive,
-                     window=10, threshold=4))
-
-        name3 = Postprocessor.__change_known_issue.\
-                    __name__ + '-3.txt'
-        map_step(name2, name3,
                  Postprocessor.__change_known_issue)
 
-        name4 = Postprocessor.__smooth.\
-                    __name__ + '-4.txt'
-        map_step(name3, name4,
-                 functools.partial(
-                     Postprocessor.__smooth, window=10))
+        # name3 = Settings.BUILD + '/' + Postprocessor. \
+        #     __smooth_aggressive.__name__ + '3.txt'
+        # map_step(name2, name3,
+        #          functools.partial(
+        #              Postprocessor.__smooth_aggressive,
+        #              window=10, threshold=4))
+        #
+        # name4 = Settings.BUILD + '/' + Postprocessor. \
+        #     __smooth.__name__ + '4.txt'
+        # map_step(name3, name4,
+        #          functools.partial(
+        #              Postprocessor.__smooth, window=10))
 
     @staticmethod
     def show_quality_deviation(source):
@@ -76,7 +76,7 @@ class Postprocessor:
     def __fix_negative(x):
         for idx, val in enumerate(x):
             if val < 0:
-                x[idx] = 0
+                x[idx] = 1.5
         return x
 
     @staticmethod
@@ -93,7 +93,7 @@ class Postprocessor:
         return x
 
     @staticmethod
-    def __change_known_issue(x):
+    def __change_known_issue(values):
         indexes = np.concatenate(
             (np.arange(1080, 1720),
              np.arange(9640, 9840)))
@@ -101,11 +101,11 @@ class Postprocessor:
         to_change = dict(zip(
             indexes, np.zeros(len(indexes))))
 
-        for idx, val in enumerate(x):
+        for idx, val in enumerate(values):
             new_val = to_change.get(idx)
             if new_val is not None:
-                x[idx] = new_val
-        return x
+                values[idx] = new_val
+        return values
 
     @staticmethod
     def __smooth(x, window):
@@ -132,8 +132,8 @@ class Postprocessor:
 if __name__ == "__main__":
     postprocessor = Postprocessor()
     # postprocessor.create_new(
-    #     Settings.BUILD + '/' + 'optical-3d-v80.txt')
+    #     Settings.BUILD + '/' + 'optical-3d-v121.txt')
     postprocessor.show_quality_deviation(
-        Settings.BUILD + '/' + 'optical-3d-v80.txt')
+        Settings.BUILD + '/' + 'optical-3d-v120-n.txt')
     postprocessor.show_quality_deviation(
-        Settings.BUILD + '/' + 'optical-3d-v120.txt')
+        Settings.BUILD + '/' + 'optical-3d-v121-n.txt')
