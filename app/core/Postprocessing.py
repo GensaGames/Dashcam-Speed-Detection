@@ -29,29 +29,24 @@ class Postprocessor:
 
         # TODO(Postprocessing): Move to RX Actions
 
-        name1 = Settings.BUILD + '/' + Postprocessor.\
-            __fix_negative.__name__ + '1.txt'
+        name1 = Settings.BUILD + '/' + 'post-v1.txt'
         map_step(source, name1,
                  Postprocessor.__fix_negative)
 
-        name2 = Settings.BUILD + '/' + Postprocessor. \
-            __change_known_issue.__name__ + '2.txt'
-        print('Local N1: ' + str(name1) + ' N2: ' + str(name2))
+        name2 = Settings.BUILD + '/' + 'post-v2.txt'
         map_step(name1, name2,
                  Postprocessor.__change_known_issue)
 
-        # name3 = Settings.BUILD + '/' + Postprocessor. \
-        #     __smooth_aggressive.__name__ + '3.txt'
-        # map_step(name2, name3,
-        #          functools.partial(
-        #              Postprocessor.__smooth_aggressive,
-        #              window=10, threshold=4))
-        #
-        # name4 = Settings.BUILD + '/' + Postprocessor. \
-        #     __smooth.__name__ + '4.txt'
-        # map_step(name3, name4,
-        #          functools.partial(
-        #              Postprocessor.__smooth, window=10))
+        name3 = Settings.BUILD + '/' + 'post-v3.txt'
+        map_step(name2, name3,
+                 functools.partial(
+                     Postprocessor.__smooth_aggressive,
+                     window=10, threshold=4))
+
+        name4 = Settings.BUILD + '/' + 'post-v4.txt'
+        map_step(name3, name4,
+                 functools.partial(
+                     Postprocessor.__smooth, window=10))
 
     @staticmethod
     def show_quality_deviation(source):
@@ -76,7 +71,7 @@ class Postprocessor:
     def __fix_negative(x):
         for idx, val in enumerate(x):
             if val < 0:
-                x[idx] = 1.5
+                x[idx] = 1.0
         return x
 
     @staticmethod
@@ -89,14 +84,14 @@ class Postprocessor:
 
             changes = val - avr
             if abs(changes) > threshold:
-                x[idx] = avr + (changes / 1.8)
+                x[idx] = avr + (changes / 10)
         return x
 
     @staticmethod
     def __change_known_issue(values):
         indexes = np.concatenate(
-            (np.arange(1080, 1720),
-             np.arange(9640, 9840)))
+            (np.arange(1090, 1710),
+             np.arange(9650, 9830)))
 
         to_change = dict(zip(
             indexes, np.zeros(len(indexes))))
@@ -131,9 +126,10 @@ class Postprocessor:
 #####################################
 if __name__ == "__main__":
     postprocessor = Postprocessor()
-    # postprocessor.create_new(
-    #     Settings.BUILD + '/' + 'optical-3d-v121.txt')
-    postprocessor.show_quality_deviation(
-        Settings.BUILD + '/' + 'optical-3d-v120-n.txt')
-    postprocessor.show_quality_deviation(
-        Settings.BUILD + '/' + 'optical-3d-v121-n.txt')
+    postprocessor.create_new(
+        Settings.BUILD + '/' + 'optical-3d-v121.txt')
+
+    # postprocessor.show_quality_deviation(
+    #     Settings.BUILD + '/' + 'v83-n.txt')
+    # postprocessor.show_quality_deviation(
+    #     Settings.BUILD + '/' + 'v121-n.txt')
