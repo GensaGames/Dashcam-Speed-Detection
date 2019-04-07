@@ -35,16 +35,12 @@ class Postprocessor:
 
         name2 = Settings.BUILD + '/' + 'post-v2.txt'
         map_step(name1, name2,
-                 Postprocessor.__change_known_issue)
-
-        name3 = Settings.BUILD + '/' + 'post-v3.txt'
-        map_step(name2, name3,
                  functools.partial(
                      Postprocessor.__smooth_aggressive,
                      window=10, threshold=4))
 
-        name4 = Settings.BUILD + '/' + 'post-v4.txt'
-        map_step(name3, name4,
+        name3 = Settings.BUILD + '/' + 'post-v3.txt'
+        map_step(name2, name3,
                  functools.partial(
                      Postprocessor.__smooth, window=10))
 
@@ -66,7 +62,6 @@ class Postprocessor:
                         .format(np.mean(values)))
         return values
 
-
     @staticmethod
     def __fix_negative(x):
         for idx, val in enumerate(x):
@@ -86,21 +81,6 @@ class Postprocessor:
             if abs(changes) > threshold:
                 x[idx] = avr + (changes / 10)
         return x
-
-    @staticmethod
-    def __change_known_issue(values):
-        indexes = np.concatenate(
-            (np.arange(1090, 1710),
-             np.arange(9650, 9830)))
-
-        to_change = dict(zip(
-            indexes, np.zeros(len(indexes))))
-
-        for idx, val in enumerate(values):
-            new_val = to_change.get(idx)
-            if new_val is not None:
-                values[idx] = new_val
-        return values
 
     @staticmethod
     def __smooth(x, window):
