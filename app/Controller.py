@@ -214,7 +214,7 @@ class MiniBatchWorker:
         model = Sequential()
         # normalization
         # perform custom normalization before lambda layer in network
-        model.add(Lambda(lambda x: x / 127.5 - 1, input_shape=input_shape))
+        model.add(Lambda(lambda x: x / 256, input_shape=input_shape))
 
         model.add(Convolution2D(24, (5, 5),
                                 strides=(2, 2),
@@ -296,11 +296,11 @@ if __name__ == "__main__":
     def combine_workers():
         workers = [MiniBatchWorker(
             PreprocessorParams(
-                backward=(0, 1), frame_y_trim=(135, -160),
-                frame_x_trim=(60, -60), frame_scale=0.6,
-                area_float=8),
+                backward=(0, 1), frame_y_trim=(130, -170),
+                frame_x_trim=(30, -30), frame_scale=0.6,
+                area_float=4),
             ControllerParams(
-                'NV-OPT-V800-2D-CNN', baths=30, train_part=0.7,
+                'NV-OPT-V801-2D-CNN', baths=30, train_part=0.7,
                 epochs=12, step_vis=80, samples=20400))]
         return workers
 
