@@ -64,8 +64,8 @@ def annot_avr(y, ax=None):
 
 
 ##########################################
-def clear_built_test(path_to, backward):
-    file = path_to + '/' + Settings.BUILT_TEST
+def clear_built_test(path_to, name, backward):
+    file = path_to + '/' + name + Settings.BUILT_TEST_FORMAT
 
     if not os.path.exists(path_to):
         os.makedirs(path_to)
@@ -77,8 +77,8 @@ def clear_built_test(path_to, backward):
 
 
 ##########################################
-def add_built_test(path_to, values):
-    file = path_to + '/' + Settings.BUILT_TEST
+def add_built_test(path_to, name, values):
+    file = path_to + '/' + name + Settings.BUILT_TEST_FORMAT
 
     if not os.path.exists(path_to):
         os.makedirs(path_to)
@@ -88,6 +88,11 @@ def add_built_test(path_to, values):
             file, np.round(values, 8), fmt='%.8f',
             delimiter="\n")
 
+
+##########################################
+def is_car_stop_variance(val):
+    from app.Controller import MiniBatchWorker
+    return val > MiniBatchWorker.PREFIX_STOP_SIZE
 
 ##########################################
 def save_plot(path_to, plot, prefix):

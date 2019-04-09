@@ -21,11 +21,11 @@ import matplotlib.pyplot as plt
 # * Convert from HSV to RGB and return RGB image with same size as original image
 def test_opencv_optical_source():
     image_current = cv2.imread(
-        '../../' + Settings.TRAIN_FRAMES + '/'
+        Settings.TRAIN_FRAMES + '/'
         + str(3700) + '.jpg', cv2.IMREAD_COLOR)
 
     image_next = cv2.imread(
-        '../../' + Settings.TRAIN_FRAMES + '/'
+        Settings.TRAIN_FRAMES + '/'
         + str(3701) + '.jpg', cv2.IMREAD_COLOR)
     gray_current = cv2.cvtColor(image_current, cv2.COLOR_RGB2GRAY)
 
@@ -78,15 +78,15 @@ def test_opencv_optical_source():
 
 def test_opencv_optical1():
     frame1 = cv2.imread(
-        '../../' + Settings.TRAIN_FRAMES + '/'
+        Settings.TRAIN_FRAMES + '/'
         + str(3700) + '.jpg', cv2.IMREAD_COLOR)
 
     image_current = cv2.imread(
-        '../../' + Settings.TRAIN_FRAMES + '/'
+        Settings.TRAIN_FRAMES + '/'
         + str(3700) + '.jpg', cv2.IMREAD_GRAYSCALE)
 
     image_next = cv2.imread(
-        '../../' + Settings.TRAIN_FRAMES + '/'
+        Settings.TRAIN_FRAMES + '/'
         + str(3701) + '.jpg', cv2.IMREAD_GRAYSCALE)
 
     flow = cv2.calcOpticalFlowFarneback(
@@ -108,22 +108,24 @@ def test_opencv_optical1():
 
 
 def test_opencv_optical_moving():
-    start_index = 2000
-    for _ in range(0, 20400, 1000):
+    for _ in range(1080, 20400, 20):
 
         for i in range(_, _ + 10):
-            ia = Augmenters.get_new_training()
-            ia = ia.to_deterministic()
+            ia = Augmenters.get_new_validation()
 
             image_current = cv2.imread(
-                '../../' + Settings.TEST_FRAMES + '/'
-                + str(start_index + i) + '.jpg', cv2.IMREAD_COLOR)
+                Settings.TEST_FRAMES + '/'
+                + str(i) + '.jpg', cv2.IMREAD_COLOR)
             image_current = ia.augment_image(image_current)
+            image_current = cv2.resize(
+                image_current[160: -160, 100:-100], (0, 0), fx=1.3, fy=1.3)
 
             image_next = cv2.imread(
-                '../../' + Settings.TEST_FRAMES + '/'
-                + str(start_index + i + 1) + '.jpg', cv2.IMREAD_COLOR)
+                Settings.TEST_FRAMES + '/'
+                + str(i + 1) + '.jpg', cv2.IMREAD_COLOR)
             image_next = ia.augment_image(image_next)
+            image_next = cv2.resize(
+                image_next[160: -160, 100:-100], (0, 0), fx=1.3, fy=1.3)
 
             hsv = np.zeros_like(image_current)
             # set saturation
@@ -133,7 +135,7 @@ def test_opencv_optical_moving():
             flow_mat = None
             image_scale = 0.5
             nb_images = 3
-            win_size = 10
+            win_size = 15
             nb_iterations = 2
             deg_expansion = 5
             STD = 1.3

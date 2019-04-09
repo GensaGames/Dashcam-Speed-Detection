@@ -52,7 +52,7 @@ def test_momentum_changes_over_time():
 def test_speed_changes_over_time():
     items = loadtxt(
         '../../' + Settings.BUILD + '/'
-        + 'v1-test-new-5.txt', delimiter=" ",
+        + Settings.BUILT_TEST_PR1, delimiter=" ",
         unpack=False)
 
     items = np.reshape(

@@ -17,6 +17,7 @@ from app.core import Augmenters
 from app.core.Parameters import ControllerParams, \
     VisualHolder, PreprocessorParams
 from app.core.Preprocessing import Preprocessor
+from app.other.LoggerFactory import get_logger
 
 
 class MiniBatchWorker:
@@ -26,18 +27,98 @@ class MiniBatchWorker:
             = p_params, c_params, VisualHolder()
         self.model = model
 
-    def start_epochs(self):
+    def start_training_epochs(self):
         train, validation = \
-            self.__split_indexes()
+            self.__prepare_training_data()
 
         for e in range(self.C_PARAMS.epochs):
             logger.info('Starting {} Training Epoch!'
                         .format(str(e)))
+
+            np.random.shuffle(train)
             self.__start_train(train, validation)
 
-    def show_evaluation(self):
+    PREFIX_STOP_SIZE = int(10.e+4)
+
+    # Include special located frames with car
+    # stop and this variance variance
+    def __get_new_stop_frames(self):
+        source_stop_frames = Settings.TRAIN_FRAMES_STOP
+        stop_indexes = []
+
+        for next_dir in os.listdir(source_stop_frames):
+            for idx, _ in enumerate(os.listdir(
+                    source_stop_frames + '/' + next_dir)):
+
+                if idx < max(self.P_PARAMS.backward):
+                    continue
+
+                # Just use folder as prefix for index, and avoid
+                # collision with initial train indexes from train part
+                idx_ = int(next_dir) * self.PREFIX_STOP_SIZE + idx
+                stop_indexes.append(idx_)
+
+        np.random.shuffle(stop_indexes)
+        return stop_indexes
+
+    # Take more important data from the resources,
+    # where car was on the street roads, and has more
+    # variance
+    def __prepare_training_data(self):
+        indexes = np.arange(
+            max(self.P_PARAMS.backward), self.C_PARAMS.samples)
+        np.random.shuffle(indexes)
+
+        assert 0 < self \
+            .C_PARAMS.train_part < 1
+        max_initial_idx = int(
+            self.C_PARAMS.train_part * len(indexes))
+
+        train = np.concatenate((
+            indexes[:max_initial_idx], self.__get_new_stop_frames()))
+        np.random.shuffle(train)
+
+        # Just align with exact part of batches.
+        max_train_idx = self.C_PARAMS.baths * int(
+            len(train) / self.C_PARAMS.baths)
+        train = train[:max_train_idx]
+
+        return train, indexes[max_initial_idx:]
+
+    def __start_train(self, train, validation):
+        step = 0
+        for i in range(0, len(train), self.C_PARAMS.baths):
+            logger.info("Start Train step: {}.".format(step))
+
+            indexes = train[list(range(
+                i, i + self.C_PARAMS.baths))]
+
+            self.__step_process(
+                step, indexes, validation)
+            step += 1
+
+        logger.info("Epoch training done. Backup.")
+
+    def __step_process(self, step, indexes, validation):
+        obs = Preprocessor(self.P_PARAMS, Augmenters
+                           .get_new_training()) \
+            .set_source(Settings.TRAIN_FRAMES, Settings.TRAIN_Y) \
+            .build(indexes) \
+            .publish()
+
+        obs.subscribe(self.__step_model)
+        obs.connect()
+
+        if step > 0 and (
+                step % self.C_PARAMS.step_vis == 0 or
+                step >= self.C_PARAMS.samples - self.C_PARAMS.baths):
+            self.__evaluate(validation)
+            self.do_backup()
+
+    def start_evaluation(self):
         train, validation = \
-            self.__split_indexes()
+            self.__prepare_training_data()
+        np.random.shuffle(train)
 
         def local_evaluate(x_y):
             cost = self.model \
@@ -48,17 +129,21 @@ class MiniBatchWorker:
 
         while True:
             np.random.shuffle(validation)
-            Preprocessor(self.P_PARAMS, Augmenters.get_new_validation()).build(
-                '../' + Settings.TRAIN_FRAMES,
-                '../' + Settings.TRAIN_Y, validation[:100]) \
+            Preprocessor(self.P_PARAMS, Augmenters
+                         .get_new_validation()) \
+                .set_source(Settings.TRAIN_FRAMES, Settings.TRAIN_Y) \
+                .build(validation[:100]) \
                 .subscribe(local_evaluate)
 
-    def make_test(self):
+    BATCHES = 120
+
+    def create_test_output(self):
+        logger.info("Create model test values.")
         samples = np.arange(
             max(self.P_PARAMS.backward), 10798)
 
         Helper.clear_built_test(
-            '../' + Settings.BUILD,
+            Settings.BUILD, self.C_PARAMS.name,
             self.P_PARAMS.backward)
 
         def local_evaluate(x_y):
@@ -66,24 +151,24 @@ class MiniBatchWorker:
                 .predict(x_y[0])
 
             Helper.add_built_test(
-                '../' + Settings.BUILD,
+                Settings.BUILD, self.C_PARAMS.name,
                 predictions)
 
-        BATCHES = 120
-
-        for i in range(0, len(samples), BATCHES):
+        for i in range(0, len(samples), self.BATCHES):
             logger.info('Moving to next Step-Idx {}.'
                         .format(str(i)))
-            step = i + BATCHES if i + BATCHES < len(
+            step = i + self.BATCHES if i + self.BATCHES < len(
                 samples) else len(samples)
 
             samples_step = samples[list(range(i, step))]
-            Preprocessor(self.P_PARAMS, Augmenters.get_new_validation())\
-                .build('../' + Settings.TEST_FRAMES, None,
-                       samples_step)\
+            Preprocessor(self.P_PARAMS, Augmenters
+                         .get_new_validation()) \
+                .set_source(Settings.TEST_FRAMES, None) \
+                .build(samples_step) \
                 .subscribe(local_evaluate)
 
     def restore_backup(self):
+        logger.info("Restoring Backup...")
         if self.model is not None:
             logging.error(
                 'Model already created. Do not override!')
@@ -92,66 +177,16 @@ class MiniBatchWorker:
         try:
             self.model, self.P_PARAMS, self.C_PARAMS, self.VISUAL = \
                 Helper.restore_model_with(
-                    '../' + Settings.BUILD, self.C_PARAMS.name)
+                    Settings.BUILD, self.C_PARAMS.name)
         except FileNotFoundError:
             logging.error(
                 'Do not have Backup! Starting new.')
 
-    def __start_train(self, train, validation):
-        np.random.shuffle(train)
-
-        for i in range(0, len(train), self.C_PARAMS.baths):
-            indexes = train[list(range(
-                i, i + self.C_PARAMS.baths))]
-            self.__step_process(i, indexes)
-
-        self.__evaluate(validation)
-        self.do_backup()
-
     def do_backup(self):
+        logger.info("Making Backup...")
         Helper.backup_model_with(
-            '../' + Settings.BUILD, self.C_PARAMS.name,
+            Settings.BUILD, self.C_PARAMS.name,
             self.model, self.P_PARAMS, self.C_PARAMS, self.VISUAL)
-        pass
-
-    def __split_indexes(self):
-        indexes = np.arange(
-            max(self.P_PARAMS.backward), self.C_PARAMS.samples)
-
-        assert 0 < self \
-            .C_PARAMS.train_part < 1
-        max_train_index = int(
-            self.C_PARAMS.train_part * len(indexes))
-
-        max_train_index = self.C_PARAMS.baths * int(
-            max_train_index / self.C_PARAMS.baths)
-
-        train = indexes[:max_train_index]
-        return train, indexes[max_train_index:]
-
-    def __step_process(self, step, indexes):
-        obs = Preprocessor(self.P_PARAMS,
-                           Augmenters.get_new_training()).build(
-            '../' + Settings.TRAIN_FRAMES,
-            '../' + Settings.TRAIN_Y, indexes) \
-            .publish()
-
-        obs.filter(lambda _: step > self.C_PARAMS.step_vis and (
-                step % self.C_PARAMS.step_vis == 0 or
-                step >= self.C_PARAMS.samples - self.C_PARAMS.baths)) \
-            .map(lambda x_y: (x_y[0], x_y[1], step)) \
-            .subscribe(self.__step_visual)
-
-        obs.subscribe(self.__step_model)
-        obs.connect()
-
-    def __step_visual(self, x_y_s):
-        cost = self.model \
-            .evaluate(x_y_s[0], x_y_s[1])
-
-        logger.info("Added for Visualisation. Iter: {} Cost: {}"
-                    .format(x_y_s[2], cost))
-        self.VISUAL.add_iter(x_y_s[2], cost)
 
     def __step_model(self, x_y):
         if self.model is None:
@@ -201,7 +236,7 @@ class MiniBatchWorker:
                                 kernel_initializer='he_normal',
                                 name='conv3'))
         model.add(ELU())
-        model.add(Dropout(0.5))
+        model.add(Dropout(0.2))
         model.add(Convolution2D(64, (3, 3),
                                 strides=(1, 1),
                                 padding='valid',
@@ -217,11 +252,11 @@ class MiniBatchWorker:
 
         model.add(Flatten(name='flatten'))
         model.add(ELU())
-        model.add(Dense(128, kernel_initializer='he_normal', name='fc1'))
+        model.add(Dense(256, kernel_initializer='he_normal', name='fc1'))
         model.add(ELU())
-        model.add(Dense(64, kernel_initializer='he_normal', name='fc2'))
+        model.add(Dense(128, kernel_initializer='he_normal', name='fc2'))
         model.add(ELU())
-        model.add(Dense(16, kernel_initializer='he_normal', name='fc3'))
+        model.add(Dense(64, kernel_initializer='he_normal', name='fc3'))
         model.add(ELU())
 
         model.add(Dense(1, name='output', kernel_initializer='he_normal'))
@@ -246,58 +281,29 @@ class MiniBatchWorker:
             self.VISUAL.add_evaluation(evaluation)
 
         Preprocessor(self.P_PARAMS,
-                     Augmenters.get_new_training()).build(
-            '../' + Settings.TRAIN_FRAMES,
-            '../' + Settings.TRAIN_Y, validation[:100]) \
+                     Augmenters.get_new_training()) \
+            .set_source(Settings.TRAIN_FRAMES, Settings.TRAIN_Y) \
+            .build(validation[:100]) \
             .subscribe(local_save)
 
 
 #####################################
 if __name__ == "__main__":
 
-    def set_logger():
-        sys.setrecursionlimit(1001001)
-        formatter = logging.Formatter(
-            '%(asctime)-15s %(message)s')
+    logger = get_logger()
 
-        log = logging.getLogger(
-            os.path.basename(__file__))
-        log.setLevel(logging.DEBUG)
-
-        path_to = '../' + Settings.BUILD
-        if not os.path.exists(path_to):
-            os.makedirs(path_to)
-
-        # Comment/Uncomment in case of
-        # using loggin in files
-        # handler = logging.FileHandler(
-        #     filename=path_to + Settings.NAME_LOGS)
-        # handler.setLevel(logging.DEBUG)
-        # handler.setFormatter(formatter)
-        # log.addHandler(handler)
-
-        # Comment/Uncomment in case of
-        # issue with logging to system
-
-        handler1 = logging.StreamHandler()
-        handler1.setLevel(logging.DEBUG)
-        handler1.setFormatter(formatter)
-        log.addHandler(handler1)
-
-        return log
-
-    logger = set_logger()
 
     def combine_workers():
         workers = [MiniBatchWorker(
             PreprocessorParams(
-                backward=(0, 1), frame_y_trim=(165, -165),
-                frame_x_trim=(100, -100), frame_scale=1,
-                area_float=6),
+                backward=(0, 1), frame_y_trim=(135, -160),
+                frame_x_trim=(60, -60), frame_scale=0.6,
+                area_float=8),
             ControllerParams(
-                'NV-OPT-V5-2D-CNN/', baths=20, train_part=0.6,
-                epochs=6, step_vis=200, samples=20400))]
+                'NV-OPT-V800-2D-CNN', baths=30, train_part=0.7,
+                epochs=12, step_vis=80, samples=20400))]
         return workers
+
 
     def worker_plot(worker):
         fig, ax = plt.subplots()
@@ -311,16 +317,17 @@ if __name__ == "__main__":
         ax.grid()
 
         plt.savefig(
-            '../' + Settings.BUILD + '/' + Settings.MODELS + '/'
+            Settings.BUILD + '/' + Settings.MODELS + '/'
             + worker.C_PARAMS.name + '/' + Settings.NAME_MODEL_PLOT)
         return plt
+
 
     def start_train():
         for worker in combine_workers():
             worker.restore_backup()
-            worker.start_epochs()
-            # worker.show_evaluation()
-            # worker.make_test()
+            worker.start_training_epochs()
+            # worker.start_evaluation()
+            # worker.create_test_output()
             # worker_plot(worker)
 
 
