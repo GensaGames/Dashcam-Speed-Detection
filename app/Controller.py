@@ -331,7 +331,7 @@ if __name__ == "__main__":
         for worker in combine_workers():
             worker.restore_backup()
             worker.start_training_epochs()
-            # worker.show_evaluation()
+            # worker.start_evaluation()
             # worker.create_test_output()
             # worker_plot(worker)
 
