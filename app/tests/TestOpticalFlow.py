@@ -108,7 +108,7 @@ def test_opencv_optical1():
 
 
 def test_opencv_optical_moving():
-    for _ in range(1080, 20400, 20):
+    for _ in range(4000, 20400, 20):
 
         for i in range(_, _ + 10):
             ia = Augmenters.get_new_validation()
@@ -118,14 +118,14 @@ def test_opencv_optical_moving():
                 + str(i) + '.jpg', cv2.IMREAD_COLOR)
             image_current = ia.augment_image(image_current)
             image_current = cv2.resize(
-                image_current[160: -160, 100:-100], (0, 0), fx=1.3, fy=1.3)
+                image_current[100:-160, 80:-80], (0, 0), fx=0.5, fy=0.5)
 
             image_next = cv2.imread(
                 Settings.TEST_FRAMES + '/'
                 + str(i + 1) + '.jpg', cv2.IMREAD_COLOR)
             image_next = ia.augment_image(image_next)
             image_next = cv2.resize(
-                image_next[160: -160, 100:-100], (0, 0), fx=1.3, fy=1.3)
+                image_next[100:-160, 80:-80], (0, 0), fx=0.5, fy=0.5)
 
             hsv = np.zeros_like(image_current)
             # set saturation
@@ -134,8 +134,8 @@ def test_opencv_optical_moving():
             # Flow Parameters
             flow_mat = None
             image_scale = 0.5
-            nb_images = 3
-            win_size = 15
+            nb_images = 2
+            win_size = 5
             nb_iterations = 2
             deg_expansion = 5
             STD = 1.3

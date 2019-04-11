@@ -232,8 +232,6 @@ class MiniBatchWorker:
                        data_format='channels_last'))
 
             self.model.add(ELU())
-            self.model.add(Dropout(0.1))
-
             self.model.add(BatchNormalization())
             self.model.add(Flatten())
 
@@ -241,11 +239,13 @@ class MiniBatchWorker:
                 .add(Dense(units=256,
                            kernel_initializer=he_normal()))
             self.model.add(ELU())
+            self.model.add(BatchNormalization())
 
             self.model \
                 .add(Dense(units=128,
                            kernel_initializer=he_normal()))
             self.model.add(ELU())
+            self.model.add(BatchNormalization())
 
             self.model \
                 .add(Dense(units=64,
@@ -301,11 +301,11 @@ if __name__ == "__main__":
     def combine_workers():
         workers = [MiniBatchWorker(
             PreprocessorParams(
-                backward=(0, 1, 2, 3), frame_y_trim=(135, -160),
-                frame_x_trim=(85, -85), frame_scale=0.5,
+                backward=(0, 1, 2, 3), frame_y_trim=(100, -160),
+                frame_x_trim=(80, -80), frame_scale=0.5,
                 area_float=8),
             ControllerParams(
-                'OPT-V200-OPT-3D-CNN', baths=30, train_part=0.65,
+                'OPT-V210-OPT-3D-CNN', baths=30, train_part=0.65,
                 epochs=12, step_vis=80, samples=20400))]
         return workers
 
