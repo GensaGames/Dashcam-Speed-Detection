@@ -243,6 +243,7 @@ class Preprocessor:
             .map(self.__map_crop) \
             .map(self.__map_scale) \
             .map(self.__build_optical_flow) \
+            .map(self.__map_normalize) \
             .map(self.__to_timeline_x)
 
         obs_y = Observable.of(indexes) \
@@ -265,11 +266,11 @@ if __name__ == "__main__":
                and x_y[0].shape[0] == x_y[1].shape[0]
 
     Preprocessor(PreprocessorParams(
-        (0, 1, 2), frame_scale=1.5, frame_x_trim=(0, 640),
-        frame_y_trim=(0, 480), area_float=0),
+        (0, 1, 2), frame_scale=1.5, frame_x_trim=(200, -200),
+        frame_y_trim=(150, -150), area_float=0),
         Augmenters.get_new_training())\
         .set_source(Settings.TRAIN_FRAMES, Settings.TRAIN_Y)\
-        .build([10, 86, 170]) \
+        .build([10]) \
         .subscribe(__assert)
 
     Preprocessor(PreprocessorParams(
