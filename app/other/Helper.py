@@ -148,15 +148,13 @@ def restore_model_with(path_to, name):
 
 
 ##########################################
-# to_frames_video('../../' + Settings.TEST_VIDEO,
-#                 '../../' + Settings.TEST_FRAMES)
+# to_frames_video(Settings.TEST_VIDEO, Settings.TEST_FRAMES)
 #
 # ffmpeg -i source/test.mp4 -y -an -f image2 /
 #      -r 20 frames-t/%01d.jpg
 def to_frames_video(path_from, path_to, img_format='.jpg'):
     vid = cv2.VideoCapture(path_from)
 
-    path_to = '../' + path_to
     if not os.path.exists(path_to):
         os.makedirs(path_to)
 
@@ -167,6 +165,7 @@ def to_frames_video(path_from, path_to, img_format='.jpg'):
         if not ret:
             break
         # Saves images
+        print(str(index))
         name = path_to + str(index) + img_format
         cv2.imwrite(name, frame)
         # next frame

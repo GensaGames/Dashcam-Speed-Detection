@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 
 def test5():
     image = cv2.imread(
-        '../../' + Settings.TRAIN_FRAMES + '/540.jpg', cv2.IMREAD_GRAYSCALE)
+        Settings.TRAIN_FRAMES + '/540.jpg', cv2.IMREAD_GRAYSCALE)
 
     from imgaug.augmenters import Sequential
     from imgaug.augmenters import Fliplr
@@ -64,7 +64,7 @@ def test6():
         state = aug_model.to_deterministic()
         for i in range(_, _ + 10):
             image = cv2.imread(
-                '../../' + Settings.TRAIN_FRAMES + '/'
+                Settings.TEST_FRAMES + '/'
                 + str(start_index + i) + '.jpg', cv2.IMREAD_GRAYSCALE)
 
             cv2.imshow('Augmented', state.augment_image(image))
@@ -74,7 +74,7 @@ test6()
 
 def test8():
     img = cv2.imread(
-        '../../' + Settings.TRAIN_FRAMES + '/'
+        Settings.TRAIN_FRAMES + '/'
         + str(3700) + '.jpg', cv2.IMREAD_COLOR)
     rows,cols,ch = img.shape
 

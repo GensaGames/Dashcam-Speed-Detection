@@ -20,7 +20,7 @@ def get_new_training():
     ia.seed(int(time.time()))
 
     return Sequential([
-        GammaContrast(gamma=(0.2, 1)),
+        GammaContrast(gamma=(0.35, 0.9)),
         Sometimes(0.3, CoarseDropout(
             p=(0.05, 0.3), size_percent=(0.1, 0.5))),
     ])
@@ -28,7 +28,7 @@ def get_new_training():
 
 def get_new_validation():
     return Sequential([
-        GammaContrast(gamma=0.4),
+        GammaContrast(gamma=0.45),
     ])
 
 

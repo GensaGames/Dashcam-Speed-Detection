@@ -206,7 +206,7 @@ class MiniBatchWorker:
 
             self.model.add(
                 Conv3D(filters=48, kernel_size=(3, 3, 3), strides=(1, 2, 2),
-                       input_shape=input_shape, padding='same',
+                       input_shape=input_shape, padding='valid',
                        kernel_initializer=he_normal()))
 
             self.model.add(ELU())
@@ -297,11 +297,11 @@ if __name__ == "__main__":
     def combine_workers():
         workers = [MiniBatchWorker(
             PreprocessorParams(
-                backward=(0, 1, 2, 3), frame_y_trim=(100, -160),
+                backward=(0, 1, 2, 3, 4, 5), frame_y_trim=(100, -160),
                 frame_x_trim=(80, -80), frame_scale=0.6,
                 area_float=6),
             ControllerParams(
-                'OPT-V230-OPT-3D-CNN', baths=30, train_part=0.65,
+                'OPT-V231-OPT-3D-CNN', baths=30, train_part=0.65,
                 epochs=12, step_vis=80, samples=20400))]
         return workers
 
