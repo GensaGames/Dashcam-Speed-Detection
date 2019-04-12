@@ -202,7 +202,7 @@ class MiniBatchWorker:
                        data_format='channels_last'))
 
             self.model.add(ELU())
-            self.model.add(Dropout(0.2))
+            self.model.add(Dropout(0.1))
             self.model.add(BatchNormalization())
 
             self.model.add(
@@ -232,7 +232,7 @@ class MiniBatchWorker:
                        data_format='channels_last'))
 
             self.model.add(ELU())
-            self.model.add(Dropout(0.2))
+            self.model.add(Dropout(0.1))
 
             self.model.add(MaxPooling3D(pool_size=(1, 2, 2)))
             self.model.add(BatchNormalization())
@@ -242,11 +242,13 @@ class MiniBatchWorker:
                 .add(Dense(units=256,
                            kernel_initializer=he_normal()))
             self.model.add(ELU())
+            self.model.add(BatchNormalization())
 
             self.model \
                 .add(Dense(units=128,
                            kernel_initializer=he_normal()))
             self.model.add(ELU())
+            self.model.add(BatchNormalization())
 
             self.model \
                 .add(Dense(units=64,
@@ -306,7 +308,7 @@ if __name__ == "__main__":
                 frame_x_trim=(80, -80), frame_scale=0.6,
                 area_float=6),
             ControllerParams(
-                'OPT-V220-OPT-3D-CNN', baths=30, train_part=0.65,
+                'OPT-V221-OPT-3D-CNN', baths=30, train_part=0.65,
                 epochs=12, step_vis=80, samples=20400))]
         return workers
 
