@@ -197,6 +197,15 @@ class MiniBatchWorker:
             self.model = Sequential()
             self.model.add(
                 Conv3D(filters=48, kernel_size=(3, 5, 5), strides=(1, 2, 2),
+                       input_shape=input_shape, padding='same',
+                       kernel_initializer=he_normal()))
+
+            self.model.add(ELU())
+            self.model.add(Dropout(0.1))
+            self.model.add(BatchNormalization())
+
+            self.model.add(
+                Conv3D(filters=64, kernel_size=(3, 3, 3), strides=(1, 2, 2),
                        input_shape=input_shape, padding='valid',
                        kernel_initializer=he_normal()))
 
@@ -205,16 +214,7 @@ class MiniBatchWorker:
             self.model.add(BatchNormalization())
 
             self.model.add(
-                Conv3D(filters=48, kernel_size=(3, 3, 3), strides=(1, 2, 2),
-                       input_shape=input_shape, padding='valid',
-                       kernel_initializer=he_normal()))
-
-            self.model.add(ELU())
-            self.model.add(Dropout(0.1))
-            self.model.add(BatchNormalization())
-
-            self.model.add(
-                Conv3D(filters=64, kernel_size=(3, 3, 3), strides=(1, 1, 1),
+                Conv3D(filters=64, kernel_size=(1, 3, 3), strides=(1, 1, 1),
                        input_shape=input_shape, padding='valid',
                        kernel_initializer=he_normal()))
 
@@ -297,11 +297,11 @@ if __name__ == "__main__":
     def combine_workers():
         workers = [MiniBatchWorker(
             PreprocessorParams(
-                backward=(0, 1, 2, 3, 4, 5, 6, 7), frame_y_trim=(100, -160),
-                frame_x_trim=(80, -80), frame_scale=0.5,
+                backward=(0, 1, 2, 3), frame_y_trim=(100, -160),
+                frame_x_trim=(80, -80), frame_scale=0.55,
                 area_float=6),
             ControllerParams(
-                'OPT-V241-OPT-3D-CNN', baths=30, train_part=0.65,
+                'OPT-V242-OPT-3D-CNN', baths=30, train_part=0.65,
                 epochs=12, step_vis=80, samples=20400))]
         return workers
 
