@@ -214,7 +214,7 @@ class MiniBatchWorker:
             self.model.add(BatchNormalization())
 
             self.model.add(
-                Conv3D(filters=64, kernel_size=(1, 3, 3), strides=(1, 1, 1),
+                Conv3D(filters=86, kernel_size=(1, 3, 3), strides=(1, 1, 1),
                        input_shape=input_shape, padding='valid',
                        kernel_initializer=he_normal()))
 
@@ -298,10 +298,10 @@ if __name__ == "__main__":
         workers = [MiniBatchWorker(
             PreprocessorParams(
                 backward=(0, 2, 4, 6), frame_y_trim=(100, -160),
-                frame_x_trim=(80, -80), frame_scale=0.55,
+                frame_x_trim=(80, -80), frame_scale=0.5,
                 area_float=6),
             ControllerParams(
-                'OPT-V250-OPT-3D-CNN', baths=30, train_part=0.65,
+                'OPT-V251-OPT-3D-CNN', baths=30, train_part=0.65,
                 epochs=12, step_vis=80, samples=20400))]
         return workers
 
