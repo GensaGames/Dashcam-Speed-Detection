@@ -110,23 +110,12 @@ def test_opencv_optical1():
 def test_opencv_optical_moving():
     for _ in range(4000, 20400, 20):
 
-        for i in range(_, _ + 10):
-            ia = Augmenters.get_new_validation()
+        feature_params = dict( maxCorners = 500,
+                               qualityLevel = 0.1,
+                               minDistance = 7,
+                               blockSize = 5 )
 
-            image_current = cv2.imread(
-                Settings.TEST_FRAMES + '/'
-                + str(i) + '.jpg', cv2.IMREAD_COLOR)
-            image_current = ia.augment_image(image_current)
-            image_current = cv2.resize(
-                image_current[100:-160, 80:-80], (0, 0), fx=0.5, fy=0.5)
-
-            image_next = cv2.imread(
-                Settings.TEST_FRAMES + '/'
-                + str(i + 1) + '.jpg', cv2.IMREAD_COLOR)
-            image_next = ia.augment_image(image_next)
-            image_next = cv2.resize(
-                image_next[100:-160, 80:-80], (0, 0), fx=0.5, fy=0.5)
-
+        def calcOptical(image_current, image_next):
             hsv = np.zeros_like(image_current)
             # set saturation
             hsv[:,:,1] = cv2.cvtColor(image_next, cv2.COLOR_RGB2HSV)[:,:,1]
@@ -135,7 +124,7 @@ def test_opencv_optical_moving():
             flow_mat = None
             image_scale = 0.5
             nb_images = 2
-            win_size = 5
+            win_size = 10
             nb_iterations = 2
             deg_expansion = 5
             STD = 1.3
@@ -161,8 +150,37 @@ def test_opencv_optical_moving():
             # hsv = np.asarray(hsv, dtype= np.float32)
 
             hsv = cv2.cvtColor(hsv,cv2.COLOR_HSV2RGB)
+            return hsv
 
-            cv2.imshow('frame2',hsv)
+        def find_corners(image):
+            p0 = cv2.goodFeaturesToTrack(cv2.cvtColor(image, cv2.COLOR_RGB2GRAY), mask = None, **feature_params)
+            for dx in p0:
+                x,y = dx.ravel()
+                cv2.circle(image,(x,y),3,255,-1)
+            return image
+
+        for i in range(_, _ + 10):
+            ia = Augmenters.get_new_validation()
+
+            image_current = cv2.imread(
+                Settings.TEST_FRAMES + '/'
+                + str(i) + '.jpg', cv2.IMREAD_COLOR)
+            image_current = ia.augment_image(image_current)
+            image_current = cv2.resize(
+                image_current[100:-160, 80:-80], (0, 0), fx=1, fy=1)
+
+
+            image_next = cv2.imread(
+                Settings.TEST_FRAMES + '/'
+                + str(i + 1) + '.jpg', cv2.IMREAD_COLOR)
+            image_next = ia.augment_image(image_next)
+            image_next = cv2.resize(
+                image_next[100:-160, 80:-80], (0, 0), fx=1, fy=1)
+
+            hsv1 = calcOptical(image_current, image_next)
+            hsv2 = calcOptical(find_corners(image_current), find_corners(image_next))
+            cv2.imshow('frame1',hsv1)
+            cv2.imshow('frame2',hsv2)
             cv2.waitKey(0)
 
 
