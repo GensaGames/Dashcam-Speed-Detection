@@ -7,7 +7,7 @@ import numpy as np
 from keras import Sequential
 from keras.activations import linear, sigmoid, relu
 from keras.initializers import he_normal
-from keras.layers import Dense, Flatten, Dropout, Conv3D, MaxPooling3D, Lambda, Convolution2D, ELU
+from keras.layers import Dense, Flatten, Dropout, Conv3D, MaxPooling3D, Lambda, Convolution2D, ELU, BatchNormalization
 from keras.losses import mean_squared_error
 from keras.optimizers import Adam
 
@@ -223,6 +223,7 @@ class MiniBatchWorker:
                                 name='conv1'))
 
         model.add(ELU())
+        model.add(BatchNormalization())
         model.add(Convolution2D(36, (5, 5),
                                 strides=(2, 2),
                                 padding='valid',
@@ -230,6 +231,7 @@ class MiniBatchWorker:
                                 name='conv2'))
 
         model.add(ELU())
+        model.add(BatchNormalization())
         model.add(Convolution2D(48, (5, 5),
                                 strides=(2, 2),
                                 padding='valid',
@@ -237,6 +239,7 @@ class MiniBatchWorker:
                                 name='conv3'))
         model.add(ELU())
         model.add(Dropout(0.2))
+        model.add(BatchNormalization())
         model.add(Convolution2D(64, (3, 3),
                                 strides=(1, 1),
                                 padding='valid',
@@ -244,6 +247,7 @@ class MiniBatchWorker:
                                 name='conv4'))
 
         model.add(ELU())
+        model.add(BatchNormalization())
         model.add(Convolution2D(64, (3, 3),
                                 strides=(1, 1),
                                 padding='valid',
@@ -252,6 +256,7 @@ class MiniBatchWorker:
 
         model.add(Flatten(name='flatten'))
         model.add(ELU())
+
         model.add(Dense(256, kernel_initializer='he_normal', name='fc1'))
         model.add(ELU())
         model.add(Dense(128, kernel_initializer='he_normal', name='fc2'))
@@ -296,11 +301,11 @@ if __name__ == "__main__":
     def combine_workers():
         workers = [MiniBatchWorker(
             PreprocessorParams(
-                backward=(0, 1), frame_y_trim=(130, -170),
-                frame_x_trim=(30, -30), frame_scale=0.6,
+                backward=(0, 1), frame_y_trim=(100, -160),
+                frame_x_trim=(80, -30), frame_scale=0.6,
                 area_float=4),
             ControllerParams(
-                'NV-OPT-V801-2D-CNN', baths=30, train_part=0.7,
+                'NV-OPT-V600-2D-CNN', baths=30, train_part=0.65,
                 epochs=12, step_vis=80, samples=20400))]
         return workers
 
