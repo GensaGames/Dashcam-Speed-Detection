@@ -23,19 +23,14 @@ def opticalFlowOverlay(image_current, image_next):
                       criteria = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.03))
 
     image_current_saved = np.copy(image_current)
-    image_next_saved = np.copy(image_next)
+    # image_next_saved = np.copy(image_next)
+    image_next_saved = np.zeros_like(image_next)
 
     image_current = cv2.cvtColor(image_current, cv2.COLOR_RGB2GRAY)
     image_next = cv2.cvtColor(image_next, cv2.COLOR_RGB2GRAY)
 
     # Finds edges in an image using the [Canny86] algorithm.
     p0 = cv2.goodFeaturesToTrack(image_current, mask = None, **feature_params)
-    for i in p0:
-        x,y = i.ravel()
-        cv2.circle(image_current_saved,(x,y),3,255,-1)
-
-    cv2.imshow('frame2', image_current_saved)
-    cv2.waitKey(0)
 
     p1, st, err = cv2.calcOpticalFlowPyrLK(image_current, image_next, p0, None, **lk_params)
 
@@ -49,13 +44,13 @@ def opticalFlowOverlay(image_current, image_next):
     for i, (new, old) in enumerate(zip(good_new, good_old)):
         a, b = new.ravel() # flatten
         c, d = old.ravel()
-        mask = cv2.arrowedLine(mask, (a,b), (c, d), color[i%100].tolist(), 2, 8)
+        image_next_saved = cv2.arrowedLine(mask, (a,b), (c, d), color[i%100].tolist(), 2, 8, tipLength=3)
 
-        image_next = cv2.circle(image_next_saved, (a, b), 1, color[29].tolist(), -1)
+        # image_next_saved = cv2.circle(image_next_saved, (a, b), 25, color[i%100].tolist(), -1)
         image_next_fg = cv2.bitwise_and(image_next, image_next, mask = mask)
 
-    dst = cv2.add(image_next, image_next_fg)
-    return dst
+    # dst = cv2.add(image_next, image_next_fg)
+    return image_next_saved
 
 
 def test_opencv_optical_moving():
@@ -79,7 +74,7 @@ def test_opencv_optical_moving():
                 image_next[100:-160, 80:-80], (0, 0), fx=1, fy=1)
 
             img_new = opticalFlowOverlay(image_current, image_next)
-            cv2.imshow('frame2', img_new)
+            cv2.imshow('frame1', img_new)
             cv2.waitKey(0)
 
 
