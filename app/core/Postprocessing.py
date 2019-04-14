@@ -1,5 +1,7 @@
 from __future__ import division
 
+import os
+
 import math
 import functools
 import numpy as np
@@ -58,8 +60,9 @@ class Postprocessor:
                 val = np.std(items[i:i + step_len])
                 values.append(val)
 
-            logger.info('Mean produced STD: {}'
-                        .format(np.mean(values)))
+            logger.info('Mean of {} produced STD: {}'
+                        .format(os.path.basename(source),
+                                np.mean(values)))
         return values
 
     @staticmethod
@@ -106,10 +109,10 @@ class Postprocessor:
 #####################################
 if __name__ == "__main__":
     postprocessor = Postprocessor()
-    postprocessor.create_new(
-        Settings.BUILD + '/' + 'optical-3d-v121.txt')
+    # postprocessor.create_new(
+    #     Settings.BUILD + '/' + 'optical-3d-v121.txt')
 
-    # postprocessor.show_quality_deviation(
-    #     Settings.BUILD + '/' + 'v83-n.txt')
-    # postprocessor.show_quality_deviation(
-    #     Settings.BUILD + '/' + 'v121-n.txt')
+    postprocessor.show_quality_deviation(
+        Settings.BUILD + '/' + 'OPT-V231-OPT-3D-CNN.txt')
+    postprocessor.show_quality_deviation(
+        Settings.BUILD + '/' + 'OPT-V240-OPT-3D-CNN.txt')
