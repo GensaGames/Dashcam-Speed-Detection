@@ -216,19 +216,11 @@ class MiniBatchWorker:
         # perform custom normalization before lambda layer in network
         model.add(Lambda(lambda x: x / 256, input_shape=input_shape))
 
-        model.add(Convolution2D(24, (5, 5),
+        model.add(Convolution2D(48, (5, 5),
                                 strides=(2, 2),
                                 padding='valid',
                                 kernel_initializer='he_normal',
                                 name='conv1'))
-
-        model.add(ELU())
-        model.add(BatchNormalization())
-        model.add(Convolution2D(36, (5, 5),
-                                strides=(2, 2),
-                                padding='valid',
-                                kernel_initializer='he_normal',
-                                name='conv2'))
 
         model.add(ELU())
         model.add(BatchNormalization())
@@ -256,6 +248,7 @@ class MiniBatchWorker:
 
         model.add(Flatten(name='flatten'))
         model.add(ELU())
+        model.add(BatchNormalization())
 
         model.add(Dense(256, kernel_initializer='he_normal', name='fc1'))
         model.add(ELU())
@@ -305,7 +298,7 @@ if __name__ == "__main__":
                 frame_x_trim=(80, -30), frame_scale=0.6,
                 area_float=4),
             ControllerParams(
-                'NV-OPT-V600-2D-CNN', baths=30, train_part=0.65,
+                'NV-OPT-V601-2D-CNN', baths=30, train_part=0.65,
                 epochs=12, step_vis=80, samples=20400))]
         return workers
 
