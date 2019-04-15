@@ -12,6 +12,7 @@ import scipy.ndimage
 
 from app import Settings
 from app.other.LoggerFactory import get_logger
+logger = get_logger()
 
 
 class Postprocessor:
@@ -44,11 +45,10 @@ class Postprocessor:
         name3 = Settings.BUILD + '/' + 'post-v3.txt'
         map_step(name2, name3,
                  functools.partial(
-                     Postprocessor.__smooth, window=10))
+                     Postprocessor.__smooth, window=6))
 
     @staticmethod
     def show_quality_deviation(source):
-        logger = get_logger()
 
         values = []
         with open(source) as file:
@@ -69,11 +69,12 @@ class Postprocessor:
     def __fix_negative(x):
         for idx, val in enumerate(x):
             if val < 0:
-                x[idx] = 1.0
+                x[idx] = 0.7
         return x
 
     @staticmethod
     def __smooth_aggressive(x, window, threshold):
+        changed = []
         for idx, val in enumerate(x):
             if idx < window:
                 continue
@@ -82,7 +83,11 @@ class Postprocessor:
 
             changes = val - avr
             if abs(changes) > threshold:
+                changed.append(idx)
                 x[idx] = avr + (changes / 10)
+
+        logger.info('Total changed len: {} Indexes: \n{}'
+                    .format(len(changed), changed))
         return x
 
     @staticmethod
@@ -109,10 +114,10 @@ class Postprocessor:
 #####################################
 if __name__ == "__main__":
     postprocessor = Postprocessor()
-    # postprocessor.create_new(
-    #     Settings.BUILD + '/' + 'optical-3d-v121.txt')
+    postprocessor.create_new(
+        Settings.BUILD + '/' + 'OPT-V252-OPT-3D-CNN.txt')
 
-    postprocessor.show_quality_deviation(
-        Settings.BUILD + '/' + 'OPT-V231-OPT-3D-CNN.txt')
-    postprocessor.show_quality_deviation(
-        Settings.BUILD + '/' + 'OPT-V240-OPT-3D-CNN.txt')
+    # postprocessor.show_quality_deviation(
+    #     Settings.BUILD + '/' + 'OPT-V231-OPT-3D-CNN.txt')
+    # postprocessor.show_quality_deviation(
+    #     Settings.BUILD + '/' + 'OPT-V252-OPT-3D-CNN.txt')
