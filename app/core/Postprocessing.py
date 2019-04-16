@@ -40,7 +40,7 @@ class Postprocessor:
         map_step(name1, name2,
                  functools.partial(
                      Postprocessor.__smooth_aggressive,
-                     window=15, thr_increase=4, thr_decrease=7))
+                     window=20, thr_increase=4, thr_decrease=8))
 
         name3 = Settings.BUILD + '/' + 'post-v3.txt'
         map_step(name2, name3,
@@ -74,7 +74,7 @@ class Postprocessor:
     def __fix_negative(x):
         for idx, val in enumerate(x):
             if val < 0:
-                x[idx] = 0.
+                x[idx] = 0.5
         return x
 
     @staticmethod
