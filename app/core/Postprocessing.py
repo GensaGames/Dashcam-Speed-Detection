@@ -40,10 +40,15 @@ class Postprocessor:
         map_step(name1, name2,
                  functools.partial(
                      Postprocessor.__smooth_aggressive,
-                     window=10, threshold=4))
+                     window=15, thr_increase=4, thr_decrease=7))
 
         name3 = Settings.BUILD + '/' + 'post-v3.txt'
         map_step(name2, name3,
+                 functools.partial(
+                     Postprocessor.__smooth, window=8))
+
+        name4 = Settings.BUILD + '/' + 'post-v4.txt'
+        map_step(name3, name4,
                  functools.partial(
                      Postprocessor.__smooth, window=6))
 
@@ -69,25 +74,44 @@ class Postprocessor:
     def __fix_negative(x):
         for idx, val in enumerate(x):
             if val < 0:
-                x[idx] = 0.7
+                x[idx] = 0.
         return x
 
     @staticmethod
-    def __smooth_aggressive(x, window, threshold):
-        changed = []
+    def __smooth_aggressive(x, window, thr_increase, thr_decrease):
+        previous_idx = 0
+        near_idx_dict = {}
+        start_near_idx = 0
+
         for idx, val in enumerate(x):
             if idx < window:
                 continue
             avr = np.mean(
                 x[idx - window:idx])
 
+            should_stat = False
             changes = val - avr
-            if abs(changes) > threshold:
-                changed.append(idx)
-                x[idx] = avr + (changes / 10)
+            if changes > 0:
+                if abs(changes) > thr_increase:
+                    x[idx] = avr + (changes / 10)
+                    should_stat = True
+            else:
+                if abs(changes) > thr_decrease:
+                    x[idx] = avr + (changes / 10)
+                    should_stat = True
 
-        logger.info('Total changed len: {} Indexes: \n{}'
-                    .format(len(changed), changed))
+            if should_stat:
+                if start_near_idx == 0:
+                    start_near_idx = idx
+                if abs(idx - previous_idx) <= 2:
+                    near_idx_dict[start_near_idx] = \
+                        near_idx_dict.get(start_near_idx, 0) + 1
+                else:
+                    start_near_idx = 0
+                previous_idx = idx
+
+        logger.info('Changes Total len: {} Stats:\n{}'
+                    .format(sum(near_idx_dict.values()), near_idx_dict))
         return x
 
     @staticmethod
