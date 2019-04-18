@@ -230,7 +230,7 @@ class MiniBatchWorker:
                                 kernel_initializer='he_normal',
                                 name='conv3'))
         model.add(ELU())
-        model.add(Dropout(0.2))
+        model.add(Dropout(0.5))
         model.add(BatchNormalization())
         model.add(Convolution2D(64, (3, 3),
                                 strides=(1, 1),
