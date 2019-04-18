@@ -298,7 +298,7 @@ if __name__ == "__main__":
                 frame_x_trim=(50, -50), frame_scale=0.6,
                 area_float=6),
             ControllerParams(
-                'NV-OPT-V600-2D-CNN', baths=30, train_part=0.7,
+                'NV-OPT-V600-2D-CNN', baths=30, train_part=0.5,
                 epochs=4, step_vis=80, samples=20400))]
         return workers
 
