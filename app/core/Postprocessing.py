@@ -1,5 +1,7 @@
 from __future__ import division
 
+import os
+
 import math
 import functools
 import numpy as np
@@ -10,6 +12,7 @@ import scipy.ndimage
 
 from app import Settings
 from app.other.LoggerFactory import get_logger
+logger = get_logger()
 
 
 class Postprocessor:
@@ -37,16 +40,20 @@ class Postprocessor:
         map_step(name1, name2,
                  functools.partial(
                      Postprocessor.__smooth_aggressive,
-                     window=10, threshold=4))
+                     window=20, thr_increase=4, thr_decrease=8))
 
         name3 = Settings.BUILD + '/' + 'post-v3.txt'
         map_step(name2, name3,
                  functools.partial(
-                     Postprocessor.__smooth, window=10))
+                     Postprocessor.__smooth, window=8))
+
+        name4 = Settings.BUILD + '/' + 'post-v4.txt'
+        map_step(name3, name4,
+                 functools.partial(
+                     Postprocessor.__smooth, window=6))
 
     @staticmethod
     def show_quality_deviation(source):
-        logger = get_logger()
 
         values = []
         with open(source) as file:
@@ -58,28 +65,53 @@ class Postprocessor:
                 val = np.std(items[i:i + step_len])
                 values.append(val)
 
-            logger.info('Mean produced STD: {}'
-                        .format(np.mean(values)))
+            logger.info('Mean of {} produced STD: {}'
+                        .format(os.path.basename(source),
+                                np.mean(values)))
         return values
 
     @staticmethod
     def __fix_negative(x):
         for idx, val in enumerate(x):
             if val < 0:
-                x[idx] = 1.0
+                x[idx] = 0.5
         return x
 
     @staticmethod
-    def __smooth_aggressive(x, window, threshold):
+    def __smooth_aggressive(x, window, thr_increase, thr_decrease):
+        previous_idx = 0
+        near_idx_dict = {}
+        start_near_idx = 0
+
         for idx, val in enumerate(x):
             if idx < window:
                 continue
             avr = np.mean(
                 x[idx - window:idx])
 
+            should_stat = False
             changes = val - avr
-            if abs(changes) > threshold:
-                x[idx] = avr + (changes / 10)
+            if changes > 0:
+                if abs(changes) > thr_increase:
+                    x[idx] = avr + (changes / 10)
+                    should_stat = True
+            else:
+                if abs(changes) > thr_decrease:
+                    x[idx] = avr + (changes / 10)
+                    should_stat = True
+
+            if should_stat:
+                if start_near_idx == 0:
+                    start_near_idx = idx
+                if abs(idx - previous_idx) <= 2:
+                    near_idx_dict[start_near_idx] = \
+                        near_idx_dict.get(start_near_idx, 0) + 1
+                else:
+                    start_near_idx = 0
+                previous_idx = idx
+
+        logger.info('Changes Total len: {} Stats:\n{}'
+                    .format(sum(near_idx_dict.values()), near_idx_dict))
         return x
 
     @staticmethod
@@ -107,9 +139,9 @@ class Postprocessor:
 if __name__ == "__main__":
     postprocessor = Postprocessor()
     postprocessor.create_new(
-        Settings.BUILD + '/' + 'optical-3d-v121.txt')
+        Settings.BUILD + '/' + 'OPT-V252-OPT-3D-CNN.txt')
 
     # postprocessor.show_quality_deviation(
-    #     Settings.BUILD + '/' + 'v83-n.txt')
+    #     Settings.BUILD + '/' + 'OPT-V231-OPT-3D-CNN.txt')
     # postprocessor.show_quality_deviation(
-    #     Settings.BUILD + '/' + 'v121-n.txt')
+    #     Settings.BUILD + '/' + 'OPT-V252-OPT-3D-CNN.txt')
