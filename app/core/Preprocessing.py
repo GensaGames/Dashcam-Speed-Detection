@@ -8,10 +8,12 @@ import cv2
 import numpy as np
 from numpy import loadtxt
 from rx import Observable
+import os
 
 from app import Settings
 from app.core import Augmenters
 from app.core.Parameters import PreprocessorParams
+from app.other import Helper
 
 
 class Preprocessor:
@@ -19,37 +21,76 @@ class Preprocessor:
     def __init__(self, params, augmenter=None):
         self.PARAMS = params
         self.AUGMETER = augmenter
+        self.source_x_y = None
 
-    def __load_y(self, path_indexes):
-        if path_indexes[0] is None:
+    def __load_y(self, indexes):
+        train_y_paths = self.source_x_y[1]
+        if train_y_paths is None:
             return None
-        assert min(path_indexes[1]) - \
+
+        assert min(indexes) - \
                max(self.PARAMS.backward) >= 0
 
-        items = loadtxt(
-            path_indexes[0], delimiter=" ",
-            unpack=False)[path_indexes[1]]
+        train_y_values = loadtxt(
+            train_y_paths, delimiter=" ",
+            unpack=False)
 
-        items = np.reshape(
-            items, (len(items), 1))
-        return items
+        # Get correct train Y values, in case it's
+        # in car stop variance, set just 0.
+        y_values = []
+        for i in indexes:
+            if Helper.is_car_stop_variance(i):
+                y_values.append(0)
+            else:
+                y_values.append(train_y_values[i])
 
-    def __load_x(self, path_indexes):
-        assert min(path_indexes[1]) - \
-               max(self.PARAMS.backward) >= 0
+        y_values = np.reshape(
+            y_values, (len(y_values), 1))
+        return y_values
+
+    @staticmethod
+    def __get_index_paths(looking_back, path):
+        from app.Controller import MiniBatchWorker
+
+        # Checking if indexes related to the car stop
+        # variance indexes, otherwise - default
+        if Helper.is_car_stop_variance(looking_back[0]):
+            source_stop_frames = Settings.TRAIN_FRAMES_STOP
+
+            # Just use folder as prefix for index, and avoid
+            # collision with initial train indexes from train part
+            folder = str(looking_back[0])[0]
+
+            new_back = list(map(lambda x: x - (
+                    int(folder) * MiniBatchWorker.PREFIX_STOP_SIZE),
+                                looking_back))
+
+            new_path = sorted(Path(
+                source_stop_frames + '/' + folder).glob('*'),
+                              key=lambda x: float(x.stem))
+            return itemgetter(*new_back)(new_path)
+
+        return itemgetter(*looking_back)(path)
+
+    def __load_x(self, indexes):
+        frames_paths = self.source_x_y[0]
+
+        assert min(indexes) - max(
+            self.PARAMS.backward) >= 0
 
         complete_path = sorted(Path(
-            path_indexes[0]).glob('*'), key=lambda x: float(x.stem))
+            frames_paths).glob('*'), key=lambda x: float(x.stem))
 
         items = []
-        for i in path_indexes[1]:
+        for i in indexes:
 
             # Look Back Strategy for the previous
             # Y Frames from started Idx position
             looking_back = list(map(
                 lambda x: i - x, self.PARAMS.backward))
 
-            list_paths = itemgetter(*looking_back)(complete_path)
+            list_paths = self.__get_index_paths(
+                looking_back, complete_path)
             augmenter = self.AUGMETER.to_deterministic()
 
             for path in np.flipud(np.array([list_paths]).flatten()):
@@ -59,7 +100,7 @@ class Preprocessor:
                 image = augmenter.augment_image(image)
                 items.append(image)
 
-        assert len(path_indexes[1]) * (
+        assert len(indexes) * (
             len(self.PARAMS.backward)) == len(items)
         return items
 
@@ -136,17 +177,21 @@ class Preprocessor:
         assert isinstance(frames, np.ndarray)
         return frames.reshape(len(frames), 1)
 
-    # noinspection PyUnresolvedReferences
-    def build(self, path_x, path_y, indexes):
+    def set_source(self, x, y):
+        self.source_x_y = (x, y)
+        return self
 
-        obs_x = Observable.of((path_x, indexes)) \
+    # noinspection PyUnresolvedReferences
+    def build(self, indexes):
+
+        obs_x = Observable.of(indexes) \
             .map(self.__load_x) \
             .map(self.__map_crop) \
             .map(self.__map_scale) \
             .map(self.__map_normalize) \
             .map(self.__to_timeline_x)
 
-        obs_y = Observable.of((path_y, indexes)) \
+        obs_y = Observable.of(indexes) \
             .map(self.__load_y) \
             .map(self.__to_timeline_y)
 
@@ -165,10 +210,10 @@ if __name__ == "__main__":
         assert x_y[0].ndim == 5 and x_y[1].ndim == 2 \
                and x_y[0].shape[0] == x_y[1].shape[0]
 
-
     Preprocessor(PreprocessorParams(
-        (0, 1, 2), frame_scale=1.5),
-    Augmenters.get_new_training()).build(
-        '../../' + Settings.TRAIN_FRAMES,
-        '../../' + Settings.TRAIN_Y, [2, 10, 86]) \
+        (0, 1, 2), frame_scale=0.5, frame_x_trim=(0, 640),
+        frame_y_trim=(0, 480), area_float=0),
+        Augmenters.get_new_training()) \
+        .set_source(Settings.TRAIN_FRAMES, Settings.TRAIN_Y) \
+        .build([18, 100006, 23]) \
         .subscribe(__assert)
