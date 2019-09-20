@@ -96,7 +96,7 @@ class Preprocessor:
             for path in np.flipud(np.array([list_paths]).flatten()):
 
                 image = cv2.imread(
-                    str(path), cv2.IMREAD_GRAYSCALE)
+                    str(path), cv2.IMREAD_COLOR)
                 image = augmenter.augment_image(image)
                 items.append(image)
 
@@ -153,7 +153,8 @@ class Preprocessor:
                isinstance(frames[0], np.ndarray)
 
         for idx, val in enumerate(frames):
-            frames[idx] = val / 256.0
+            frames[idx] = (frames[idx].mean(axis=2) / 256.0).flatten()
+
 
         return frames
 
@@ -167,8 +168,7 @@ class Preprocessor:
             frames) / timeline)
 
         return np.array(frames).reshape((
-            delta_len, timeline, frames[0].shape[0],
-            frames[0].shape[1], 1))
+            delta_len, timeline, frames[0].shape[0]))
 
     @staticmethod
     def __to_timeline_y(frames):
@@ -207,12 +207,12 @@ if __name__ == "__main__":
         logging.info('X shape {}'.format(x_y[0].shape))
         logging.info('Y shape {}'.format(x_y[1].shape))
 
-        assert x_y[0].ndim == 5 and x_y[1].ndim == 2 \
+        assert x_y[0].ndim == 3 and x_y[1].ndim == 2 \
                and x_y[0].shape[0] == x_y[1].shape[0]
 
     Preprocessor(PreprocessorParams(
-        (0, 1, 2), frame_scale=0.5, frame_x_trim=(0, 640),
-        frame_y_trim=(0, 480), area_float=0),
+        (0, 1, 2), frame_scale=1, frame_y_trim=(300, -115),
+        frame_x_trim=(80, -80), area_float=0),
         Augmenters.get_new_training()) \
         .set_source(Settings.TRAIN_FRAMES, Settings.TRAIN_Y) \
         .build([18, 100006, 23]) \

@@ -14,15 +14,15 @@ def test_image_resize():
     start_idx = 6606
 
     for idx in range(5):
-        i = cv2.imread('../../' + Settings.TEST_FRAMES + '/' + str(
+        i = cv2.imread(Settings.TEST_FRAMES + '/' + str(
             start_idx + idx) + '.jpg', cv2.IMREAD_COLOR)
 
         # scale
         frm = cv2.resize(
-            i[190: -190, 220:-220], (0, 0), fx=1.3, fy=1.3)
+            i[300: -115, 80:-80], (0, 0), fx=1.3, fy=1.3)
 
         cv2.imwrite('car-normal-ex3-' + str(idx) + '.jpg', frm)
-
+test_image_resize()
 
 def test_image_resize_mean():
     image1 = cv2.imread('../' + Settings.TEST_FRAMES + '/540.jpg', cv2.IMREAD_COLOR)

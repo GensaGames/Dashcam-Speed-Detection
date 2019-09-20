@@ -5,9 +5,10 @@ import sys
 import matplotlib.pyplot as plt
 import numpy as np
 from keras import Sequential
-from keras.activations import linear, sigmoid, relu
+from keras.activations import linear, sigmoid, relu, elu
+from keras.engine import InputLayer
 from keras.initializers import he_normal
-from keras.layers import Dense, Flatten, Dropout, Conv3D, MaxPooling3D, ELU, BatchNormalization
+from keras.layers import Dense, Flatten, Dropout, Conv3D, MaxPooling3D, ELU, BatchNormalization, LSTM
 from keras.losses import mean_squared_error
 from keras.optimizers import Adam
 
@@ -190,43 +191,43 @@ class MiniBatchWorker:
 
     def __step_model(self, x_y):
         if self.model is None:
-            input_shape = (
-                len(self.P_PARAMS.backward),
-                x_y[0].shape[2], x_y[0].shape[3], 1)
+            input_shape = (x_y[0].shape[1], x_y[0].shape[2])
 
             self.model = Sequential()
-            self.model.add(
-                Conv3D(filters=32, kernel_size=(2, 5, 5), strides=(1, 2, 2),
-                       activation=sigmoid, input_shape=input_shape,
-                       padding='valid', data_format='channels_last'))
-
-            self.model.add(MaxPooling3D(pool_size=(1, 2, 2)))
+            self.model.add(InputLayer(input_shape=input_shape))
 
             self.model.add(
-                Conv3D(filters=48, kernel_size=(1, 3, 3), strides=(1, 1, 1),
-                       activation=sigmoid, input_shape=input_shape,
-                       padding='valid', data_format='channels_last'))
+                LSTM(units=128, return_sequences=True,
+                     kernel_initializer=he_normal(),
+                     activation=elu))
 
             self.model.add(
-                Conv3D(filters=48, kernel_size=(1, 3, 3), strides=(1, 1, 1),
-                       activation=sigmoid, input_shape=input_shape,
-                       padding='valid', data_format='channels_last'))
+                LSTM(units=128, return_sequences=True,
+                     kernel_initializer=he_normal(),
+                     activation=elu))
 
-            self.model.add(MaxPooling3D(pool_size=(2, 2, 2)))
-            self.model.add(Flatten())
+            self.model.add(
+                LSTM(units=128, return_sequences=True,
+                     kernel_initializer=he_normal(),
+                     activation=elu))
+
+            self.model.add(
+                LSTM(units=64, return_sequences=False,
+                     kernel_initializer=he_normal(),
+                     activation=elu))
 
             self.model \
                 .add(Dense(units=256,
                            kernel_initializer=he_normal(),
-                           activation=relu))
+                           activation=elu))
             self.model \
                 .add(Dense(units=128,
                            kernel_initializer=he_normal(),
-                           activation=relu))
+                           activation=elu))
             self.model \
                 .add(Dense(units=64,
                            kernel_initializer=he_normal(),
-                           activation=relu))
+                           activation=elu))
 
             self.model \
                 .add(Dense(units=1,
@@ -273,16 +274,15 @@ if __name__ == "__main__":
 
     logger = get_logger()
 
-
     def combine_workers():
         workers = [MiniBatchWorker(
             PreprocessorParams(
-                backward=(0, 1, 2, 3), frame_y_trim=(190, -190),
-                frame_x_trim=(100, -100), frame_scale=1.3,
+                backward=(0, 1, 2, 3, 5), frame_y_trim=(300, -115),
+                frame_x_trim=(80, -80), frame_scale=1,
                 area_float=6),
             ControllerParams(
-                'OPT-V100-OPT-3D-CNN', baths=30, train_part=0.65,
-                epochs=12, step_vis=80, samples=20400))]
+                'New-Simple-LSTM', baths=30, train_part=0.65,
+                epochs=6, step_vis=60, samples=20400))]
         return workers
 
 
