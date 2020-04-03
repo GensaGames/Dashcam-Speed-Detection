@@ -21,4 +21,6 @@ MODELS = 'models'
 NAME_MODEL = 'model-view.h5'
 NAME_MODEL_PLOT = 'epochs-plot.png'
 
+PREFIX_STOP_SIZE = int(10.e+4)
+
 

@@ -28,5 +28,4 @@ def get_logger(include_file=False):
     handler1.setLevel(logging.DEBUG)
     handler1.setFormatter(formatter)
     log.addHandler(handler1)
-
     return log

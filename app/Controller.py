@@ -1,17 +1,14 @@
-import logging
 import os
-import sys
-
 import matplotlib.pyplot as plt
 import numpy as np
 from keras import Sequential
-from keras.activations import linear, sigmoid, relu
+from keras.activations import linear
 from keras.initializers import he_normal
-from keras.layers import Dense, Flatten, Dropout, Conv3D, MaxPooling3D, ELU, BatchNormalization
+from keras.layers import Dense, Flatten, Dropout, Conv2D, Conv3D, ELU, BatchNormalization
 from keras.losses import mean_squared_error
 from keras.optimizers import Adam
 
-import app.Settings as Settings
+from app import Settings
 import app.other.Helper as Helper
 from app.core import Augmenters
 from app.core.Parameters import ControllerParams, \
@@ -38,8 +35,6 @@ class MiniBatchWorker:
             np.random.shuffle(train)
             self.__start_train(train, validation)
 
-    PREFIX_STOP_SIZE = int(10.e+4)
-
     # Include special located frames with car
     # stop and this variance variance
     def __get_new_stop_frames(self):
@@ -55,9 +50,10 @@ class MiniBatchWorker:
 
                 # Just use folder as prefix for index, and avoid
                 # collision with initial train indexes from train part
-                idx_ = int(next_dir) * self.PREFIX_STOP_SIZE + idx
+                idx_ = int(next_dir) * Settings.PREFIX_STOP_SIZE + idx
                 stop_indexes.append(idx_)
 
+        stop_indexes = np.array(stop_indexes, dtype=np.int32)
         np.random.shuffle(stop_indexes)
         return stop_indexes
 
@@ -100,14 +96,11 @@ class MiniBatchWorker:
         logger.info("Epoch training done. Backup.")
 
     def __step_process(self, step, indexes, validation):
-        obs = Preprocessor(self.P_PARAMS, Augmenters
-                           .get_new_training()) \
+        Preprocessor(self.P_PARAMS, Augmenters
+                     .get_new_training()) \
             .set_source(Settings.TRAIN_FRAMES, Settings.TRAIN_Y) \
             .build(indexes) \
-            .publish()
-
-        obs.subscribe(self.__step_model)
-        obs.connect()
+            .subscribe(self.__step_model)
 
         if step > 0 and (
                 step % self.C_PARAMS.step_vis == 0 or
@@ -170,7 +163,7 @@ class MiniBatchWorker:
     def restore_backup(self):
         logger.info("Restoring Backup...")
         if self.model is not None:
-            logging.error(
+            logger.error(
                 'Model already created. Do not override!')
             return
 
@@ -179,7 +172,7 @@ class MiniBatchWorker:
                 Helper.restore_model_with(
                     Settings.BUILD, self.C_PARAMS.name)
         except FileNotFoundError:
-            logging.error(
+            logger.error(
                 'Do not have Backup! Starting new.')
 
     def do_backup(self):
@@ -191,12 +184,11 @@ class MiniBatchWorker:
     def __step_model(self, x_y):
         if self.model is None:
             input_shape = (
-                len(self.P_PARAMS.backward) - 1,
-                x_y[0].shape[2], x_y[0].shape[3], x_y[0].shape[4])
+                x_y[0].shape[1], x_y[0].shape[2], x_y[0].shape[3])
 
             self.model = Sequential()
             self.model.add(
-                Conv3D(filters=48, kernel_size=(3, 5, 5), strides=(1, 2, 2),
+                Conv2D(filters=48, kernel_size=(5, 5), strides=(2, 2),
                        input_shape=input_shape, padding='same',
                        kernel_initializer=he_normal()))
 
@@ -205,7 +197,7 @@ class MiniBatchWorker:
             self.model.add(BatchNormalization())
 
             self.model.add(
-                Conv3D(filters=48, kernel_size=(3, 3, 3), strides=(1, 2, 2),
+                Conv2D(filters=64, kernel_size=(3, 3), strides=(2, 2),
                        input_shape=input_shape, padding='valid',
                        kernel_initializer=he_normal()))
 
@@ -214,16 +206,7 @@ class MiniBatchWorker:
             self.model.add(BatchNormalization())
 
             self.model.add(
-                Conv3D(filters=64, kernel_size=(3, 3, 3), strides=(1, 1, 1),
-                       input_shape=input_shape, padding='valid',
-                       kernel_initializer=he_normal()))
-
-            self.model.add(ELU())
-            self.model.add(Dropout(0.1))
-            self.model.add(BatchNormalization())
-
-            self.model.add(
-                Conv3D(filters=64, kernel_size=(1, 3, 3), strides=(1, 1, 1),
+                Conv2D(filters=64, kernel_size=(3, 3), strides=(1, 1),
                        input_shape=input_shape, padding='valid',
                        kernel_initializer=he_normal()))
 
@@ -290,18 +273,17 @@ class MiniBatchWorker:
 
 #####################################
 if __name__ == "__main__":
-
     logger = get_logger()
 
 
     def combine_workers():
         workers = [MiniBatchWorker(
             PreprocessorParams(
-                backward=(0, 2, 4, 6, 8, 10), frame_y_trim=(100, -160),
-                frame_x_trim=(80, -80), frame_scale=0.55,
+                backward=(0, 2), frame_y_trim=(100, -160),
+                frame_x_trim=(80, -80), frame_scale=0.9,
                 area_float=6),
             ControllerParams(
-                'OPT-V252-OPT-3D-CNN', baths=30, train_part=0.65,
+                'OPT-New-V1', baths=2, train_part=0.65,
                 epochs=12, step_vis=80, samples=20400))]
         return workers
 
@@ -325,6 +307,10 @@ if __name__ == "__main__":
 
     def start_train():
         for worker in combine_workers():
+            """ 
+            Comment/Uncomment for making different
+            controller actions.
+            """
             worker.restore_backup()
             worker.start_training_epochs()
             # worker.start_evaluation()

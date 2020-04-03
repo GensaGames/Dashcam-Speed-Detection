@@ -1,30 +1,30 @@
 from __future__ import division
 
-import logging
 from operator import itemgetter
 from pathlib import Path
 
 import cv2
 import numpy as np
+import rx
 from numpy import loadtxt
-from rx import Observable
-import os
+from rx import operators as ops
 
 from app import Settings
 from app.core import Augmenters
 from app.core.Parameters import PreprocessorParams
 from app.other import Helper
+from app.other.LoggerFactory import get_logger
 
 
 class Preprocessor:
 
     def __init__(self, params, augmenter=None):
         self.PARAMS = params
-        self.AUGMETER = augmenter
-        self.source_x_y = None
+        self.AUGMENTER = augmenter
+        self.SOURCE_X_Y = None
 
     def __load_y(self, indexes):
-        train_y_paths = self.source_x_y[1]
+        train_y_paths = self.SOURCE_X_Y[1]
         if train_y_paths is None:
             return None
 
@@ -50,7 +50,6 @@ class Preprocessor:
 
     @staticmethod
     def __get_index_paths(looking_back, path):
-        from app.Controller import MiniBatchWorker
 
         # Checking if indexes related to the car stop
         # variance indexes, otherwise - default
@@ -62,7 +61,7 @@ class Preprocessor:
             folder = str(looking_back[0])[0]
 
             new_back = list(map(lambda x: x - (
-                    int(folder) * MiniBatchWorker.PREFIX_STOP_SIZE),
+                    int(folder) * Settings.PREFIX_STOP_SIZE),
                                 looking_back))
 
             new_path = sorted(Path(
@@ -73,7 +72,7 @@ class Preprocessor:
         return itemgetter(*looking_back)(path)
 
     def __load_x(self, indexes):
-        frames_paths = self.source_x_y[0]
+        frames_paths = self.SOURCE_X_Y[0]
 
         assert min(indexes) - max(
             self.PARAMS.backward) >= 0
@@ -91,10 +90,9 @@ class Preprocessor:
 
             list_paths = self.__get_index_paths(
                 looking_back, complete_path)
-            augmenter = self.AUGMETER.to_deterministic()
+            augmenter = self.AUGMENTER.to_deterministic()
 
             for path in np.flipud(np.array([list_paths]).flatten()):
-
                 image = cv2.imread(
                     str(path), cv2.IMREAD_COLOR)
                 image = augmenter.augment_image(image)
@@ -178,7 +176,7 @@ class Preprocessor:
 
             # Сonvert HSV to float32's
             # hsv = np.asarray(hsv, dtype= np.float32)
-            hsv = cv2.cvtColor(hsv,cv2.COLOR_HSV2RGB)
+            hsv = cv2.cvtColor(hsv, cv2.COLOR_HSV2RGB)
 
             """ 
             Comment/Uncomment for showing each image
@@ -214,14 +212,14 @@ class Preprocessor:
     # Merging previous Frames to the Timeline
     # With 3D array of Samples * Timeline * Features
     def __to_timeline_x(self, frames):
-        timeline = len(self.PARAMS.backward) -1
+        timeline = len(self.PARAMS.backward) - 1
         assert len(frames) % timeline == 0
 
         delta_len = int(len(
             frames) / timeline)
 
         return np.array(frames).reshape((
-            delta_len, timeline, frames[0].shape[0],
+            delta_len, frames[0].shape[0],
             frames[0].shape[1], frames[0].shape[2]))
 
     @staticmethod
@@ -232,51 +230,48 @@ class Preprocessor:
         return frames.reshape(len(frames), 1)
 
     def set_source(self, x, y):
-        self.source_x_y = (x, y)
+        self.SOURCE_X_Y = (x, y)
         return self
 
     # noinspection PyUnresolvedReferences
     def build(self, indexes):
+        obs_x = rx.of(indexes).pipe(
+            ops.map(self.__load_x),
+            ops.map(self.__map_crop),
+            ops.map(self.__map_scale),
+            ops.map(self.__build_optical_flow),
+            ops.map(self.__map_normalize),
+            ops.map(self.__to_timeline_x),
+        )
 
-        obs_x = Observable.of(indexes) \
-            .map(self.__load_x) \
-            .map(self.__map_crop) \
-            .map(self.__map_scale) \
-            .map(self.__build_optical_flow) \
-            .map(self.__map_normalize) \
-            .map(self.__to_timeline_x)
+        obs_y = rx.of(indexes).pipe(
+            ops.map(self.__load_y),
+            ops.map(self.__to_timeline_y),
+        )
 
-        obs_y = Observable.of(indexes) \
-            .map(self.__load_y) \
-            .map(self.__to_timeline_y)
-
-        return Observable.zip(
-            obs_x, obs_y, lambda x, y: (x, y))
+        return rx.zip(obs_x, obs_y)
 
 
 #####################################
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
+    logger = get_logger()
 
     def __assert(x_y):
-        logging.info('X shape {}'.format(x_y[0].shape))
-        logging.info('Y shape {}'.format(x_y[1].shape))
+        logger.info('X shape {}'.format(x_y[0].shape))
+        logger.info('Y shape {}'.format(x_y[1].shape))
 
-        assert x_y[0].ndim == 5 and x_y[1].ndim == 2 \
+        assert x_y[0].ndim == 4 and x_y[1].ndim == 2 \
                and x_y[0].shape[0] == x_y[1].shape[0]
 
     Preprocessor(PreprocessorParams(
-        (0, 1, 2), frame_scale=1.5, frame_x_trim=(200, -200),
+        (0, 2), frame_scale=1.5, frame_x_trim=(200, -200),
         frame_y_trim=(150, -150), area_float=0),
-        Augmenters.get_new_training())\
-        .set_source(Settings.TRAIN_FRAMES, Settings.TRAIN_Y)\
-        .build([10]) \
-        .subscribe(__assert)
-
-    Preprocessor(PreprocessorParams(
-        (0, 1, 2), frame_scale=0.5, frame_x_trim=(0, 640),
-        frame_y_trim=(0, 480), area_float=0),
         Augmenters.get_new_training()) \
         .set_source(Settings.TRAIN_FRAMES, Settings.TRAIN_Y) \
-        .build([18, 100006, 23]) \
-        .subscribe(__assert)
+        .build([10, 11])\
+        .subscribe(__assert, on_error=lambda e: print(e))
+
+
+
+
+

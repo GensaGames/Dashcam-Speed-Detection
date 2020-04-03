@@ -75,7 +75,6 @@ def test_opencv_optical_source():
     return rgb_flow
 
 
-
 def test_opencv_optical1():
     frame1 = cv2.imread(
         Settings.TRAIN_FRAMES + '/'
@@ -183,5 +182,3 @@ def test_opencv_optical_moving():
             cv2.imshow('frame2',hsv2)
             cv2.waitKey(0)
 
-
-test_opencv_optical_moving()

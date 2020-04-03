@@ -1,19 +1,11 @@
-import logging
+
 import time
 
-import cv2
-
-
-from imgaug.augmenters import Sequential
-from imgaug.augmenters import ia
-from imgaug.augmenters import Sometimes
-from imgaug.augmenters import GammaContrast
-from imgaug.augmenters import Emboss
-from imgaug.augmenters import CoarseSalt
 from imgaug.augmenters import CoarseDropout
-from imgaug.augmenters import SomeOf
-
-from app import Settings
+from imgaug.augmenters import GammaContrast
+from imgaug.augmenters import Sequential
+from imgaug.augmenters import Sometimes
+from imgaug.augmenters import ia
 
 
 def get_new_training():
@@ -34,5 +26,4 @@ def get_new_validation():
 
 #####################################
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
     assert get_new_training() is not None

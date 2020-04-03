@@ -1,15 +1,14 @@
-import datetime
 import os
+
+from keras.models import load_model
+from app import Settings
 
 import cv2
 import jsonpickle
-import numpy as np
 import jsonpickle.ext.numpy as jsonpickle_numpy
-jsonpickle_numpy.register_handlers()
+import numpy as np
 
-import app.Settings as Settings
-from keras.models import model_from_json
-from keras.models import load_model
+jsonpickle_numpy.register_handlers()
 
 
 ##########################################
@@ -27,12 +26,12 @@ def save_plot_with(path_to, plot, prefix, model, p_params):
 def annot_max(x, y, ax=None):
     xmax = x[np.argmax(y)]
     ymax = y.max()
-    text= "x={:.3f}, Max y={:.3f}".format(xmax, ymax)
+    text = "x={:.3f}, Max y={:.3f}".format(xmax, ymax)
     if not ax:
-        ax=plt.gca()
+        ax = plt.gca()
     bbox_props = dict(boxstyle="square,pad=0.8", fc="w", ec="k", lw=0.72)
-    arrowprops=dict(arrowstyle="->",connectionstyle="angle,angleA=0,angleB=60")
-    kw = dict(xycoords='data',textcoords="axes fraction",
+    arrowprops = dict(arrowstyle="->", connectionstyle="angle,angleA=0,angleB=60")
+    kw = dict(xycoords='data', textcoords="axes fraction",
               arrowprops=arrowprops, bbox=bbox_props, ha="right", va="top")
     ax.annotate(text, xy=(xmax, ymax), xytext=(0.7, 0.7), **kw)
 
@@ -41,12 +40,12 @@ def annot_max(x, y, ax=None):
 def annot_min(x, y, ax=None):
     xmin = x[np.argmin(y)]
     ymin = y.min()
-    text= "x={:.3f}, Min y={:.3f}".format(xmin, ymin)
+    text = "x={:.3f}, Min y={:.3f}".format(xmin, ymin)
     if not ax:
-        ax=plt.gca()
+        ax = plt.gca()
     bbox_props = dict(boxstyle="square,pad=0.8", fc="w", ec="k", lw=0.4)
-    arrowprops=dict(arrowstyle="->",connectionstyle="angle,angleA=0,angleB=60")
-    kw = dict(xycoords='data',textcoords="axes fraction",
+    arrowprops = dict(arrowstyle="->", connectionstyle="angle,angleA=0,angleB=60")
+    kw = dict(xycoords='data', textcoords="axes fraction",
               arrowprops=arrowprops, bbox=bbox_props, ha="right", va="top")
     ax.annotate(text, xy=(xmin, ymin), xytext=(0.4, 0.4), **kw)
 
@@ -54,11 +53,11 @@ def annot_min(x, y, ax=None):
 ##########################################
 def annot_avr(y, ax=None):
     y_mean = np.mean(y)
-    text= "Mean ={:.3f}".format(y_mean)
+    text = "Mean ={:.3f}".format(y_mean)
     if not ax:
-        ax=plt.gca()
+        ax = plt.gca()
     bbox_props = dict(boxstyle="square,pad=0.8", fc="r", ec="k", lw=0.4)
-    kw = dict(xycoords='data',textcoords="axes fraction",
+    kw = dict(xycoords='data', textcoords="axes fraction",
               bbox=bbox_props, ha="right", va="top")
     ax.annotate(text, xy=(0, 0), xytext=(0.1, 0.9), **kw)
 
@@ -91,8 +90,8 @@ def add_built_test(path_to, name, values):
 
 ##########################################
 def is_car_stop_variance(val):
-    from app.Controller import MiniBatchWorker
-    return val > MiniBatchWorker.PREFIX_STOP_SIZE
+    return val > Settings.PREFIX_STOP_SIZE
+
 
 ##########################################
 def save_plot(path_to, plot, prefix):
@@ -103,7 +102,7 @@ def save_plot(path_to, plot, prefix):
 
 ##########################################
 def backup_model_with(path_to, name, model, *args):
-    path_to = path_to + '/' + Settings.MODELS\
+    path_to = path_to + '/' + Settings.MODELS \
               + '/' + name + '/'
     if not os.path.exists(path_to):
         os.makedirs(path_to)
@@ -143,7 +142,7 @@ def restore_model_with(path_to, name):
             except UnicodeDecodeError:
                 pass
 
-    return load_model(path_to + Settings.NAME_MODEL),\
+    return load_model(path_to + Settings.NAME_MODEL), \
            p_params, c_params, visual
 
 
@@ -170,7 +169,3 @@ def to_frames_video(path_from, path_to, img_format='.jpg'):
         cv2.imwrite(name, frame)
         # next frame
         index += 1
-
-
-
-
