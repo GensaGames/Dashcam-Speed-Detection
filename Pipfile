@@ -9,7 +9,6 @@ verify_ssl = true
 pandas = "*"
 scipy = "*"
 matplotlib = "*"
-tensorflow = "*"
 keras = "*"
 scikit-learn = "*"
 opencv-python = "*"
