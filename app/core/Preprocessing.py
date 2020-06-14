@@ -151,17 +151,18 @@ class Preprocessor:
         assert len(frames) % timeline == 0
 
         # Main function for optical flow detection
+        # noinspection DuplicatedCode
         def get_flow_change(img1, img2):
 
             hsv = np.zeros_like(img1)
             # set saturation
             hsv[:, :, 1] = cv2.cvtColor(
-                image_next, cv2.COLOR_RGB2HSV)[:, :, 1]
+                img2, cv2.COLOR_RGB2HSV)[:, :, 1]
 
             flow = cv2.calcOpticalFlowFarneback(
                 cv2.cvtColor(img1, cv2.COLOR_RGB2GRAY),
                 cv2.cvtColor(img2, cv2.COLOR_RGB2GRAY), None,
-                0.5, 2, 5, 2, 5, 1.3, 0)
+                0.6, 4, 20, 3, 5, 1.1, 0)
 
             # convert from cartesian to polar
             mag, ang = cv2.cartToPolar(
@@ -178,24 +179,23 @@ class Preprocessor:
             # hsv = np.asarray(hsv, dtype= np.float32)
             hsv = cv2.cvtColor(hsv, cv2.COLOR_HSV2RGB)
 
-            """ 
+            """
             Comment/Uncomment for showing each image
             moving optical flow.
             """
-            # cv2.imshow('Original', hsv)
-            # cv2.waitKey(0)
-
+            cv2.imshow('Preprocessing Flow', hsv)
+            cv2.waitKey(0)
             return hsv
 
         flow_frames = []
         for line in range(0, len(frames), timeline):
 
             for idx in range(line, line + timeline - 1):
-                image_current = frames[idx]
+                image = frames[idx]
                 image_next = frames[idx + 1]
 
                 flow_frames.append(get_flow_change(
-                    image_current, image_next))
+                    image, image_next))
 
         return flow_frames
 
@@ -219,8 +219,10 @@ class Preprocessor:
             frames) / timeline)
 
         return np.array(frames).reshape((
-            delta_len, frames[0].shape[0],
-            frames[0].shape[1], frames[0].shape[2]))
+            delta_len,
+            frames[0].shape[0],
+            frames[0].shape[1],
+            3))
 
     @staticmethod
     def __to_timeline_y(frames):
@@ -260,18 +262,13 @@ if __name__ == "__main__":
         logger.info('X shape {}'.format(x_y[0].shape))
         logger.info('Y shape {}'.format(x_y[1].shape))
 
-        assert x_y[0].ndim == 4 and x_y[1].ndim == 2 \
-               and x_y[0].shape[0] == x_y[1].shape[0]
+        assert x_y[0].ndim == 4 and x_y[1].ndim == 2
 
     Preprocessor(PreprocessorParams(
-        (0, 2), frame_scale=1.5, frame_x_trim=(200, -200),
-        frame_y_trim=(150, -150), area_float=0),
-        Augmenters.get_new_training()) \
-        .set_source(Settings.TRAIN_FRAMES, Settings.TRAIN_Y) \
-        .build([10, 11])\
-        .subscribe(__assert, on_error=lambda e: print(e))
-
-
-
-
-
+        (0, 1), frame_scale=1.5, frame_x_trim=(200, -200),
+        frame_y_trim=(140, -200), area_float=0),
+        Augmenters.get_new_validation()) \
+        .set_source(Settings.TEST_FRAMES, Settings.TRAIN_Y) \
+        .build(list(range(67, 300)))\
+        .subscribe(__assert, on_error=lambda e:
+    logger.error('Exception! ' + str(e)))

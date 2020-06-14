@@ -17,6 +17,9 @@ jsonpickle = "*"
 pydot = "*"
 scikit-image = "*"
 imgaug = "*"
+graphviz = "*"
+graphviz-python = "*"
+tensorflow-cpu = "*"
 
 [requires]
 python_version = "3.7"

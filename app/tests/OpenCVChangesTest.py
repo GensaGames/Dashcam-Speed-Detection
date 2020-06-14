@@ -19,7 +19,7 @@ def test_image_resize():
 
         # scale
         frm = cv2.resize(
-            i[100:-160, 80:-80], (0, 0), fx=0.5, fy=0.5)
+            i[100:-175, 120:-120], (0, 0), fx=1, fy=1)
 
         cv2.imwrite('car-normal-ex3-' + str(idx) + '.jpg', frm)
 

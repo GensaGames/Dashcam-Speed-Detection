@@ -105,7 +105,7 @@ def testOpenCVOpticalMoving():
             image_next = cv2.resize(
                 image_next[100:-160, 80:-80], (0, 0), fx=1, fy=1)
 
-            img_new = opticalFlowOverlay(image_current, image_next)
+            img_new = opticalFlowOverlay2(image_current, image_next)
             cv2.imshow('frame1', img_new)
             cv2.waitKey(0)
 

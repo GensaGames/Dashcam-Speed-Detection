@@ -31,7 +31,6 @@ class Postprocessor:
                     delimiter="\n")
 
         # TODO(Postprocessing): Move to RX Actions
-
         name1 = Settings.BUILD + '/' + 'post-v1.txt'
         map_step(source, name1,
                  Postprocessor.__fix_negative)
@@ -40,12 +39,12 @@ class Postprocessor:
         map_step(name1, name2,
                  functools.partial(
                      Postprocessor.__smooth_aggressive,
-                     window=20, thr_increase=4, thr_decrease=8))
+                     window=20, thr_increase=4, thr_decrease=4))
 
         name3 = Settings.BUILD + '/' + 'post-v3.txt'
         map_step(name2, name3,
                  functools.partial(
-                     Postprocessor.__smooth, window=8))
+                     Postprocessor.__smooth, window=6))
 
         name4 = Settings.BUILD + '/' + 'post-v4.txt'
         map_step(name3, name4,
@@ -139,7 +138,7 @@ class Postprocessor:
 if __name__ == "__main__":
     postprocessor = Postprocessor()
     postprocessor.create_new(
-        Settings.BUILD + '/' + 'OPT-V252-OPT-3D-CNN.txt')
+        Settings.BUILD + '/' + '3D-CNN-Delta.txt')
 
     # postprocessor.show_quality_deviation(
     #     Settings.BUILD + '/' + 'OPT-V231-OPT-3D-CNN.txt')

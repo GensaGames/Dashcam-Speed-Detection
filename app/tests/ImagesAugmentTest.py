@@ -65,12 +65,15 @@ def test6():
         for i in range(_, _ + 10):
             image = cv2.imread(
                 Settings.TEST_FRAMES + '/'
-                + str(start_index + i) + '.jpg', cv2.IMREAD_GRAYSCALE)
+                + str(start_index + i) + '.jpg', cv2.IMREAD_COLOR)
 
             cv2.imshow('Augmented', state.augment_image(image))
             cv2.imshow('Original', image)
             cv2.waitKey(0)
+
+
 test6()
+
 
 def test8():
     img = cv2.imread(

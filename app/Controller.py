@@ -100,7 +100,8 @@ class MiniBatchWorker:
                      .get_new_training()) \
             .set_source(Settings.TRAIN_FRAMES, Settings.TRAIN_Y) \
             .build(indexes) \
-            .subscribe(self.__step_model)
+            .subscribe(self.__step_model, on_error=lambda e:
+        logger.error('Exception! ' + str(e)))
 
         if step > 0 and (
                 step % self.C_PARAMS.step_vis == 0 or
@@ -126,7 +127,8 @@ class MiniBatchWorker:
                          .get_new_validation()) \
                 .set_source(Settings.TRAIN_FRAMES, Settings.TRAIN_Y) \
                 .build(validation[:100]) \
-                .subscribe(local_evaluate)
+                .subscribe(local_evaluate, on_error=lambda e:
+            logger.error('Exception! ' + str(e)))
 
     BATCHES = 120
 
@@ -158,7 +160,8 @@ class MiniBatchWorker:
                          .get_new_validation()) \
                 .set_source(Settings.TEST_FRAMES, None) \
                 .build(samples_step) \
-                .subscribe(local_evaluate)
+                .subscribe(local_evaluate, on_error=lambda e:
+            logger.error('Exception! ' + str(e)))
 
     def restore_backup(self):
         logger.info("Restoring Backup...")
@@ -184,36 +187,30 @@ class MiniBatchWorker:
     def __step_model(self, x_y):
         if self.model is None:
             input_shape = (
-                x_y[0].shape[1], x_y[0].shape[2], x_y[0].shape[3])
+                x_y[0].shape[1],
+                x_y[0].shape[2],
+                x_y[0].shape[3],)
 
             self.model = Sequential()
             self.model.add(
-                Conv2D(filters=48, kernel_size=(5, 5), strides=(2, 2),
+                Conv2D(filters=48, kernel_size=(5, 5), strides=(3, 3),
                        input_shape=input_shape, padding='same',
-                       kernel_initializer=he_normal()))
+                       kernel_initializer=he_normal())
+            )
 
             self.model.add(ELU())
-            self.model.add(Dropout(0.1))
-            self.model.add(BatchNormalization())
-
             self.model.add(
-                Conv2D(filters=64, kernel_size=(3, 3), strides=(2, 2),
-                       input_shape=input_shape, padding='valid',
-                       kernel_initializer=he_normal()))
+                Conv2D(filters=64, kernel_size=(5, 5), strides=(3, 3),
+                       padding='same', kernel_initializer=he_normal())
+            )
 
             self.model.add(ELU())
-            self.model.add(Dropout(0.1))
-            self.model.add(BatchNormalization())
-
             self.model.add(
-                Conv2D(filters=64, kernel_size=(3, 3), strides=(1, 1),
-                       input_shape=input_shape, padding='valid',
-                       kernel_initializer=he_normal()))
+                Conv2D(filters=128, kernel_size=(3, 3), strides=(1, 1),
+                       padding='valid', kernel_initializer=he_normal())
+            )
 
             self.model.add(ELU())
-            self.model.add(Dropout(0.1))
-
-            self.model.add(BatchNormalization())
             self.model.add(Flatten())
 
             self.model \
@@ -268,7 +265,8 @@ class MiniBatchWorker:
                      Augmenters.get_new_training()) \
             .set_source(Settings.TRAIN_FRAMES, Settings.TRAIN_Y) \
             .build(validation[:100]) \
-            .subscribe(local_save)
+            .subscribe(local_save, on_error=lambda e:
+        logger.error('Exception! ' + str(e)))
 
 
 #####################################
@@ -279,12 +277,12 @@ if __name__ == "__main__":
     def combine_workers():
         workers = [MiniBatchWorker(
             PreprocessorParams(
-                backward=(0, 2), frame_y_trim=(100, -160),
-                frame_x_trim=(80, -80), frame_scale=0.9,
+                backward=(0, 1), frame_y_trim=(140, -200),
+                frame_x_trim=(200, -200), frame_scale=1.5,
                 area_float=6),
             ControllerParams(
-                'OPT-New-V1', baths=2, train_part=0.65,
-                epochs=12, step_vis=80, samples=20400))]
+                '2D-CNN-V1-F', baths=30, train_part=0.95,
+                epochs=2, step_vis=80, samples=20400))]
         return workers
 
 
@@ -314,8 +312,8 @@ if __name__ == "__main__":
             worker.restore_backup()
             worker.start_training_epochs()
             # worker.start_evaluation()
-            # worker.create_test_output()
-            # worker_plot(worker)
-
+            worker.create_test_output()
+            worker_plot(worker)
 
     start_train()
+

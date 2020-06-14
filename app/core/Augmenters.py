@@ -9,18 +9,17 @@ from imgaug.augmenters import ia
 
 
 def get_new_training():
-    ia.seed(int(time.time()))
 
     return Sequential([
-        GammaContrast(gamma=(0.35, 0.9)),
+        GammaContrast(gamma=(0.45, 0.7)),
         Sometimes(0.3, CoarseDropout(
-            p=(0.05, 0.3), size_percent=(0.1, 0.5))),
+            p=(0.05, 0.1), size_percent=(0.1, 0.2))),
     ])
 
 
 def get_new_validation():
     return Sequential([
-        GammaContrast(gamma=0.45),
+        GammaContrast(gamma=(0.45, 0.7)),
     ])
 
 
