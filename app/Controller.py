@@ -200,13 +200,13 @@ class MiniBatchWorker:
 
             self.model.add(ELU())
             self.model.add(
-                Conv2D(filters=64, kernel_size=(5, 5), strides=(3, 3),
+                Conv2D(filters=86, kernel_size=(5, 5), strides=(3, 3),
                        padding='same', kernel_initializer=he_normal())
             )
 
             self.model.add(ELU())
             self.model.add(
-                Conv2D(filters=128, kernel_size=(3, 3), strides=(1, 1),
+                Conv2D(filters=86, kernel_size=(3, 3), strides=(1, 1),
                        padding='valid', kernel_initializer=he_normal())
             )
 
@@ -278,10 +278,10 @@ if __name__ == "__main__":
         workers = [MiniBatchWorker(
             PreprocessorParams(
                 backward=(0, 1), frame_y_trim=(140, -200),
-                frame_x_trim=(200, -200), frame_scale=1.5,
+                frame_x_trim=(200, -200), frame_scale=1.6,
                 area_float=6),
             ControllerParams(
-                '2D-CNN-V1-F', baths=30, train_part=0.95,
+                '2D-CNN-V2-F', baths=30, train_part=0.95,
                 epochs=2, step_vis=80, samples=20400))]
         return workers
 

@@ -183,8 +183,8 @@ class Preprocessor:
             Comment/Uncomment for showing each image
             moving optical flow.
             """
-            cv2.imshow('Preprocessing Flow', hsv)
-            cv2.waitKey(0)
+            # cv2.imshow('Preprocessing Flow', hsv)
+            # cv2.waitKey(0)
             return hsv
 
         flow_frames = []
@@ -265,7 +265,7 @@ if __name__ == "__main__":
         assert x_y[0].ndim == 4 and x_y[1].ndim == 2
 
     Preprocessor(PreprocessorParams(
-        (0, 1), frame_scale=1.5, frame_x_trim=(200, -200),
+        (0, 1), frame_scale=1.6, frame_x_trim=(200, -200),
         frame_y_trim=(140, -200), area_float=0),
         Augmenters.get_new_validation()) \
         .set_source(Settings.TEST_FRAMES, Settings.TRAIN_Y) \
