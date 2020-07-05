@@ -70,6 +70,9 @@ def opticalFlowOverlay2(imagePv, image):
         imagePvGray, imageGray, p0, None, **lk_params)
     color = np.random.randint(0, 255, (300, 3))
 
+    colorL = np.array([122, 122, 122])
+    colorC = np.array([255, 255, 255])
+
     # Select good points
     good_new = p1[st == 1]
     good_old = p0[st == 1]
@@ -79,14 +82,14 @@ def opticalFlowOverlay2(imagePv, image):
         a, b = new.ravel()
         c, d = old.ravel()
 
-        mask = cv2.line(mask, (a, b), (c, d), color[i].tolist(), 2)
-        image = cv2.circle(image, (a, b), 5, color[i].tolist(), -1)
+        mask = cv2.line(mask, (a, b), (c, d), colorL.tolist(), 1)
+        image = cv2.circle(mask, (a, b), 2, colorC.tolist(), -1)
 
     return cv2.add(image, mask)
 
 
 def testOpenCVOpticalMoving():
-    for _ in range(4000, 20400, 20):
+    for _ in range(100, 20400, 20):
 
         for i in range(_, _ + 10):
             ia = Augmenters.get_new_validation()
@@ -96,14 +99,14 @@ def testOpenCVOpticalMoving():
                 + str(i) + '.jpg', cv2.IMREAD_COLOR)
             image_current = ia.augment_image(image_current)
             image_current = cv2.resize(
-                image_current[100:-160, 80:-80], (0, 0), fx=1, fy=1)
+                image_current[80:-160, 60:-60], (0, 0), fx=1, fy=1)
 
             image_next = cv2.imread(
                 Settings.TEST_FRAMES + '/'
                 + str(i + 1) + '.jpg', cv2.IMREAD_COLOR)
             image_next = ia.augment_image(image_next)
             image_next = cv2.resize(
-                image_next[100:-160, 80:-80], (0, 0), fx=1, fy=1)
+                image_next[80:-160, 60:-60], (0, 0), fx=1, fy=1)
 
             img_new = opticalFlowOverlay2(image_current, image_next)
             cv2.imshow('frame1', img_new)

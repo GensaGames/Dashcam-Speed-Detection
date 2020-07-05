@@ -189,30 +189,26 @@ class MiniBatchWorker:
             input_shape = (
                 x_y[0].shape[1],
                 x_y[0].shape[2],
-                x_y[0].shape[3],)
+                1,)
 
             self.model = Sequential()
             self.model.add(
-                Conv2D(filters=48, kernel_size=(5, 5), strides=(3, 3),
-                       input_shape=input_shape, padding='same',
+                Conv2D(filters=64, kernel_size=(5, 5), strides=(3, 3),
+                       input_shape=input_shape, padding='valid',
                        kernel_initializer=he_normal())
             )
 
-            self.model.add(ELU())
             self.model.add(
                 Conv2D(filters=86, kernel_size=(5, 5), strides=(3, 3),
-                       padding='same', kernel_initializer=he_normal())
+                       padding='valid', kernel_initializer=he_normal())
             )
 
-            self.model.add(ELU())
             self.model.add(
                 Conv2D(filters=86, kernel_size=(3, 3), strides=(1, 1),
                        padding='valid', kernel_initializer=he_normal())
             )
 
-            self.model.add(ELU())
             self.model.add(Flatten())
-
             self.model \
                 .add(Dense(units=256,
                            kernel_initializer=he_normal()))
@@ -277,12 +273,12 @@ if __name__ == "__main__":
     def combine_workers():
         workers = [MiniBatchWorker(
             PreprocessorParams(
-                backward=(0, 1), frame_y_trim=(140, -200),
-                frame_x_trim=(200, -200), frame_scale=1.6,
+                backward=(0, 1), frame_y_trim=(100, -170),
+                frame_x_trim=(70, -70), frame_scale=1.4,
                 area_float=6),
             ControllerParams(
-                '2D-CNN-V2-F', baths=30, train_part=0.95,
-                epochs=2, step_vis=80, samples=20400))]
+                'NEW-OPT-V1', baths=30, train_part=0.7,
+                epochs=3, step_vis=80, samples=20400))]
         return workers
 
 

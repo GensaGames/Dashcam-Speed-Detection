@@ -24,12 +24,10 @@ def testOpenCVOpticalMoving():
         old_frame = cv2.resize(
             old_frame[100:-160, 80:-80], (0, 0), fx=1, fy=1)
         # params for ShiTomasi corner detection
-        feature_params = dict(maxCorners=100,
-                              qualityLevel=0.3,
+        feature_params = dict(maxCorners=500,
+                              qualityLevel=0.1,
                               minDistance=7,
-                              blockSize=7)
-
-        # Parameters for lucas kanade optical flow
+                              blockSize=5)
         lk_params = dict(winSize=(15, 15),
                          maxLevel=2,
                          criteria=(cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.03))

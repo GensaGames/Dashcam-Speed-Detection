@@ -94,7 +94,7 @@ class Preprocessor:
 
             for path in np.flipud(np.array([list_paths]).flatten()):
                 image = cv2.imread(
-                    str(path), cv2.IMREAD_COLOR)
+                    str(path), cv2.IMREAD_GRAYSCALE)
                 image = augmenter.augment_image(image)
                 items.append(image)
 
@@ -145,6 +145,20 @@ class Preprocessor:
                 fy=self.PARAMS.frame_scaler)
         return frames
 
+    FLOW_FEATUES = dict(
+        maxCorners=500,
+        qualityLevel=0.1,
+        minDistance=7,
+        blockSize=5
+    )
+
+    FLOW_LK_PARAMS = dict(
+        winSize=(15, 15),
+        maxLevel=2,
+        criteria=(cv2.TERM_CRITERIA_EPS
+                  | cv2.TERM_CRITERIA_COUNT, 10, 0.03)
+    )
+
     def __build_optical_flow(self, frames):
 
         timeline = len(self.PARAMS.backward)
@@ -154,38 +168,37 @@ class Preprocessor:
         # noinspection DuplicatedCode
         def get_flow_change(img1, img2):
 
-            hsv = np.zeros_like(img1)
-            # set saturation
-            hsv[:, :, 1] = cv2.cvtColor(
-                img2, cv2.COLOR_RGB2HSV)[:, :, 1]
+            # Finds edges in an image using the [Canny86] algorithm.
+            p0 = cv2.goodFeaturesToTrack(
+                img2, mask=None, **Preprocessor.FLOW_FEATUES
+            )
 
-            flow = cv2.calcOpticalFlowFarneback(
-                cv2.cvtColor(img1, cv2.COLOR_RGB2GRAY),
-                cv2.cvtColor(img2, cv2.COLOR_RGB2GRAY), None,
-                0.6, 4, 20, 3, 5, 1.1, 0)
+            p1, st, err = cv2.calcOpticalFlowPyrLK(
+                img1, img2, p0, None,
+                **Preprocessor.FLOW_LK_PARAMS
+            )
 
-            # convert from cartesian to polar
-            mag, ang = cv2.cartToPolar(
-                flow[..., 0], flow[..., 1])
+            # Select good points
+            good_new = p1[st == 1]
+            good_old = p0[st == 1]
 
-            # hue corresponds to direction
-            hsv[:, :, 0] = ang * (180 / np.pi / 2)
+            mask = np.zeros_like(img2)
+            for i, (new, old) in enumerate(zip(good_new, good_old)):
+                a, b = new.ravel()
+                c, d = old.ravel()
 
-            # value corresponds to magnitude
-            hsv[:, :, 2] = cv2.normalize(
-                mag, None, 0, 255, cv2.NORM_MINMAX)
+                mask = cv2.line(mask, (a, b), (c, d), [122, 122, 122], 1)
+                img2 = cv2.circle(mask, (a, b), 2, [255, 255, 255], -1)
 
-            # Сonvert HSV to float32's
-            # hsv = np.asarray(hsv, dtype= np.float32)
-            hsv = cv2.cvtColor(hsv, cv2.COLOR_HSV2RGB)
+            new = cv2.add(img2, mask)
 
             """
             Comment/Uncomment for showing each image
             moving optical flow.
             """
-            # cv2.imshow('Preprocessing Flow', hsv)
+            # cv2.imshow('Preprocessing Flow', new)
             # cv2.waitKey(0)
-            return hsv
+            return new
 
         flow_frames = []
         for line in range(0, len(frames), timeline):
@@ -222,7 +235,8 @@ class Preprocessor:
             delta_len,
             frames[0].shape[0],
             frames[0].shape[1],
-            3))
+            1
+        ))
 
     @staticmethod
     def __to_timeline_y(frames):
@@ -258,17 +272,19 @@ class Preprocessor:
 if __name__ == "__main__":
     logger = get_logger()
 
+
     def __assert(x_y):
         logger.info('X shape {}'.format(x_y[0].shape))
         logger.info('Y shape {}'.format(x_y[1].shape))
 
-        assert x_y[0].ndim == 4 and x_y[1].ndim == 2
+        assert x_y[0].ndim == 4 and x_y[1].ndim == 2 \
+               and x_y[0].shape[0] == x_y[1].shape[0]
 
     Preprocessor(PreprocessorParams(
-        (0, 1), frame_scale=1.6, frame_x_trim=(200, -200),
-        frame_y_trim=(140, -200), area_float=0),
+        (0, 1), frame_scale=1.4, frame_x_trim=(70, -70),
+        frame_y_trim=(100, -170), area_float=0),
         Augmenters.get_new_validation()) \
         .set_source(Settings.TEST_FRAMES, Settings.TRAIN_Y) \
-        .build(list(range(67, 300)))\
+        .build(list(range(67, 200))) \
         .subscribe(__assert, on_error=lambda e:
     logger.error('Exception! ' + str(e)))

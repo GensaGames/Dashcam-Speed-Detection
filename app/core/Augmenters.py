@@ -12,8 +12,6 @@ def get_new_training():
 
     return Sequential([
         GammaContrast(gamma=(0.45, 0.7)),
-        Sometimes(0.3, CoarseDropout(
-            p=(0.05, 0.1), size_percent=(0.1, 0.2))),
     ])
 
 
