@@ -18,7 +18,7 @@ from app.other.LoggerFactory import get_logger
 
 class Preprocessor:
 
-    def __init__(self, params, augmenter=None):
+    def __init__(self, params, augmenter):
         self.PARAMS = params
         self.AUGMENTER = augmenter
         self.SOURCE_X_Y = None
@@ -90,12 +90,13 @@ class Preprocessor:
 
             list_paths = self.__get_index_paths(
                 looking_back, complete_path)
-            augmenter = self.AUGMENTER.to_deterministic()
+
+            img_aug = self.AUGMENTER.image.to_deterministic()
 
             for path in np.flipud(np.array([list_paths]).flatten()):
                 image = cv2.imread(
                     str(path), cv2.IMREAD_GRAYSCALE)
-                image = augmenter.augment_image(image)
+                image = img_aug.augment_image(image)
                 items.append(image)
 
         assert len(indexes) * (
@@ -108,12 +109,12 @@ class Preprocessor:
 
         # Apply random floating Area Shift
         def shift():
-            if self.PARAMS.area_float is 0:
+            if self.AUGMENTER.area_float is 0:
                 return 0
 
             return np.random.randint(
-                low=-1 * self.PARAMS.area_float,
-                high=self.PARAMS.area_float)
+                low=-1 * self.AUGMENTER.area_float,
+                high=self.AUGMENTER.area_float)
 
         step = len(self.PARAMS.backward)
         assert len(frames) % step == 0
@@ -184,6 +185,9 @@ class Preprocessor:
 
             mask = np.zeros_like(img2)
             for i, (new, old) in enumerate(zip(good_new, good_old)):
+                if self.AUGMENTER.features_dropout \
+                        > np.random.uniform(0, 1):
+                    continue
                 a, b = new.ravel()
                 c, d = old.ravel()
 
@@ -280,10 +284,13 @@ if __name__ == "__main__":
         assert x_y[0].ndim == 4 and x_y[1].ndim == 2 \
                and x_y[0].shape[0] == x_y[1].shape[0]
 
-    Preprocessor(PreprocessorParams(
-        (0, 1), frame_scale=1.4, frame_x_trim=(70, -70),
-        frame_y_trim=(100, -170), area_float=0),
-        Augmenters.get_new_validation()) \
+
+    Preprocessor(
+        PreprocessorParams(
+            (0, 1), frame_scale=1.4, frame_x_trim=(70, -70),
+            frame_y_trim=(100, -170),
+        ),
+        Augmenters.get_new_training()) \
         .set_source(Settings.TEST_FRAMES, Settings.TRAIN_Y) \
         .build(list(range(67, 200))) \
         .subscribe(__assert, on_error=lambda e:

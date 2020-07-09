@@ -204,6 +204,11 @@ class MiniBatchWorker:
             )
 
             self.model.add(
+                Conv2D(filters=86, kernel_size=(3, 3), strides=(2, 2),
+                       padding='valid', kernel_initializer=he_normal())
+            )
+
+            self.model.add(
                 Conv2D(filters=86, kernel_size=(3, 3), strides=(1, 1),
                        padding='valid', kernel_initializer=he_normal())
             )
@@ -235,9 +240,9 @@ class MiniBatchWorker:
             Comment/Uncomment for showing detailed
             info about Model Structure.
             """
-            # from keras.utils import plot_model
-            # plot_model(self.model, to_file='model_plot1.png',
-            #            show_shapes=True, show_layer_names=True)
+            from keras.utils import plot_model
+            plot_model(self.model, to_file='model_plot1.png',
+                       show_shapes=True, show_layer_names=True)
 
         value = self.model.train_on_batch(x_y[0], x_y[1])
         logger.debug('Training Batch loss: {}'
@@ -275,10 +280,10 @@ if __name__ == "__main__":
             PreprocessorParams(
                 backward=(0, 1), frame_y_trim=(100, -170),
                 frame_x_trim=(70, -70), frame_scale=1.4,
-                area_float=6),
+            ),
             ControllerParams(
-                'NEW-OPT-V1', baths=30, train_part=0.7,
-                epochs=3, step_vis=80, samples=20400))]
+                'NEW-OPT-V2', baths=30, train_part=0.75,
+                epochs=2, step_vis=40, samples=20400))]
         return workers
 
 

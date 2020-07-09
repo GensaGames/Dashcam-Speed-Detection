@@ -5,14 +5,12 @@ class PreprocessorParams:
 
     def __init__(
             self, backward=(0,), frame_y_trim=(230, 350),
-            frame_x_trim=(140, 380), area_float=10,
-            frame_scale=0.7):
+            frame_x_trim=(140, 380), frame_scale=0.7):
 
         self._backward = backward
         self._frame_y_trim = frame_y_trim
         self._frame_x_trim = frame_x_trim
         self._frame_scale = frame_scale
-        self._area_float = area_float
 
     @property
     def backward(self):
@@ -29,10 +27,6 @@ class PreprocessorParams:
     @property
     def frame_scaler(self):
         return self._frame_scale
-
-    @property
-    def area_float(self):
-        return self._area_float
 
 
 class ControllerParams:
