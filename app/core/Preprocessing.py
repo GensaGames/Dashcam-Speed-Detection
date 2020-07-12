@@ -21,36 +21,37 @@ class Preprocessor:
     def __init__(self, params, augmenter):
         self.PARAMS = params
         self.AUGMENTER = augmenter
-        self.SOURCE_X_Y = None
 
-    def set_source(self, x, y):
-        self.SOURCE_X_Y = (x, y)
-        return self
+    def __load_x(self, indexes, x_source):
 
-    def __load_y(self, indexes):
-        train_y_paths = self.SOURCE_X_Y[1]
-        if train_y_paths is None:
-            return None
+        assert min(indexes) - max(
+            self.PARAMS.backward) >= 0
 
-        assert min(indexes) - \
-               max(self.PARAMS.backward) >= 0
+        complete_path = sorted(Path(
+            x_source).glob('*'), key=lambda x: float(x.stem))
 
-        train_y_values = loadtxt(
-            train_y_paths, delimiter=" ",
-            unpack=False)
-
-        # Get correct train Y values, in case it's
-        # in car stop variance, set just 0.
-        y_values = []
+        items = []
         for i in indexes:
-            if Helper.is_car_stop_variance(i):
-                y_values.append(0)
-            else:
-                y_values.append(train_y_values[i])
 
-        y_values = np.reshape(
-            y_values, (len(y_values), 1))
-        return y_values
+            # Look Back Strategy for the previous
+            # Y Frames from started Idx position
+            looking_back = list(map(
+                lambda x: i - x, self.PARAMS.backward))
+
+            list_paths = self.__get_index_paths(
+                looking_back, complete_path)
+
+            img_aug = self.AUGMENTER.image.to_deterministic()
+
+            for path in np.flipud(np.array([list_paths]).flatten()):
+                image = cv2.imread(
+                    str(path), cv2.IMREAD_GRAYSCALE)
+                image = img_aug.augment_image(image)
+                items.append(image)
+
+        assert len(indexes) * (
+            len(self.PARAMS.backward)) == len(items)
+        return items
 
     @staticmethod
     def __get_index_paths(looking_back, path):
@@ -75,37 +76,29 @@ class Preprocessor:
 
         return itemgetter(*looking_back)(path)
 
-    def __load_x(self, indexes):
-        frames_paths = self.SOURCE_X_Y[0]
+    def __load_y(self, indexes, y_source):
+        if y_source is None:
+            return None
 
-        assert min(indexes) - max(
-            self.PARAMS.backward) >= 0
+        assert min(indexes) - \
+               max(self.PARAMS.backward) >= 0
 
-        complete_path = sorted(Path(
-            frames_paths).glob('*'), key=lambda x: float(x.stem))
+        train_y_values = loadtxt(
+            y_source, delimiter=" ",
+            unpack=False)
 
-        items = []
+        # Get correct train Y values, in case it's
+        # in car stop variance, set just 0.
+        y_values = []
         for i in indexes:
+            if Helper.is_car_stop_variance(i):
+                y_values.append(0)
+            else:
+                y_values.append(train_y_values[i])
 
-            # Look Back Strategy for the previous
-            # Y Frames from started Idx position
-            looking_back = list(map(
-                lambda x: i - x, self.PARAMS.backward))
-
-            list_paths = self.__get_index_paths(
-                looking_back, complete_path)
-
-            img_aug = self.AUGMENTER.image.to_deterministic()
-
-            for path in np.flipud(np.array([list_paths]).flatten()):
-                image = cv2.imread(
-                    str(path), cv2.IMREAD_GRAYSCALE)
-                image = img_aug.augment_image(image)
-                items.append(image)
-
-        assert len(indexes) * (
-            len(self.PARAMS.backward)) == len(items)
-        return items
+        y_values = np.reshape(
+            y_values, (len(y_values), 1))
+        return y_values
 
     def __map_crop(self, frames):
         assert isinstance(frames, list) and \
@@ -255,9 +248,10 @@ class Preprocessor:
         return frames.reshape(len(frames), 1)
 
     # noinspection PyUnresolvedReferences
-    def build(self, indexes):
-        obs_x = rx.of(indexes).pipe(
-            ops.map(self.__load_x),
+    def build(self, indexes, source_x_y):
+
+        x = self.__load_x(indexes, source_x_y[0])
+        obs_x = rx.of(x).pipe(
             ops.map(self.__map_crop),
             ops.map(self.__map_scale),
             ops.map(self.__build_optical_flow),
@@ -265,8 +259,8 @@ class Preprocessor:
             ops.map(self.__to_timeline_x),
         )
 
-        obs_y = rx.of(indexes).pipe(
-            ops.map(self.__load_y),
+        y = self.__load_y(indexes, source_x_y[1])
+        obs_y = rx.of(y).pipe(
             ops.map(self.__to_timeline_y),
         )
 
@@ -295,15 +289,16 @@ if __name__ == "__main__":
 
         assert x_y[0].ndim == 4 and x_y[1].ndim == 2 \
                and x_y[0].shape[0] == x_y[1].shape[0]
-
+        
 
     Preprocessor(
         PreprocessorParams(
             (0, 1), frame_scale=1.4, frame_x_trim=(70, -70),
             frame_y_trim=(100, -170),
         ),
-        Augmenters.get_new_training()) \
-        .set_source(Settings.TEST_FRAMES, Settings.TRAIN_Y) \
-        .build(list(range(67, 200))) \
-        .subscribe(__assert, on_error=lambda e:
-    logger.error('Exception! ' + str(e)))
+        Augmenters.get_new_training()
+    ).build(
+        list(range(67, 200)),
+        (Settings.TEST_FRAMES, Settings.TRAIN_Y)
+    ).subscribe(__assert, on_error=lambda e: logger
+                .error('Exception! ' + str(e)))

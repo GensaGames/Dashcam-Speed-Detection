@@ -1,15 +1,16 @@
 import os
+
 import matplotlib.pyplot as plt
 import numpy as np
 from keras import Sequential
 from keras.activations import linear
 from keras.initializers import he_normal
-from keras.layers import Dense, Flatten, Dropout, Conv2D, Conv3D, ELU, BatchNormalization
+from keras.layers import Dense, Flatten, Conv2D, ELU
 from keras.losses import mean_squared_error
 from keras.optimizers import Adam
 
-from app import Settings
 import app.other.Helper as Helper
+from app import Settings
 from app.core import Augmenters
 from app.core.Parameters import ControllerParams, \
     VisualHolder, PreprocessorParams
@@ -30,32 +31,12 @@ class MiniBatchWorker:
 
         for e in range(self.C_PARAMS.epochs):
             get_logger().info('Starting {} Training Epoch!'
-                        .format(str(e)))
+                              .format(str(e)))
 
             np.random.shuffle(train)
             self.__start_train(train, validation)
-
-    # Include special located frames with car
-    # stop and this variance variance
-    def __get_new_stop_frames(self):
-        source_stop_frames = Settings.TRAIN_FRAMES_STOP
-        stop_indexes = []
-
-        for next_dir in os.listdir(source_stop_frames):
-            for idx, _ in enumerate(os.listdir(
-                    source_stop_frames + '/' + next_dir)):
-
-                if idx < max(self.P_PARAMS.backward):
-                    continue
-
-                # Just use folder as prefix for index, and avoid
-                # collision with initial train indexes from train part
-                idx_ = int(next_dir) * Settings.PREFIX_STOP_SIZE + idx
-                stop_indexes.append(idx_)
-
-        stop_indexes = np.array(stop_indexes, dtype=np.int32)
-        np.random.shuffle(stop_indexes)
-        return stop_indexes
+            get_logger().info("Epoch {} training done. Backup."
+                              .format(e))
 
     # Take more important data from the resources,
     # where car was on the street roads, and has more
@@ -81,53 +62,57 @@ class MiniBatchWorker:
 
         return train, indexes[max_initial_idx:]
 
+    # Include special located frames with car
+    # stop and this variance variance
+    def __get_new_stop_frames(self):
+        source_stop_frames = Settings.TRAIN_FRAMES_STOP
+        stop_indexes = []
+
+        for next_dir in os.listdir(source_stop_frames):
+            for idx, _ in enumerate(os.listdir(
+                    source_stop_frames + '/' + next_dir)):
+
+                if idx < max(self.P_PARAMS.backward):
+                    continue
+
+                # Just use folder as prefix for index, and avoid
+                # collision with initial train indexes from train part
+                idx_ = int(next_dir) * Settings.PREFIX_STOP_SIZE + idx
+                stop_indexes.append(idx_)
+
+        stop_indexes = np.array(stop_indexes, dtype=np.int32)
+        np.random.shuffle(stop_indexes)
+        return stop_indexes
+
     def __start_train(self, train, validation):
-        step = 0
-        for i in range(0, len(train), self.C_PARAMS.baths):
-            get_logger().info("Start Train step: {}.".format(step))
+        for step in range(0, len(train) // self.C_PARAMS.baths):
+            get_logger().info("Start Train step: {}."
+                              .format(step))
 
             indexes = train[list(range(
-                i, i + self.C_PARAMS.baths))]
+                step * self.C_PARAMS.baths,
+                (step + 1) * self.C_PARAMS.baths
+            ))]
 
             self.__step_process(
                 step, indexes, validation)
-            step += 1
-
-        get_logger().info("Epoch training done. Backup.")
 
     def __step_process(self, step, indexes, validation):
-        Preprocessor(self.P_PARAMS, Augmenters
-                     .get_new_training()) \
-            .set_source(Settings.TRAIN_FRAMES, Settings.TRAIN_Y) \
-            .build(indexes) \
-            .subscribe(self.__step_model, on_error=lambda e:
-        get_logger().error('Exception! ' + str(e)))
+
+        Preprocessor(
+            self.P_PARAMS,
+            Augmenters.get_new_training()
+        ).build(
+            indexes,
+            (Settings.TRAIN_FRAMES, Settings.TRAIN_Y)
+        ).subscribe(self.__step_model, on_error=lambda e: get_logger()
+                    .error('Exception! ' + str(e)))
 
         if step > 0 and (
                 step % self.C_PARAMS.step_vis == 0 or
                 step >= self.C_PARAMS.samples - self.C_PARAMS.baths):
-            self.__evaluate(validation)
+            self.__step_validation(validation)
             self.do_backup()
-
-    def start_evaluation(self):
-        _, validation = \
-            self.__prepare_training_data()
-
-        def local_evaluate(x_y):
-            cost = self.model \
-                .evaluate(x_y[0], x_y[1])
-
-            get_logger().info("Evaluation on Items: {} Cost: {}"
-                        .format(len(x_y[0]), cost))
-
-        while True:
-            np.random.shuffle(validation)
-            Preprocessor(self.P_PARAMS, Augmenters
-                         .get_new_validation()) \
-                .set_source(Settings.TRAIN_FRAMES, Settings.TRAIN_Y) \
-                .build(validation[:100]) \
-                .subscribe(local_evaluate, on_error=lambda e:
-            get_logger().error('Exception! ' + str(e)))
 
     BATCHES = 120
 
@@ -150,17 +135,20 @@ class MiniBatchWorker:
 
         for i in range(0, len(samples), self.BATCHES):
             get_logger().info('Moving to next Step-Idx {}.'
-                        .format(str(i)))
+                              .format(str(i)))
             step = i + self.BATCHES if i + self.BATCHES < len(
                 samples) else len(samples)
 
             samples_step = samples[list(range(i, step))]
-            Preprocessor(self.P_PARAMS, Augmenters
-                         .get_new_validation()) \
-                .set_source(Settings.TEST_FRAMES, None) \
-                .build(samples_step) \
-                .subscribe(local_evaluate, on_error=lambda e:
-            get_logger().error('Exception! ' + str(e)))
+
+            Preprocessor(
+                self.P_PARAMS,
+                Augmenters.get_new_validation()
+            ).build(
+                samples_step,
+                (Settings.TEST_FRAMES, None)
+            ).subscribe(local_evaluate, on_error=lambda e: get_logger()
+                        .error('Exception! ' + str(e)))
 
     def restore_backup(self):
         get_logger().info("Restoring Backup...")
@@ -196,22 +184,18 @@ class MiniBatchWorker:
                        input_shape=input_shape, padding='valid',
                        kernel_initializer=he_normal())
             )
-
             self.model.add(
                 Conv2D(filters=86, kernel_size=(5, 5), strides=(3, 3),
                        padding='valid', kernel_initializer=he_normal())
             )
-
             self.model.add(
                 Conv2D(filters=86, kernel_size=(3, 3), strides=(2, 2),
                        padding='valid', kernel_initializer=he_normal())
             )
-
             self.model.add(
                 Conv2D(filters=86, kernel_size=(3, 3), strides=(1, 1),
                        padding='valid', kernel_initializer=he_normal())
             )
-
             self.model.add(Flatten())
             self.model \
                 .add(Dense(units=256,
@@ -234,7 +218,7 @@ class MiniBatchWorker:
                            activation=linear))
             self.model \
                 .compile(loss=mean_squared_error,
-                         optimizer=Adam(lr=1e-4))
+                         optimizer=Adam())
             """
             Comment/Uncomment for showing detailed
             info about Model Structure.
@@ -245,9 +229,9 @@ class MiniBatchWorker:
 
         value = self.model.train_on_batch(x_y[0], x_y[1])
         get_logger().debug('Training Batch loss: {}'
-                     .format(value))
+                           .format(value))
 
-    def __evaluate(self, validation):
+    def __step_validation(self, validation):
         np.random.shuffle(validation)
 
         def local_save(x_y):
@@ -261,12 +245,14 @@ class MiniBatchWorker:
                 "Value: {}".format(len(x_y[0]), evaluation))
             self.VISUAL.add_evaluation(evaluation)
 
-        Preprocessor(self.P_PARAMS,
-                     Augmenters.get_new_training()) \
-            .set_source(Settings.TRAIN_FRAMES, Settings.TRAIN_Y) \
-            .build(validation[:100]) \
-            .subscribe(local_save, on_error=lambda e:
-        get_logger().error('Exception! ' + str(e)))
+        Preprocessor(
+            self.P_PARAMS,
+            Augmenters.get_new_validation()
+        ).build(
+            validation[:100],
+            (Settings.TRAIN_FRAMES, Settings.TRAIN_Y)
+        ).subscribe(local_save, on_error=lambda e: get_logger()
+                    .error('Exception! ' + str(e)))
 
 
 #####################################
@@ -301,7 +287,7 @@ if __name__ == "__main__":
         return plt
 
 
-    def start_train():
+    def start_actions():
         for worker in combine_workers():
             """ 
             Comment/Uncomment for making different
@@ -313,5 +299,5 @@ if __name__ == "__main__":
             # worker.create_test_output()
             worker_plot(worker)
 
-    start_train()
 
+    start_actions()

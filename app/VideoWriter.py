@@ -40,13 +40,13 @@ class VideoWriter:
         y = self.worker.model.predict(x)
 
         # Smooth Aggressive:
-        if len(memory) > 10:
-            previous = memory[-20:]
-            avg = sum(previous) / len(previous)
-            if abs(y - avg) > 5:
-                y = avg
-            # else:
-            #     y = (sum(previous) + y) / (len(previous) + 1)
+        # if len(memory) > 10:
+        #     previous = memory[-20:]
+        #     avg = sum(previous) / len(previous)
+        #     if abs(y - avg) > 5:
+        #         y = avg
+        #     else:
+        #         y = (sum(previous) + y) / (len(previous) + 1)
 
         memory.append(y)
         get_logger().info(y)
@@ -55,12 +55,12 @@ class VideoWriter:
         Comment/Uncomment for showing each image
         moving optical flow.
         """
-        cv2.imshow('Video Image', cv2.resize(
-            image1[110:-160, 0:-120], (0, 0), fx=1.4, fy=1.4))
-        cv2.waitKey(0)
-
-        # cv2.imshow('Video Image', image2)
+        # cv2.imshow('Video Image', cv2.resize(
+        #     image1[110:-160, 0:-120], (0, 0), fx=1.4, fy=1.4))
         # cv2.waitKey(0)
+
+        cv2.imshow('Video Image', image2)
+        cv2.waitKey(0)
 
     def start(self):
         if not os.path.exists(self.PARAMS.path):
