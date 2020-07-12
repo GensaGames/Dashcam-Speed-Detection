@@ -23,6 +23,10 @@ class Preprocessor:
         self.AUGMENTER = augmenter
         self.SOURCE_X_Y = None
 
+    def set_source(self, x, y):
+        self.SOURCE_X_Y = (x, y)
+        return self
+
     def __load_y(self, indexes):
         train_y_paths = self.SOURCE_X_Y[1]
         if train_y_paths is None:
@@ -249,10 +253,6 @@ class Preprocessor:
         assert isinstance(frames, np.ndarray)
         return frames.reshape(len(frames), 1)
 
-    def set_source(self, x, y):
-        self.SOURCE_X_Y = (x, y)
-        return self
-
     # noinspection PyUnresolvedReferences
     def build(self, indexes):
         obs_x = rx.of(indexes).pipe(
@@ -270,6 +270,17 @@ class Preprocessor:
         )
 
         return rx.zip(obs_x, obs_y)
+
+    # noinspection PyUnresolvedReferences
+    def buildOne(self, image1, image2):
+        obs_x = rx.of([image1, image2]).pipe(
+            ops.map(self.__map_crop),
+            ops.map(self.__map_scale),
+            ops.map(self.__build_optical_flow),
+            ops.map(self.__map_normalize),
+            ops.map(self.__to_timeline_x),
+        )
+        return obs_x
 
 
 #####################################

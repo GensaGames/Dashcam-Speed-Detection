@@ -77,7 +77,9 @@ def clear_built_test(path_to, name, backward):
 
 ##########################################
 def add_built_test(path_to, name, values):
-    file = path_to + '/' + name + Settings.BUILT_TEST_FORMAT
+    file = path_to + '/' \
+              + Settings.MODELS + '/' + name + '/output' \
+              + Settings.BUILT_TEST_FORMAT
 
     if not os.path.exists(path_to):
         os.makedirs(path_to)

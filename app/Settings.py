@@ -24,3 +24,8 @@ NAME_MODEL_PLOT = 'epochs-plot.png'
 PREFIX_STOP_SIZE = int(10.e+4)
 
 
+WRITE_VIDEO_PATH = RESOURCE + 'videos-o/'
+WRITE_VIDEO_1 = WRITE_VIDEO_PATH + 'Bilkamera-F.mp4'
+WRITE_VIDEO_2 = WRITE_VIDEO_PATH + 'y2mate.com-F.mp4'
+
+

@@ -29,7 +29,7 @@ class MiniBatchWorker:
             self.__prepare_training_data()
 
         for e in range(self.C_PARAMS.epochs):
-            logger.info('Starting {} Training Epoch!'
+            get_logger().info('Starting {} Training Epoch!'
                         .format(str(e)))
 
             np.random.shuffle(train)
@@ -84,7 +84,7 @@ class MiniBatchWorker:
     def __start_train(self, train, validation):
         step = 0
         for i in range(0, len(train), self.C_PARAMS.baths):
-            logger.info("Start Train step: {}.".format(step))
+            get_logger().info("Start Train step: {}.".format(step))
 
             indexes = train[list(range(
                 i, i + self.C_PARAMS.baths))]
@@ -93,7 +93,7 @@ class MiniBatchWorker:
                 step, indexes, validation)
             step += 1
 
-        logger.info("Epoch training done. Backup.")
+        get_logger().info("Epoch training done. Backup.")
 
     def __step_process(self, step, indexes, validation):
         Preprocessor(self.P_PARAMS, Augmenters
@@ -101,7 +101,7 @@ class MiniBatchWorker:
             .set_source(Settings.TRAIN_FRAMES, Settings.TRAIN_Y) \
             .build(indexes) \
             .subscribe(self.__step_model, on_error=lambda e:
-        logger.error('Exception! ' + str(e)))
+        get_logger().error('Exception! ' + str(e)))
 
         if step > 0 and (
                 step % self.C_PARAMS.step_vis == 0 or
@@ -110,15 +110,14 @@ class MiniBatchWorker:
             self.do_backup()
 
     def start_evaluation(self):
-        train, validation = \
+        _, validation = \
             self.__prepare_training_data()
-        np.random.shuffle(train)
 
         def local_evaluate(x_y):
             cost = self.model \
                 .evaluate(x_y[0], x_y[1])
 
-            logger.info("Evaluation on Items: {} Cost: {}"
+            get_logger().info("Evaluation on Items: {} Cost: {}"
                         .format(len(x_y[0]), cost))
 
         while True:
@@ -128,12 +127,12 @@ class MiniBatchWorker:
                 .set_source(Settings.TRAIN_FRAMES, Settings.TRAIN_Y) \
                 .build(validation[:100]) \
                 .subscribe(local_evaluate, on_error=lambda e:
-            logger.error('Exception! ' + str(e)))
+            get_logger().error('Exception! ' + str(e)))
 
     BATCHES = 120
 
     def create_test_output(self):
-        logger.info("Create model test values.")
+        get_logger().info("Create model test values.")
         samples = np.arange(
             max(self.P_PARAMS.backward), 10798)
 
@@ -150,7 +149,7 @@ class MiniBatchWorker:
                 predictions)
 
         for i in range(0, len(samples), self.BATCHES):
-            logger.info('Moving to next Step-Idx {}.'
+            get_logger().info('Moving to next Step-Idx {}.'
                         .format(str(i)))
             step = i + self.BATCHES if i + self.BATCHES < len(
                 samples) else len(samples)
@@ -161,12 +160,12 @@ class MiniBatchWorker:
                 .set_source(Settings.TEST_FRAMES, None) \
                 .build(samples_step) \
                 .subscribe(local_evaluate, on_error=lambda e:
-            logger.error('Exception! ' + str(e)))
+            get_logger().error('Exception! ' + str(e)))
 
     def restore_backup(self):
-        logger.info("Restoring Backup...")
+        get_logger().info("Restoring Backup...")
         if self.model is not None:
-            logger.error(
+            get_logger().error(
                 'Model already created. Do not override!')
             return
 
@@ -175,11 +174,11 @@ class MiniBatchWorker:
                 Helper.restore_model_with(
                     Settings.BUILD, self.C_PARAMS.name)
         except FileNotFoundError:
-            logger.error(
+            get_logger().error(
                 'Do not have Backup! Starting new.')
 
     def do_backup(self):
-        logger.info("Making Backup...")
+        get_logger().info("Making Backup...")
         Helper.backup_model_with(
             Settings.BUILD, self.C_PARAMS.name,
             self.model, self.P_PARAMS, self.C_PARAMS, self.VISUAL)
@@ -240,24 +239,24 @@ class MiniBatchWorker:
             Comment/Uncomment for showing detailed
             info about Model Structure.
             """
-            from keras.utils import plot_model
-            plot_model(self.model, to_file='model_plot1.png',
-                       show_shapes=True, show_layer_names=True)
+            # from keras.utils import plot_model
+            # plot_model(self.model, to_file='model_plot1.png',
+            #            show_shapes=True, show_layer_names=True)
 
         value = self.model.train_on_batch(x_y[0], x_y[1])
-        logger.debug('Training Batch loss: {}'
+        get_logger().debug('Training Batch loss: {}'
                      .format(value))
 
     def __evaluate(self, validation):
         np.random.shuffle(validation)
 
         def local_save(x_y):
-            logger.info("Starting Cross Validation.")
+            get_logger().info("Starting Cross Validation.")
 
             evaluation = self.model \
                 .evaluate(x_y[0], x_y[1])
 
-            logger.info(
+            get_logger().info(
                 "Cross Validation Done on Items Size: {} "
                 "Value: {}".format(len(x_y[0]), evaluation))
             self.VISUAL.add_evaluation(evaluation)
@@ -267,13 +266,11 @@ class MiniBatchWorker:
             .set_source(Settings.TRAIN_FRAMES, Settings.TRAIN_Y) \
             .build(validation[:100]) \
             .subscribe(local_save, on_error=lambda e:
-        logger.error('Exception! ' + str(e)))
+        get_logger().error('Exception! ' + str(e)))
 
 
 #####################################
 if __name__ == "__main__":
-    logger = get_logger()
-
 
     def combine_workers():
         workers = [MiniBatchWorker(
@@ -282,8 +279,8 @@ if __name__ == "__main__":
                 frame_x_trim=(70, -70), frame_scale=1.4,
             ),
             ControllerParams(
-                'NEW-OPT-V2', baths=30, train_part=0.75,
-                epochs=2, step_vis=40, samples=20400))]
+                'NEW-OPT-FIN-2', baths=30, train_part=0.99,
+                epochs=1, step_vis=40, samples=20400))]
         return workers
 
 
@@ -313,7 +310,7 @@ if __name__ == "__main__":
             worker.restore_backup()
             worker.start_training_epochs()
             # worker.start_evaluation()
-            worker.create_test_output()
+            # worker.create_test_output()
             worker_plot(worker)
 
     start_train()

@@ -4,7 +4,7 @@ import os
 from app import Settings
 
 
-def get_logger(include_file=False):
+def build_logger(include_file=False):
 
     formatter = logging.Formatter(
         '%(asctime)-15s %(message)s')
@@ -29,3 +29,10 @@ def get_logger(include_file=False):
     handler1.setFormatter(formatter)
     log.addHandler(handler1)
     return log
+
+
+logger = build_logger()
+
+
+def get_logger():
+    return logger
