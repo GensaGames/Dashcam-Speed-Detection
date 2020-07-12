@@ -204,7 +204,8 @@ class Preprocessor:
             Comment/Uncomment for showing each image
             moving optical flow.
             """
-            # cv2.imshow('Preprocessing Flow', new)
+            # cv2.imshow('Preprocessing Flow.', new)
+            # cv2.imshow('Original.', img1)
             # cv2.waitKey(0)
             return new
 

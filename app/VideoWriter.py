@@ -15,13 +15,10 @@ class VideoWriter:
         self.PARAMS = params
 
         self.worker = MiniBatchWorker(
-            PreprocessorParams(
-                backward=(0, 1), frame_y_trim=(110, -160),
-                frame_x_trim=(0, -120), frame_scale=1.4,
-            ),
+            PreprocessorParams(),
             ControllerParams(
-                'NEW-OPT-FIN-2', baths=30, train_part=0.99,
-                epochs=1, step_vis=40, samples=20400)
+                'NEW-OPT-FIN-2'
+            )
         )
         self.worker.restore_backup()
 
@@ -58,12 +55,12 @@ class VideoWriter:
         Comment/Uncomment for showing each image
         moving optical flow.
         """
-        # cv2.imshow('Video Image', cv2.resize(
-        #     image1[110:-160, 0:-120], (0, 0), fx=1.4, fy=1.4))
-        # cv2.waitKey(0)
-
-        cv2.imshow('Video Image', image2)
+        cv2.imshow('Video Image', cv2.resize(
+            image1[110:-160, 0:-120], (0, 0), fx=1.4, fy=1.4))
         cv2.waitKey(0)
+
+        # cv2.imshow('Video Image', image2)
+        # cv2.waitKey(0)
 
     def start(self):
         if not os.path.exists(self.PARAMS.path):

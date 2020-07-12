@@ -19,10 +19,10 @@ from app.other.LoggerFactory import get_logger
 
 class MiniBatchWorker:
 
-    def __init__(self, p_params, c_params, model=None):
+    def __init__(self, p_params, c_params):
         self.P_PARAMS, self.C_PARAMS, self.VISUAL \
             = p_params, c_params, VisualHolder()
-        self.model = model
+        self.model = None
 
     def start_training_epochs(self):
         train, validation = \
