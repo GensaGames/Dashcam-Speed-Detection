@@ -38,13 +38,17 @@ class MiniBatchWorker:
             get_logger().info("Epoch {} training done. Backup."
                               .format(e))
 
+        get_logger().info('Starting Final Validation!')
+        for i in range(20):
+            self.__step_validation(validation)
+
     # Take more important data from the resources,
     # where car was on the street roads, and has more
     # variance
     def __prepare_training_data(self):
         indexes = np.arange(
             max(self.P_PARAMS.backward), self.C_PARAMS.samples)
-        np.random.shuffle(indexes)
+        # np.random.shuffle(indexes)
 
         assert 0 < self \
             .C_PARAMS.train_part < 1
@@ -53,7 +57,6 @@ class MiniBatchWorker:
 
         train = np.concatenate((
             indexes[:max_initial_idx], self.__get_new_stop_frames()))
-        np.random.shuffle(train)
 
         # Just align with exact part of batches.
         max_train_idx = self.C_PARAMS.baths * int(
@@ -237,19 +240,27 @@ class MiniBatchWorker:
         def local_save(x_y):
             get_logger().info("Starting Cross Validation.")
 
-            evaluation = self.model \
-                .evaluate(x_y[0], x_y[1])
+            predictions = self.model \
+                .predict(x_y[0])
+
+            mse = sum(mean_squared_error(
+                predictions, x_y[1]).numpy()) / len(predictions)
 
             get_logger().info(
                 "Cross Validation Done on Items Size: {} "
-                "Value: {}".format(len(x_y[0]), evaluation))
-            self.VISUAL.add_evaluation(evaluation)
+                "MSE: {}".format(len(x_y[0]), mse))
+
+            pvMse = self.model \
+                .evaluate(x_y[0], x_y[1])
+            get_logger().info('Previous MSE: {}'.format(pvMse))
+
+            self.VISUAL.add_evaluation(mse)
 
         Preprocessor(
             self.P_PARAMS,
             Augmenters.get_new_validation()
         ).build(
-            validation[:100],
+            validation[:200],
             (Settings.TRAIN_FRAMES, Settings.TRAIN_Y)
         ).subscribe(local_save, on_error=lambda e: get_logger()
                     .error('Exception! ' + str(e)))
@@ -265,8 +276,8 @@ if __name__ == "__main__":
                 frame_x_trim=(70, -70), frame_scale=1.4,
             ),
             ControllerParams(
-                'NEW-OPT-FIN-2', baths=30, train_part=0.99,
-                epochs=1, step_vis=40, samples=20400))]
+                'NEW-OPT-FIN-10', baths=30, train_part=0.8,
+                epochs=1, step_vis=5, samples=20400))]
         return workers
 
 

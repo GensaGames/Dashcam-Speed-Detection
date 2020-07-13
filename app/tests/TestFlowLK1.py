@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 
 
 def testOpenCVOpticalMoving():
-    ia = Augmenters.get_new_validation()
+    ia = Augmenters.get_new_validation().image
     for part in range(4000, 20400, 20):
 
         old_frame = cv2.imread(
@@ -60,10 +60,14 @@ def testOpenCVOpticalMoving():
 
             # draw the tracks
             for i2, (new, old) in enumerate(zip(good_new, good_old)):
-                a, b = new.ravel()
-                c, d = old.ravel()
-                mask = cv2.line(mask, (a, b), (c, d), color[i2].tolist(), 2)
-                frame = cv2.circle(frame, (a, b), 5, color[i2].tolist(), -1)
+                # noinspection PyBroadException
+                try:
+                    a, b = new.ravel()
+                    c, d = old.ravel()
+                    mask = cv2.line(mask, (a, b), (c, d), color[i2].tolist(), 2)
+                    frame = cv2.circle(frame, (a, b), 5, color[i2].tolist(), -1)
+                except:
+                    pass
             img = cv2.add(frame, mask)
 
             cv2.imshow('frame1', img)

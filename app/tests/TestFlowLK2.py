@@ -92,7 +92,7 @@ def testOpenCVOpticalMoving():
     for _ in range(100, 20400, 20):
 
         for i in range(_, _ + 10):
-            ia = Augmenters.get_new_validation()
+            ia = Augmenters.get_new_validation().image
 
             image_current = cv2.imread(
                 Settings.TEST_FRAMES + '/'
