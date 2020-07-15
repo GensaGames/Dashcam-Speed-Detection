@@ -12,7 +12,36 @@ import app.Settings as Settings
 import matplotlib.pyplot as plt
 
 
-# noinspection DuplicatedCode
+def opticalFlowOverlay1(image_pv, image):
+    image_pv = cv2.convertScaleAbs(
+        image_pv, alpha=1.5, beta=50)
+    image = cv2.convertScaleAbs(
+        image, alpha=1.5, beta=50)
+
+    delta = np.subtract(
+        image.astype(np.int16),
+        image_pv.astype(np.int16),
+    )
+    new = np.absolute(delta)
+    new = new.astype(np.uint8)
+    cv2.imshow('frame1', new)
+    cv2.waitKey(0)
+
+
+def diffImage(image_pv, image):
+    # new = cv2.adaptiveThreshold(
+    #     new, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+    #     cv2.THRESH_BINARY, 11, 2
+    # )
+    delta = np.subtract(
+        image.astype(np.int16),
+        image_pv.astype(np.int16),
+    )
+    new = np.absolute(delta)
+    new = new.astype(np.uint8)
+    return new
+
+
 def calcOptical(img1, img2):
     hsv = np.zeros_like(img1)
     # set saturation
@@ -22,7 +51,7 @@ def calcOptical(img1, img2):
     flow = cv2.calcOpticalFlowFarneback(
         cv2.cvtColor(img1, cv2.COLOR_RGB2GRAY),
         cv2.cvtColor(img2, cv2.COLOR_RGB2GRAY), None,
-        0.6, 4, 20, 2, 5, 1.1, 0)
+        0.6, 4, 20, 3, 5, 1.1, 0)
 
     # convert from cartesian to polar
     mag, ang = cv2.cartToPolar(
@@ -40,29 +69,26 @@ def calcOptical(img1, img2):
     return hsv
 
 
-# noinspection DuplicatedCode
 def testOpenCVOpticalMoving():
     def format_image(img):
         img = cv2.resize(
-            img[150:-200, 200:-200], (0, 0), fx=1.5, fy=1.5)
+            img[250:-160, 150:-150], (0, 0), fx=2, fy=2)
         return img
 
-    for _ in range(100, 20400, 20):
+    for _ in range(100, 20400, 10):
 
         for i in range(_, _ + 10):
             image_pv = cv2.imread(
-                Settings.TRAIN_FRAMES + '/'
-                + str(i) + '.jpg', cv2.IMREAD_COLOR)
+                Settings.TEST_FRAMES + '/'
+                + str(i) + '.jpg', cv2.IMREAD_GRAYSCALE)
             image_pv = format_image(image_pv)
 
             image = cv2.imread(
-                Settings.TRAIN_FRAMES + '/'
-                + str(i + 1) + '.jpg', cv2.IMREAD_COLOR)
+                Settings.TEST_FRAMES + '/'
+                + str(i + 1) + '.jpg', cv2.IMREAD_GRAYSCALE)
             image = format_image(image)
 
-            img_new = calcOptical(image_pv, image)
-            cv2.imshow('frame1', img_new)
-            cv2.waitKey(0)
+            opticalFlowOverlay1(image_pv, image)
 
 
 testOpenCVOpticalMoving()
