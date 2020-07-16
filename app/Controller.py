@@ -272,12 +272,18 @@ if __name__ == "__main__":
     def combine_workers():
         workers = [MiniBatchWorker(
             PreprocessorParams(
-                backward=(0, 1), frame_y_trim=(100, -170),
-                frame_x_trim=(70, -70), frame_scale=1.4,
+                backward=(0, 1),
+                frame_y_trim=(150, -160),
+                frame_x_trim=(100, -100),
+                frame_scale=1.4,
             ),
             ControllerParams(
-                'NEW-OPT-FIN-10', baths=30, train_part=0.8,
-                epochs=1, step_vis=5, samples=20400))]
+                'NEW-OPT-A1',
+                baths=30,
+                train_part=0.8,
+                epochs=2,
+                step_vis=5,
+                samples=20400))]
         return workers
 
 

@@ -1,5 +1,6 @@
 from __future__ import division
 
+import math
 from operator import itemgetter
 from pathlib import Path
 
@@ -188,8 +189,9 @@ class Preprocessor:
                 a, b = new.ravel()
                 c, d = old.ravel()
 
-                mask = cv2.line(mask, (a, b), (c, d), [122, 122, 122], 1)
-                img2 = cv2.circle(mask, (a, b), 2, [255, 255, 255], -1)
+                diff = int(math.hypot(a-c, b-d) / 5)
+
+                img2 = cv2.circle(mask, (a, b), diff, [255, 255, 255], -1)
 
             new = cv2.add(img2, mask)
 
@@ -293,8 +295,10 @@ if __name__ == "__main__":
 
     Preprocessor(
         PreprocessorParams(
-            (0, 1), frame_scale=1.4, frame_x_trim=(70, -70),
-            frame_y_trim=(100, -170),
+            backward=(0, 1),
+            frame_y_trim=(230, -160),
+            frame_x_trim=(150, -150),
+            frame_scale=1.4,
         ),
         Augmenters.get_new_training()
     ).build(

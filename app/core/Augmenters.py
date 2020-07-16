@@ -12,7 +12,7 @@ def get_new_training():
         image=Sequential([
             GammaContrast(gamma=(0.45, 0.7)),
         ]),
-        area_float=6,
+        area_float=0,
         features_dropout=0.1
     )
 
@@ -20,7 +20,7 @@ def get_new_training():
 def get_new_validation():
     return AugmenterSettings(
         image=Sequential([
-            GammaContrast(gamma=(0.45, 0.7)),
+            GammaContrast(gamma=0.55),
         ])
     )
 
