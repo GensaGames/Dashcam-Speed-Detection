@@ -1,5 +1,5 @@
 # Toy-Model-Checking
-
+*My mad diary*
 
 
 
@@ -136,7 +136,7 @@ For some cases, very simple process of scaling up small Image helps to make some
 
 For the normalization, we don't have something new. In case we working with Images, we can just normilize features, over maximum value of colors. Mean of RBG values at pixel divided by Max possible color value (255) (or even simpler for an Image, loaded in the Grey filter). As a another point, we can think about normalization with `Scikit-Learn` Scalers, however first variant is good enough. 
 
-At this stage, we will play with Scaling in two different ways. After choosing some Sub Area from Working, we will **a) Apply some Scalling up and down based on Working Area size.*
+At this stage, we will play with Scaling in two different ways. After choosing some Sub Area from Working, we will **c) Apply some Scalling up and down based on Working Area size.*
 
 
 <br/>
@@ -154,7 +154,7 @@ Single training sample consist from several frames
 
 For testing purpose, we created Preprocessor objects, which can retrive Timelines in different format, and not only previous frame. We can represent it, as indexes '(0, 1, 2)', where '(0)' it's current frame, where we now the right Y value (and looking back to the previous '(1)', and next to it '(2)' frames). 
 
-In out testing, we might check dependencies between frames '(0, 1)' or '(0, 1, 2, 3, 4)' and some variations in this range.   And even more complicated behavior, Timeline with different steps (ex. with step 2, we will have '(0, 2, 4)'), where frame changes will be more visible. So action items for this mapping is **a) Check different Frame Timelines.**
+In out testing, we might check dependencies between frames '(0, 1)' or '(0, 1, 2, 3, 4)' and some variations in this range.   And even more complicated behavior, Timeline with different steps (ex. with step 2, we will have '(0, 2, 4)'), where frame changes will be more visible. So action items for this mapping is **d) Check different Frame Timelines.**
 
 
 
@@ -163,27 +163,11 @@ In out testing, we might check dependencies between frames '(0, 1)' or '(0, 1, 2
 
 ### Regularization
 
-#### What we don't use
+After coming with different tests we see that regularization is very specific for task/model, and feature params/extraction which we have. Hence we suppose to skip this session and describe just agnostic points of it. 
 
-As a good reference and maybe future work we can use image augmentation below. As you can see from the Analyze above, we should care enough about Regularization. And model should be well rounded to cover most cases. We seperate all regularization objective into several points. 
+- Floating area in the working frames. Descents and ascents might effect Camera angle and cause different frame representation. To cover such cases we added few functions, which produce floating area, during training phase. 
 
-- We have model above with Frames Augmentation and `CoarseDropout` and `GammaContrast` work for our cases. Only few layers enough for the retaining most of the usefull features in the video, without overfitting. Some of examples, you can see below. 
-
-<br/><br/>
-
-<img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/2.4-2/aug-image-1.jpg" width="280" height="170" /> <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/2.4-2/aug-image-2.jpg" width="280" height="170" /> <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/2.4-2/aug-image-3.jpg" width="280" height="170" /> 
-
-Examples of Working Areas in the train set.
-<br/> <br/>
-
-#### What we use
-
-Floating area in the working frames. Steep descent and ascent, which effect Camera angle and cause different frame representation. To cover such cases we added few functions, which produce floating area, during training phase. 
-
-- Model. 
-
-
-
+- Other.
 
 
 <br/>
@@ -191,7 +175,7 @@ Floating area in the working frames. Steep descent and ascent, which effect Came
 ### Summary
 
 
-In general it's very simple process, where we just shared all thoughts during Preprocessing. For some model, we should take Frames Timeline on Working Area and Normilize inputs. However we came up with several different options: Preprocessor Combinations, which we should investigate (combination of all possible parameters, also marked above). 
+In general it's very simple process, where we just shared all thoughts during Preprocessing. For some model, we should take Frames Timeline on Working Area and Normilize inputs. However we came up with several different options: Preprocessor combinations (marked above) which we should investigate. Keep in mind it might be quite specific for particular model and feature extraction purpose. 
 
 Well known other algorithms might be used for feature extraction on Images. Some of them like `SIFT`, `ORB`, `HOG` and other, could work very well, but they don't. During validation and testing, patterns between their changes, doesn't work for speed. And other reasons related to the performance of a model, and such actions require huge time for computing.
 
@@ -204,7 +188,7 @@ Well known other algorithms might be used for feature extraction on Images. Some
 <br/> <br/>
 
 
-## Model.
+## Model
 
 Same with preprocessing, we will describe just all investigation and work for choosing Model. We will start from simple implementations. In first phases, we suppose to keep everything as simple, as possible. Because you can increase complexity in any time and every part of the Model. 
 
