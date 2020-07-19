@@ -36,11 +36,11 @@ def opticalFlowOverlay1(image_pv, image):
 
 def diffImage(image_pv, image):
     new = np.subtract(
-        image,
-        image_pv,
+        image.astype(np.int16),
+        image_pv.astype(np.int16),
     )
-    # new = np.absolute(delta)
-    # new = new.astype(np.uint8)
+    new = np.absolute(new)
+    new = new.astype(np.uint8)
     return new
 
 

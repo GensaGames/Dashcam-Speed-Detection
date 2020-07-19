@@ -2,12 +2,7 @@ import os
 
 import matplotlib.pyplot as plt
 import numpy as np
-from keras import Sequential
-from keras.activations import linear
-from keras.initializers import he_normal
-from keras.layers import Dense, Flatten, Conv2D, ELU
-from keras.losses import mean_squared_error
-from keras.optimizers import Adam
+from keras.utils import plot_model
 
 import app.other.Helper as Helper
 from app import Settings
@@ -40,7 +35,7 @@ class MiniBatchWorker:
                               .format(e))
 
         get_logger().info('Starting Final Validation!')
-        for i in range(20):
+        for i in range(10):
             self.__step_validation(validation)
 
     # Take more important data from the resources,
@@ -178,13 +173,7 @@ class MiniBatchWorker:
     def __step_model(self, x_y):
         if self.model is None:
             self.model = Models.get3D_CNN(x_y[0])
-            """
-            Comment/Uncomment for showing detailed
-            info about Model Structure.
-            """
-            from keras.utils import plot_model
-            plot_model(self.model, to_file='model_plot1.png',
-                       show_shapes=True, show_layer_names=True)
+            plot_structure(self)
 
         value = self.model.train_on_batch(x_y[0], x_y[1])
         get_logger().debug('Training Batch loss: {}'
@@ -192,23 +181,15 @@ class MiniBatchWorker:
 
     def __step_validation(self, validation):
         np.random.shuffle(validation)
+        get_logger().info("Starting Cross Validation.")
 
         def local_save(x_y):
-            get_logger().info("Starting Cross Validation.")
-
-            predictions = self.model \
-                .predict(x_y[0])
-
-            mse = sum(mean_squared_error(
-                predictions, x_y[1]).numpy()) / len(predictions)
+            mse = self.model \
+                .evaluate(x_y[0], x_y[1])
 
             get_logger().info(
                 "Cross Validation Done on Items Size: {} "
                 "MSE: {}".format(len(x_y[0]), mse))
-
-            pvMse = self.model \
-                .evaluate(x_y[0], x_y[1])
-            get_logger().info('Previous MSE: {}'.format(pvMse))
 
             self.VISUAL.add_evaluation(mse)
 
@@ -228,22 +209,31 @@ if __name__ == "__main__":
     def combine_workers():
         workers = [MiniBatchWorker(
             PreprocessorParams(
-                backward=(0, 1),
+                backward=(0, 1, 2, 3, 4, 5),
                 frame_y_trim=(250, -160),
                 frame_x_trim=(150, -150),
                 frame_scale=1.4,
             ),
             ControllerParams(
-                'NEW-OPT-A2',
+                'NEW-OPT-A3',
                 baths=30,
                 train_part=0.7,
-                epochs=2,
+                epochs=1,
                 step_vis=10,
                 samples=20400))]
         return workers
 
 
-    def worker_plot(worker):
+    def plot_structure(worker):
+        plot_model(
+            worker.model,
+            to_file=Settings.NAME_STRUCTURE,
+            show_shapes=True,
+            show_layer_names=True
+        )
+        return plt
+
+    def plot_progress(worker):
         fig, ax = plt.subplots()
 
         ax.plot(
@@ -254,23 +244,26 @@ if __name__ == "__main__":
                ylabel='Costs (J)')
         ax.grid()
 
-        plt.savefig(
-            Settings.BUILD + '/' + Settings.MODELS + '/'
-            + worker.C_PARAMS.name + '/' + Settings.NAME_MODEL_PLOT)
+        plt.savefig('/'.join([
+            Settings.BUILD,
+            Settings.MODELS,
+            worker.C_PARAMS.name,
+            Settings.NAME_MODEL_PLOT
+        ]))
         return plt
 
 
     def start_actions():
         for worker in combine_workers():
+            worker.restore_backup()
             """ 
             Comment/Uncomment for making different
             controller actions.
             """
-            worker.restore_backup()
             worker.start_training_epochs()
             # worker.start_evaluation()
             # worker.create_test_output()
-            worker_plot(worker)
+            plot_progress(worker)
 
 
     start_actions()

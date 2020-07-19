@@ -20,6 +20,7 @@ BUILT_TEST_FORMAT = '.txt'
 MODELS = 'models'
 NAME_MODEL = 'model-view.h5'
 NAME_MODEL_PLOT = 'epochs-plot.png'
+NAME_STRUCTURE = 'structure.png'
 
 PREFIX_STOP_SIZE = int(10.e+4)
 

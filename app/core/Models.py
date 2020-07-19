@@ -70,21 +70,28 @@ class Models:
 
         model = Sequential()
         model.add(
-            Conv3D(filters=86, kernel_size=(3, 5, 5), strides=(1, 2, 2),
+            Conv3D(filters=86, kernel_size=(3, 5, 5), strides=(2, 2, 2),
                    input_shape=input_shape, padding='same',
                    kernel_initializer=he_normal()))
         model.add(BatchNormalization())
 
         model.add(
-            Conv3D(filters=64, kernel_size=(3, 3, 3), strides=(1, 2, 2),
-                   input_shape=input_shape, padding='same',
-                   kernel_initializer=he_normal()))
-        model.add(BatchNormalization())
-
-        model.add(
-            Conv3D(filters=48, kernel_size=(1, 3, 3), strides=(1, 1, 1),
+            Conv3D(filters=64, kernel_size=(2, 5, 5), strides=(1, 2, 2),
                    input_shape=input_shape, padding='valid',
                    kernel_initializer=he_normal()))
+        model.add(BatchNormalization())
+
+        model.add(
+            Conv3D(filters=64, kernel_size=(2, 3, 3), strides=(1, 1, 1),
+                   input_shape=input_shape, padding='valid',
+                   kernel_initializer=he_normal()))
+        model.add(BatchNormalization())
+
+        model.add(
+            Conv3D(filters=32, kernel_size=(1, 3, 3), strides=(1, 1, 1),
+                   input_shape=input_shape, padding='valid',
+                   kernel_initializer=he_normal()))
+        model.add(BatchNormalization())
         model.add(Flatten())
 
         model \
