@@ -1,6 +1,5 @@
 from __future__ import division
 
-import math
 from operator import itemgetter
 from pathlib import Path
 
@@ -46,7 +45,7 @@ class Preprocessor:
 
             for path in np.flipud(np.array([list_paths]).flatten()):
                 image = cv2.imread(
-                    str(path), cv2.IMREAD_GRAYSCALE)
+                    str(path), cv2.IMREAD_COLOR)
                 image = img_aug.augment_image(image)
                 items.append(image)
 
@@ -144,20 +143,6 @@ class Preprocessor:
                 fy=self.PARAMS.frame_scaler)
         return frames
 
-    FLOW_FEATUES = dict(
-        maxCorners=500,
-        qualityLevel=0.1,
-        minDistance=7,
-        blockSize=5
-    )
-
-    FLOW_LK_PARAMS = dict(
-        winSize=(15, 15),
-        maxLevel=2,
-        criteria=(cv2.TERM_CRITERIA_EPS
-                  | cv2.TERM_CRITERIA_COUNT, 10, 0.03)
-    )
-
     def __build_optical_flow(self, frames):
 
         timeline = len(self.PARAMS.backward)
@@ -166,34 +151,29 @@ class Preprocessor:
         # Main function for optical flow detection
         # noinspection DuplicatedCode
         def get_flow_change(img1, img2):
+            hsv = np.zeros_like(img1)
+            # set saturation
+            hsv[:, :, 1] = cv2.cvtColor(
+                img2, cv2.COLOR_RGB2HSV)[:, :, 1]
 
-            # Finds edges in an image using the [Canny86] algorithm.
-            p0 = cv2.goodFeaturesToTrack(
-                img2, mask=None, **Preprocessor.FLOW_FEATUES
-            )
+            flow = cv2.calcOpticalFlowFarneback(
+                cv2.cvtColor(img1, cv2.COLOR_RGB2GRAY),
+                cv2.cvtColor(img2, cv2.COLOR_RGB2GRAY), None,
+                0.6, 4, 20, 3, 5, 1.1, 0)
 
-            p1, st, err = cv2.calcOpticalFlowPyrLK(
-                img1, img2, p0, None,
-                **Preprocessor.FLOW_LK_PARAMS
-            )
+            # convert from cartesian to polar
+            mag, ang = cv2.cartToPolar(
+                flow[..., 0], flow[..., 1])
 
-            # Select good points
-            good_new = p1[st == 1]
-            good_old = p0[st == 1]
+            # hue corresponds to direction
+            hsv[:, :, 0] = ang * (180 / np.pi / 2)
 
-            mask = np.zeros_like(img2)
-            for i, (new, old) in enumerate(zip(good_new, good_old)):
-                if self.AUGMENTER.features_dropout \
-                        > np.random.uniform(0, 1):
-                    continue
-                a, b = new.ravel()
-                c, d = old.ravel()
+            # value corresponds to magnitude
+            hsv[:, :, 2] = cv2.normalize(
+                mag, None, 0, 255, cv2.NORM_MINMAX)
 
-                diff = int(math.hypot(a-c, b-d) / 5)
-
-                img2 = cv2.circle(mask, (a, b), diff, [255, 255, 255], -1)
-
-            new = cv2.add(img2, mask)
+            # Сonvert HSV to float32's
+            new = cv2.cvtColor(hsv, cv2.COLOR_HSV2RGB_FULL)
 
             """
             Comment/Uncomment for showing each image
@@ -232,14 +212,15 @@ class Preprocessor:
         timeline = len(self.PARAMS.backward) - 1
         assert len(frames) % timeline == 0
 
-        delta_len = int(len(
+        samples = int(len(
             frames) / timeline)
 
         return np.array(frames).reshape((
-            delta_len,
+            samples,
+            timeline,
             frames[0].shape[0],
             frames[0].shape[1],
-            1
+            3
         ))
 
     @staticmethod
@@ -289,14 +270,13 @@ if __name__ == "__main__":
         logger.info('X shape {}'.format(x_y[0].shape))
         logger.info('Y shape {}'.format(x_y[1].shape))
 
-        assert x_y[0].ndim == 4 and x_y[1].ndim == 2 \
-               and x_y[0].shape[0] == x_y[1].shape[0]
+        assert x_y[0].shape[0] == x_y[1].shape[0]
         
 
     Preprocessor(
         PreprocessorParams(
-            backward=(0, 1),
-            frame_y_trim=(230, -160),
+            backward=(0, 1, 2, 3, 4),
+            frame_y_trim=(250, -160),
             frame_x_trim=(150, -150),
             frame_scale=1.4,
         ),

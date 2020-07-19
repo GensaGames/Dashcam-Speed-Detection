@@ -12,6 +12,7 @@ from keras.optimizers import Adam
 import app.other.Helper as Helper
 from app import Settings
 from app.core import Augmenters
+from app.core.Models import Models
 from app.core.Parameters import ControllerParams, \
     VisualHolder, PreprocessorParams
 from app.core.Preprocessing import Preprocessor
@@ -176,59 +177,14 @@ class MiniBatchWorker:
 
     def __step_model(self, x_y):
         if self.model is None:
-            input_shape = (
-                x_y[0].shape[1],
-                x_y[0].shape[2],
-                1,)
-
-            self.model = Sequential()
-            self.model.add(
-                Conv2D(filters=64, kernel_size=(5, 5), strides=(3, 3),
-                       input_shape=input_shape, padding='valid',
-                       kernel_initializer=he_normal())
-            )
-            self.model.add(
-                Conv2D(filters=86, kernel_size=(5, 5), strides=(3, 3),
-                       padding='valid', kernel_initializer=he_normal())
-            )
-            self.model.add(
-                Conv2D(filters=86, kernel_size=(3, 3), strides=(2, 2),
-                       padding='valid', kernel_initializer=he_normal())
-            )
-            self.model.add(
-                Conv2D(filters=86, kernel_size=(3, 3), strides=(1, 1),
-                       padding='valid', kernel_initializer=he_normal())
-            )
-            self.model.add(Flatten())
-            self.model \
-                .add(Dense(units=256,
-                           kernel_initializer=he_normal()))
-            self.model.add(ELU())
-
-            self.model \
-                .add(Dense(units=128,
-                           kernel_initializer=he_normal()))
-            self.model.add(ELU())
-
-            self.model \
-                .add(Dense(units=64,
-                           kernel_initializer=he_normal()))
-            self.model.add(ELU())
-
-            self.model \
-                .add(Dense(units=1,
-                           kernel_initializer=he_normal(),
-                           activation=linear))
-            self.model \
-                .compile(loss=mean_squared_error,
-                         optimizer=Adam())
+            self.model = Models.get3D_CNN(x_y[0])
             """
             Comment/Uncomment for showing detailed
             info about Model Structure.
             """
-            # from keras.utils import plot_model
-            # plot_model(self.model, to_file='model_plot1.png',
-            #            show_shapes=True, show_layer_names=True)
+            from keras.utils import plot_model
+            plot_model(self.model, to_file='model_plot1.png',
+                       show_shapes=True, show_layer_names=True)
 
         value = self.model.train_on_batch(x_y[0], x_y[1])
         get_logger().debug('Training Batch loss: {}'
@@ -273,16 +229,16 @@ if __name__ == "__main__":
         workers = [MiniBatchWorker(
             PreprocessorParams(
                 backward=(0, 1),
-                frame_y_trim=(150, -160),
-                frame_x_trim=(100, -100),
+                frame_y_trim=(250, -160),
+                frame_x_trim=(150, -150),
                 frame_scale=1.4,
             ),
             ControllerParams(
-                'NEW-OPT-A1',
+                'NEW-OPT-A2',
                 baths=30,
-                train_part=0.8,
+                train_part=0.7,
                 epochs=2,
-                step_vis=5,
+                step_vis=10,
                 samples=20400))]
         return workers
 
