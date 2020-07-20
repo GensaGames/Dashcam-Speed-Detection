@@ -44,7 +44,6 @@ class MiniBatchWorker:
     def __prepare_training_data(self):
         indexes = np.arange(
             max(self.P_PARAMS.backward), self.C_PARAMS.samples)
-        # np.random.shuffle(indexes)
 
         assert 0 < self \
             .C_PARAMS.train_part < 1
@@ -210,9 +209,9 @@ if __name__ == "__main__":
         workers = [MiniBatchWorker(
             PreprocessorParams(
                 backward=(0, 1, 2, 3, 4, 5),
-                frame_y_trim=(250, -160),
-                frame_x_trim=(150, -150),
-                frame_scale=1.4,
+                frame_y_trim=(230, -160),
+                frame_x_trim=(180, -180),
+                frame_scale=1,
             ),
             ControllerParams(
                 'NEW-OPT-A3',
