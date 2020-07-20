@@ -69,6 +69,15 @@ Delta Speed changes over Previous 20 frames.
 
 
 
+## Feature Extraction
+
+This is the most important step to solve this task. The way for creation model, regularization and preprocessing make no sense, unless we know what features are going to work! All examples below will consider the next way. Take frame at time T and next to it frame T+1. Use this two frames for feature extraction. 
+
+### Optical Flow Gunnar Farneback
+
+### Optical Flow Gunnar Farneback
+
+### Optical Flow Lucas-Kanade
 
 
 
