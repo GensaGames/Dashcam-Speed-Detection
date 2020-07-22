@@ -180,24 +180,32 @@ class Preprocessor:
             moving optical flow.
             """
             # cv2.imshow('Preprocessing Flow.', new)
-            # cv2.imshow('Original.', img1)
             # cv2.waitKey(0)
             return new
 
         flow_frames = []
         for line in range(0, len(frames), timeline):
+            img_aug = self.AUGMENTER.image2.to_deterministic()
 
             for idx in range(line, line + timeline - 1):
-                image = frames[idx]
-                image_next = frames[idx + 1]
+                optical = get_flow_change(
+                    frames[idx],
+                    frames[idx + 1]
+                )
 
-                flow_frames.append(get_flow_change(
-                    image, image_next))
+                # Second round of Augmentation
+                optical = img_aug.augment_image(optical)
+                """
+                Comment/Uncomment for showing each image
+                Augmented optical
+                """
+                cv2.imshow('Augmented Flow.', optical)
+                cv2.waitKey(0)
+                flow_frames.append(optical)
 
         return flow_frames
 
-    @staticmethod
-    def __map_normalize(frames):
+    def __map_normalize(self, frames):
         assert isinstance(frames, list) and \
                isinstance(frames[0], np.ndarray)
 
@@ -276,13 +284,13 @@ if __name__ == "__main__":
     Preprocessor(
         PreprocessorParams(
             backward=(0, 1, 2, 3, 4),
-            frame_y_trim=(250, -160),
-            frame_x_trim=(150, -150),
+            frame_y_trim=(230, -150),
+            frame_x_trim=(180, -180),
             frame_scale=1.4,
         ),
         Augmenters.get_new_training()
     ).build(
         list(range(67, 200)),
-        (Settings.TEST_FRAMES, Settings.TRAIN_Y)
+        (Settings.TRAIN_FRAMES, Settings.TRAIN_Y)
     ).subscribe(__assert, on_error=lambda e: logger
                 .error('Exception! ' + str(e)))

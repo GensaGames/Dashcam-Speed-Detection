@@ -13,12 +13,6 @@ import matplotlib.pyplot as plt
 
 
 def opticalFlowOverlay1(image_pv, image):
-    image_pv = cv2.convertScaleAbs(
-        image_pv, alpha=1.5, beta=60)
-
-    image = cv2.convertScaleAbs(
-        image, alpha=1.5, beta=60)
-
     optical = calcOptical(image_pv, image)
 
     cv2.imshow('frame1', optical)
@@ -53,23 +47,33 @@ def calcOptical(img1, img2):
 
 
 def testOpenCVOpticalMoving():
+    augmenter = Augmenters.get_new_training()
+
     def format_image(img):
         img = cv2.resize(
-            img[230:-150, 180:-180], (0, 0), fx=1, fy=1)
+            img[230:-150, 180:-180], (0, 0), fx=1.5, fy=1.5)
         return img
 
-    for _ in range(0, 20400, 10):
+    for _ in range(10, 20400, 10):
 
         for i in range(_, _ + 10):
+            img_aug = augmenter.image.to_deterministic()
+
             image_pv = cv2.imread(
-                Settings.TEST_FRAMES + '/'
+                Settings.TRAIN_FRAMES + '/'
                 + str(i) + '.jpg', cv2.IMREAD_COLOR)
-            image_pv = format_image(image_pv)
+            image_pv = format_image(
+                img_aug.augment_image(image_pv)
+            )
 
             image = cv2.imread(
-                Settings.TEST_FRAMES + '/'
+                Settings.TRAIN_FRAMES + '/'
                 + str(i + 1) + '.jpg', cv2.IMREAD_COLOR)
-            image = format_image(image)
+            # cv2.imshow('source', format_image(image))
+
+            image = format_image(
+                img_aug.augment_image(image)
+            )
 
             opticalFlowOverlay1(image_pv, image)
 
