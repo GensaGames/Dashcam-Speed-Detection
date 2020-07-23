@@ -185,27 +185,18 @@ class Preprocessor:
 
         flow_frames = []
         for line in range(0, len(frames), timeline):
-            img_aug = self.AUGMENTER.image2.to_deterministic()
 
             for idx in range(line, line + timeline - 1):
                 optical = get_flow_change(
                     frames[idx],
                     frames[idx + 1]
                 )
-
-                # Second round of Augmentation
-                optical = img_aug.augment_image(optical)
-                """
-                Comment/Uncomment for showing each image
-                Augmented optical
-                """
-                cv2.imshow('Augmented Flow.', optical)
-                cv2.waitKey(0)
                 flow_frames.append(optical)
 
         return flow_frames
 
-    def __map_normalize(self, frames):
+    @staticmethod
+    def __map_normalize(frames):
         assert isinstance(frames, list) and \
                isinstance(frames[0], np.ndarray)
 

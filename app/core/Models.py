@@ -82,18 +82,18 @@ class Models:
         model.add(BatchNormalization())
 
         model.add(
-            Conv3D(filters=64, kernel_size=(2, 3, 3), strides=(1, 1, 1),
+            Conv3D(filters=64, kernel_size=(1, 3, 3), strides=(1, 1, 1),
                    input_shape=input_shape, padding='valid',
                    kernel_initializer=he_normal()))
         model.add(BatchNormalization())
 
         model.add(
-            Conv3D(filters=86, kernel_size=(1, 3, 3), strides=(1, 1, 1),
+            Conv3D(filters=48, kernel_size=(1, 3, 3), strides=(1, 1, 1),
                    input_shape=input_shape, padding='valid',
                    kernel_initializer=he_normal()))
         model.add(BatchNormalization())
-        model.add(Flatten())
 
+        model.add(Flatten())
         model \
             .add(Dense(units=256,
                        kernel_initializer=he_normal()))
