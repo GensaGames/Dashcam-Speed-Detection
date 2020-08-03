@@ -15,7 +15,7 @@ class Models:
             x.shape[2],
             x.shape[3],
         )
-    
+
         model = Sequential()
         model.add(
             Conv2D(filters=64, kernel_size=(5, 5), strides=(3, 3),
@@ -39,17 +39,17 @@ class Models:
             .add(Dense(units=256,
                        kernel_initializer=he_normal()))
         model.add(ELU())
-    
+
         model \
             .add(Dense(units=128,
                        kernel_initializer=he_normal()))
         model.add(ELU())
-    
+
         model \
             .add(Dense(units=64,
                        kernel_initializer=he_normal()))
         model.add(ELU())
-    
+
         model \
             .add(Dense(units=1,
                        kernel_initializer=he_normal(),
@@ -69,28 +69,37 @@ class Models:
             x_shape[4])
 
         model = Sequential()
-        model.add(
-            Conv3D(filters=32, kernel_size=(3, 5, 5), strides=(2, 2, 2),
-                   input_shape=input_shape, padding='same',
-                   kernel_initializer=he_normal()))
+        model.add(Conv3D(
+            filters=86, kernel_size=(3, 5, 5), strides=(2, 2, 2),
+            input_shape=input_shape,
+            padding='same',
+            kernel_initializer=he_normal(),
+            activation='relu',
+        ))
         model.add(BatchNormalization())
 
-        model.add(
-            Conv3D(filters=64, kernel_size=(2, 5, 5), strides=(1, 2, 2),
-                   input_shape=input_shape, padding='valid',
-                   kernel_initializer=he_normal()))
+        model.add(Conv3D(
+            filters=64, kernel_size=(2, 5, 5), strides=(2, 2, 2),
+            padding='valid',
+            kernel_initializer=he_normal(),
+            activation='relu',
+        ))
         model.add(BatchNormalization())
 
-        model.add(
-            Conv3D(filters=64, kernel_size=(1, 3, 3), strides=(1, 1, 1),
-                   input_shape=input_shape, padding='valid',
-                   kernel_initializer=he_normal()))
+        model.add(Conv3D(
+            filters=64, kernel_size=(1, 3, 3), strides=(1, 1, 1),
+            padding='valid',
+            kernel_initializer=he_normal(),
+            activation='relu',
+        ))
         model.add(BatchNormalization())
 
-        model.add(
-            Conv3D(filters=48, kernel_size=(1, 3, 3), strides=(1, 1, 1),
-                   input_shape=input_shape, padding='valid',
-                   kernel_initializer=he_normal()))
+        model.add(Conv3D(
+            filters=48, kernel_size=(1, 3, 3), strides=(1, 1, 1),
+            padding='valid',
+            kernel_initializer=he_normal(),
+            activation='relu',
+        ))
         model.add(BatchNormalization())
 
         model.add(Flatten())

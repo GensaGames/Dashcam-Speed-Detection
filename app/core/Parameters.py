@@ -68,25 +68,19 @@ class ControllerParams:
 
 class VisualHolder:
     def __init__(self):
-        self._iters, self._costs = \
-            deque(maxlen=1000), deque(maxlen=1000)
-        self._evaluations = deque(maxlen=1000)
+        self._errors = deque()
+        self._trainings = deque()
 
-    def add_iter(self, _iter, _cost):
-        self._iters.append(_iter)
-        self._costs.append(_cost)
+    def add_error_point(self, val):
+        self._errors.append(val)
 
-    def add_evaluation(self, val):
-        self._evaluations.append(val)
+    def add_train_point(self, _training):
+        self._trainings.append(_training)
 
     @property
-    def evaluations(self):
-        return self._evaluations
+    def get_error_points(self):
+        return self._errors
 
     @property
-    def costs(self):
-        return self._costs
-
-    @property
-    def iters(self):
-        return self._iters
+    def get_training_points(self):
+        return self._trainings

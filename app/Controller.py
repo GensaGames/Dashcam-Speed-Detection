@@ -175,12 +175,14 @@ class MiniBatchWorker:
             plot_structure(self)
 
         value = self.model.train_on_batch(x_y[0], x_y[1])
+        self.VISUAL.add_train_point(value)
+
         get_logger().debug('Training Batch loss: {}'
                            .format(value))
 
     def __step_validation(self, validation):
-        np.random.shuffle(validation)
         get_logger().info("Starting Cross Validation.")
+        np.random.shuffle(validation)
 
         def local_save(x_y):
             mse = self.model \
@@ -190,7 +192,7 @@ class MiniBatchWorker:
                 "Cross Validation Done on Items Size: {} "
                 "MSE: {}".format(len(x_y[0]), mse))
 
-            self.VISUAL.add_evaluation(mse)
+            self.VISUAL.add_error_point(mse)
 
         Preprocessor(
             self.P_PARAMS,
@@ -211,10 +213,10 @@ if __name__ == "__main__":
                 backward=(0, 1, 2, 3, 4, 5),
                 frame_y_trim=(230, -160),
                 frame_x_trim=(180, -180),
-                frame_scale=1.4,
+                frame_scale=1.2,
             ),
             ControllerParams(
-                'NEW-OPT-A20',
+                'NEW-OPT-A50',
                 baths=30,
                 train_part=0.7,
                 epochs=1,
@@ -234,13 +236,19 @@ if __name__ == "__main__":
 
     def plot_progress(worker):
         fig, ax = plt.subplots()
+        x_values = map(
+            lambda x: x * worker.C_PARAMS.step_vis(),
+            list(range(0, len(worker.VISUAL.get_error_points())))
+        )
 
-        ax.plot(
-            range(0, len(worker.VISUAL.evaluations)),
-            worker.VISUAL.evaluations)
+        ax.plot(x_values, worker.VISUAL.get_error_points())
+        ax.plot(x_values, worker.VISUAL.get_training_points())
 
-        ax.set(xlabel='Iters (I)',
-               ylabel='Costs (J)')
+        ax.legend(['Validation', 'Training'])
+        ax.set(
+            xlabel='Batch Step (S)',
+            ylabel='Error (J)'
+        )
         ax.grid()
 
         plt.savefig('/'.join([
