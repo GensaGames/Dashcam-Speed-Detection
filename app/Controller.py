@@ -234,15 +234,20 @@ if __name__ == "__main__":
         )
         return plt
 
+
     def plot_progress(worker):
         fig, ax = plt.subplots()
-        x_values = map(
-            lambda x: x * worker.C_PARAMS.step_vis(),
-            list(range(0, len(worker.VISUAL.get_error_points())))
-        )
+        ax.plot(
+            list(map(
+                lambda x: (x + 1) * worker.C_PARAMS.step_vis,
+                list(range(0, len(worker.VISUAL.points_validation)))
+            )), worker.VISUAL.points_validation)
 
-        ax.plot(x_values, worker.VISUAL.get_error_points())
-        ax.plot(x_values, worker.VISUAL.get_training_points())
+        ax.plot(
+            list(
+                range(0, len(worker.VISUAL.points_training))
+            ),
+            worker.VISUAL.points_training)
 
         ax.legend(['Validation', 'Training'])
         ax.set(
@@ -267,7 +272,7 @@ if __name__ == "__main__":
             Comment/Uncomment for making different
             controller actions.
             """
-            worker.start_training_epochs()
+            # worker.start_training_epochs()
             # worker.start_evaluation()
             # worker.create_test_output()
             plot_progress(worker)
