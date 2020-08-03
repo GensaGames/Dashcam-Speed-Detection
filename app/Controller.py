@@ -175,7 +175,7 @@ class MiniBatchWorker:
             plot_structure(self)
 
         value = self.model.train_on_batch(x_y[0], x_y[1])
-        self.VISUAL.add_train_point(value)
+        self.VISUAL.add_training_point(value)
 
         get_logger().debug('Training Batch loss: {}'
                            .format(value))
@@ -192,7 +192,7 @@ class MiniBatchWorker:
                 "Cross Validation Done on Items Size: {} "
                 "MSE: {}".format(len(x_y[0]), mse))
 
-            self.VISUAL.add_error_point(mse)
+            self.VISUAL.add_validation_point(mse)
 
         Preprocessor(
             self.P_PARAMS,
@@ -252,7 +252,7 @@ if __name__ == "__main__":
         ax.legend(['Validation', 'Training'])
         ax.set(
             xlabel='Batch Step (S)',
-            ylabel='Error (J)'
+            ylabel='Errors (J)'
         )
         ax.grid()
 
@@ -272,7 +272,7 @@ if __name__ == "__main__":
             Comment/Uncomment for making different
             controller actions.
             """
-            # worker.start_training_epochs()
+            worker.start_training_epochs()
             # worker.start_evaluation()
             # worker.create_test_output()
             plot_progress(worker)

@@ -71,10 +71,10 @@ class VisualHolder:
         self._trainings = deque()
         self._validation = deque()
 
-    def add_train_point(self, _training):
+    def add_training_point(self, _training):
         self._trainings.append(_training)
 
-    def add_error_point(self, val):
+    def add_validation_point(self, val):
         self._validation.append(val)
 
     @property
