@@ -216,7 +216,7 @@ if __name__ == "__main__":
                 frame_scale=1,
             ),
             ControllerParams(
-                'NEW-OPT-A70',
+                'NEW-OPT-A71',
                 baths=30,
                 train_part=0.7,
                 epochs=1,
