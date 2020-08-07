@@ -1,7 +1,8 @@
 from keras import Sequential
 from keras.activations import linear
+from keras.engine import InputLayer
 from keras.initializers import he_normal
-from keras.layers import Dense, ELU, Flatten, Conv2D, Conv3D, BatchNormalization
+from keras.layers import Dense, ELU, Flatten, Conv2D, Conv3D, BatchNormalization, LeakyReLU
 from keras.losses import mean_squared_error
 from keras.optimizers import Adam
 
@@ -17,10 +18,10 @@ class Models:
         )
 
         model = Sequential()
+        model.add(InputLayer(input_shape=input_shape))
         model.add(
             Conv2D(filters=64, kernel_size=(5, 5), strides=(3, 3),
-                   input_shape=input_shape, padding='valid',
-                   kernel_initializer=he_normal())
+                   padding='valid',  kernel_initializer=he_normal())
         )
         model.add(
             Conv2D(filters=86, kernel_size=(5, 5), strides=(2, 2),
@@ -69,37 +70,37 @@ class Models:
             x_shape[4])
 
         model = Sequential()
+        model.add(InputLayer(input_shape=input_shape))
         model.add(Conv3D(
-            filters=86, kernel_size=(3, 5, 5), strides=(2, 2, 2),
-            input_shape=input_shape,
-            padding='same',
+            filters=86, kernel_size=(2, 10, 10), strides=(1, 1, 1),
+            padding='valid',
             kernel_initializer=he_normal(),
-            activation='relu',
         ))
+        model.add(LeakyReLU())
         model.add(BatchNormalization())
 
         model.add(Conv3D(
-            filters=64, kernel_size=(2, 5, 5), strides=(2, 2, 2),
+            filters=64, kernel_size=(2, 5, 5), strides=(1, 1, 1),
             padding='valid',
             kernel_initializer=he_normal(),
-            activation='relu',
         ))
+        model.add(LeakyReLU())
         model.add(BatchNormalization())
 
         model.add(Conv3D(
             filters=64, kernel_size=(1, 3, 3), strides=(1, 1, 1),
             padding='valid',
             kernel_initializer=he_normal(),
-            activation='relu',
         ))
+        model.add(LeakyReLU())
         model.add(BatchNormalization())
 
         model.add(Conv3D(
             filters=48, kernel_size=(1, 3, 3), strides=(1, 1, 1),
             padding='valid',
             kernel_initializer=he_normal(),
-            activation='relu',
         ))
+        model.add(LeakyReLU())
         model.add(BatchNormalization())
 
         model.add(Flatten())

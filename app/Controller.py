@@ -210,13 +210,13 @@ if __name__ == "__main__":
     def combine_workers():
         workers = [MiniBatchWorker(
             PreprocessorParams(
-                backward=(0, 1, 2, 3, 4, 5),
+                backward=(0, 1, 2, 3),
                 frame_y_trim=(230, -160),
                 frame_x_trim=(180, -180),
-                frame_scale=1.2,
+                frame_scale=1,
             ),
             ControllerParams(
-                'NEW-OPT-A50',
+                'NEW-OPT-A70',
                 baths=30,
                 train_part=0.7,
                 epochs=1,
@@ -237,6 +237,7 @@ if __name__ == "__main__":
 
     def plot_progress(worker):
         fig, ax = plt.subplots()
+
         ax.plot(
             list(map(
                 lambda x: (x + 1) * worker.C_PARAMS.step_vis,
@@ -250,6 +251,7 @@ if __name__ == "__main__":
             worker.VISUAL.points_training)
 
         ax.legend(['Validation', 'Training'])
+        ax.set_ylim([0, 40])
         ax.set(
             xlabel='Batch Step (S)',
             ylabel='Errors (J)'
