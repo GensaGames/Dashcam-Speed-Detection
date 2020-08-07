@@ -88,6 +88,14 @@ class Models:
         model.add(BatchNormalization())
 
         model.add(Conv3D(
+            filters=64, kernel_size=(1, 3, 3), strides=(1, 1, 1),
+            padding='valid',
+            kernel_initializer=he_normal(),
+        ))
+        model.add(LeakyReLU())
+        model.add(BatchNormalization())
+
+        model.add(Conv3D(
             filters=48, kernel_size=(1, 3, 3), strides=(1, 1, 1),
             padding='valid',
             kernel_initializer=he_normal(),
@@ -103,11 +111,6 @@ class Models:
 
         model \
             .add(Dense(units=128,
-                       kernel_initializer=he_normal()))
-        model.add(ELU())
-
-        model \
-            .add(Dense(units=64,
                        kernel_initializer=he_normal()))
         model.add(ELU())
 

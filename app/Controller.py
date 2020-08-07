@@ -213,10 +213,10 @@ if __name__ == "__main__":
                 backward=(0, 1, 2, 3),
                 frame_y_trim=(230, -160),
                 frame_x_trim=(180, -180),
-                frame_scale=1,
+                frame_scale=0.7,
             ),
             ControllerParams(
-                'NEW-OPT-A71',
+                'NEW-OPT-A72',
                 baths=30,
                 train_part=0.7,
                 epochs=1,
