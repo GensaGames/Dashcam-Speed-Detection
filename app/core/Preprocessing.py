@@ -187,6 +187,12 @@ class Preprocessor:
         for line in range(0, len(frames), timeline):
 
             for idx in range(line, line + timeline - 1):
+                """
+                Comment/Uncomment for showing each image
+                moving optical flow.
+                """
+                # cv2.imshow('Preprocessing Flow.', frames[idx])
+                # cv2.waitKey(0)
                 optical = get_flow_change(
                     frames[idx],
                     frames[idx + 1]
@@ -219,7 +225,7 @@ class Preprocessor:
             timeline,
             frames[0].shape[0],
             frames[0].shape[1],
-            3
+            3 if len(frames[0].shape) > 2 else 1
         ))
 
     @staticmethod

@@ -13,16 +13,11 @@ import matplotlib.pyplot as plt
 
 
 def opticalFlowOverlay1(image_pv, image):
-    image_pv = cv2.convertScaleAbs(
-        image_pv, alpha=1.5, beta=50)
 
     image_pv = cv2.adaptiveThreshold(
         image_pv, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
         cv2.THRESH_BINARY, 11, 2
     )
-
-    image = cv2.convertScaleAbs(
-        image, alpha=1.5, beta=50)
 
     image = cv2.adaptiveThreshold(
         image, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
@@ -45,7 +40,9 @@ def diffImage(image_pv, image):
 
 
 def testOpenCVOpticalMoving():
-    def format_image(img):
+    def format_image(img, augmenter):
+        img = augmenter.augment_image(img)
+
         img = cv2.resize(
             img[250:-160, 150:-150], (0, 0), fx=2, fy=2)
         return img
@@ -56,12 +53,14 @@ def testOpenCVOpticalMoving():
             image_pv = cv2.imread(
                 Settings.TRAIN_FRAMES + '/'
                 + str(i) + '.jpg', cv2.IMREAD_GRAYSCALE)
-            image_pv = format_image(image_pv)
+            img_aug = Augmenters.get_new_validation().image.to_deterministic()
+
+            image_pv = format_image(image_pv, img_aug)
 
             image = cv2.imread(
                 Settings.TRAIN_FRAMES + '/'
                 + str(i + 1) + '.jpg', cv2.IMREAD_GRAYSCALE)
-            image = format_image(image)
+            image = format_image(image, img_aug)
 
             opticalFlowOverlay1(image_pv, image)
 
