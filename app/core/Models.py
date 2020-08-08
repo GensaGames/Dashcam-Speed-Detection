@@ -72,7 +72,7 @@ class Models:
         model = Sequential()
         model.add(InputLayer(input_shape=input_shape))
         model.add(Conv3D(
-            filters=86, kernel_size=(2, 5, 5), strides=(1, 2, 2),
+            filters=86, kernel_size=(2, 8, 8), strides=(1, 5, 5),
             padding='valid',
             kernel_initializer=he_normal(),
         ))
@@ -80,7 +80,7 @@ class Models:
         model.add(BatchNormalization())
 
         model.add(Conv3D(
-            filters=64, kernel_size=(2, 5, 5), strides=(1, 2, 2),
+            filters=64, kernel_size=(2, 5, 5), strides=(1, 3, 3),
             padding='valid',
             kernel_initializer=he_normal(),
         ))
