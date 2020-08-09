@@ -1,11 +1,6 @@
-import cv2
-import numpy as np
-
-from app.core import Augmenters
+from app.tools import Augmenters
 from app.other.Helper import *
-from numpy import loadtxt
 import cv2
-import math
 import app.Settings as Settings
 import matplotlib.pyplot as plt
 
@@ -16,10 +11,7 @@ def test5():
 
     from imgaug.augmenters import Sequential
     from imgaug.augmenters import Fliplr
-    from imgaug.augmenters import GaussianBlur
     from imgaug.augmenters import GammaContrast
-    from imgaug.augmenters import Invert
-    from imgaug.augmenters import CoarseSalt
     from imgaug.augmenters import CoarseDropout
     from imgaug.augmenters import Emboss
 

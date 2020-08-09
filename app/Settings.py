@@ -3,6 +3,7 @@ import os
 PROJECT = os.path.dirname(
     os.path.realpath(__file__)) + '/../'
 RESOURCE = PROJECT + 'res/'
+CUSTOM = PROJECT + 'custom/'
 
 TRAIN_VIDEO = RESOURCE + 'source/train.mp4'
 TRAIN_FRAMES = RESOURCE + 'frames/'

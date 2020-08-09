@@ -4,9 +4,9 @@ import cv2
 
 from app import Settings
 from app.Controller import MiniBatchWorker
-from app.core import Augmenters
-from app.core.Parameters import PreprocessorParams, ControllerParams
-from app.core.Preprocessing import Preprocessor
+from app.tools import Augmenters
+from app.other.Parameters import PreprocessorParams, ControllerParams
+from app.Preprocessing import Preprocessor
 from app.other.LoggerFactory import get_logger
 
 

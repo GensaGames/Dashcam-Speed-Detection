@@ -1,13 +1,6 @@
-import cv2
-import numpy as np
-
-from app.core import Augmenters
 from app.other.Helper import *
-from numpy import loadtxt
 import cv2
-import math
 import app.Settings as Settings
-import matplotlib.pyplot as plt
 
 
 def test_image_resize():

@@ -10,8 +10,8 @@ from numpy import loadtxt
 from rx import operators as ops
 
 from app import Settings
-from app.core import Augmenters
-from app.core.Parameters import PreprocessorParams
+from app.tools import Augmenters
+from app.other.Parameters import PreprocessorParams
 from app.other import Helper
 from app.other.LoggerFactory import get_logger
 

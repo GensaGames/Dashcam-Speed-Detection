@@ -6,11 +6,11 @@ from keras.utils import plot_model
 
 import app.other.Helper as Helper
 from app import Settings
-from app.core import Augmenters
-from app.core.Models import Models
-from app.core.Parameters import ControllerParams, \
+from app.tools import Augmenters
+from app.Models import Models
+from app.other.Parameters import ControllerParams, \
     VisualHolder, PreprocessorParams
-from app.core.Preprocessing import Preprocessor
+from app.Preprocessing import Preprocessor
 from app.other.LoggerFactory import get_logger
 
 
@@ -213,11 +213,11 @@ if __name__ == "__main__":
                 backward=(0, 1, 2, 3),
                 frame_y_trim=(230, -160),
                 frame_x_trim=(180, -180),
-                frame_scale=1.6,
+                frame_scale=1,
             ),
 
             ControllerParams(
-                'NEW-OPT-A91',
+                'STAR-3D-V3',
                 baths=30,
                 train_part=0.7,
                 epochs=1,
