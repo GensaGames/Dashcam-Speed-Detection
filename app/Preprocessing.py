@@ -6,13 +6,11 @@ from pathlib import Path
 import cv2
 import numpy as np
 import rx
-from numpy import loadtxt
 from rx import operators as ops
 
-from app import Settings
+from app.Data import Data
 from app.tools import Augmenters
 from app.other.Parameters import PreprocessorParams
-from app.other import Helper
 from app.other.LoggerFactory import get_logger
 
 
@@ -22,30 +20,30 @@ class Preprocessor:
         self.PARAMS = params
         self.AUGMENTER = augmenter
 
-    def __load_x(self, indexes, x_source):
+    def __take_x(self, indexes, path):
 
         assert min(indexes) - max(
             self.PARAMS.backward) >= 0
 
         complete_path = sorted(Path(
-            x_source).glob('*'), key=lambda x: float(x.stem))
+            path).glob('*'), key=lambda x: float(x.stem))
 
         items = []
         for i in indexes:
-
             # Look Back Strategy for the previous
             # Y Frames from started Idx position
             looking_back = list(map(
                 lambda x: i - x, self.PARAMS.backward))
 
-            list_paths = self.__get_index_paths(
-                looking_back, complete_path)
+            list_paths = itemgetter(
+                *looking_back)(complete_path)
 
             img_aug = self.AUGMENTER.image.to_deterministic()
 
-            for path in np.flipud(np.array([list_paths]).flatten()):
+            for full_path in np.flipud(np.array([list_paths]).flatten()):
+
                 image = cv2.imread(
-                    str(path), cv2.IMREAD_COLOR)
+                    str(full_path), cv2.IMREAD_COLOR)
                 image = img_aug.augment_image(image)
                 items.append(image)
 
@@ -53,48 +51,16 @@ class Preprocessor:
             len(self.PARAMS.backward)) == len(items)
         return items
 
-    @staticmethod
-    def __get_index_paths(looking_back, path):
-
-        # Checking if indexes related to the car stop
-        # variance indexes, otherwise - default
-        if Helper.is_car_stop_variance(looking_back[0]):
-            source_stop_frames = Settings.TRAIN_FRAMES_STOP
-
-            # Just use folder as prefix for index, and avoid
-            # collision with initial train indexes from train part
-            folder = str(looking_back[0])[0]
-
-            new_back = list(map(lambda x: x - (
-                    int(folder) * Settings.PREFIX_STOP_SIZE),
-                                looking_back))
-
-            new_path = sorted(Path(
-                source_stop_frames + '/' + folder).glob('*'),
-                              key=lambda x: float(x.stem))
-            return itemgetter(*new_back)(new_path)
-
-        return itemgetter(*looking_back)(path)
-
-    def __load_y(self, indexes, y_source):
-        if y_source is None:
+    def __take_y(self, indexes, y):
+        if y is None:
             return None
 
         assert min(indexes) - \
                max(self.PARAMS.backward) >= 0
 
-        train_y_values = loadtxt(
-            y_source, delimiter=" ",
-            unpack=False)
-
-        # Get correct train Y values, in case it's
-        # in car stop variance, set just 0.
         y_values = []
         for i in indexes:
-            if Helper.is_car_stop_variance(i):
-                y_values.append(0)
-            else:
-                y_values.append(train_y_values[i])
+            y_values.append(y[i])
 
         y_values = np.reshape(
             y_values, (len(y_values), 1))
@@ -236,9 +202,9 @@ class Preprocessor:
         return frames.reshape(len(frames), 1)
 
     # noinspection PyUnresolvedReferences
-    def build(self, indexes, source_x_y):
+    def build(self, indexes, path, y_values):
 
-        x = self.__load_x(indexes, source_x_y[0])
+        x = self.__take_x(indexes, path)
         obs_x = rx.of(x).pipe(
             ops.map(self.__map_crop),
             ops.map(self.__map_scale),
@@ -247,47 +213,45 @@ class Preprocessor:
             ops.map(self.__to_timeline_x),
         )
 
-        y = self.__load_y(indexes, source_x_y[1])
+        y = self.__take_y(indexes, y_values)
         obs_y = rx.of(y).pipe(
             ops.map(self.__to_timeline_y),
         )
-
         return rx.zip(obs_x, obs_y)
-
-    # noinspection PyUnresolvedReferences
-    def buildOne(self, image1, image2):
-        obs_x = rx.of([image1, image2]).pipe(
-            ops.map(self.__map_crop),
-            ops.map(self.__map_scale),
-            ops.map(self.__build_optical_flow),
-            ops.map(self.__map_normalize),
-            ops.map(self.__to_timeline_x),
-        )
-        return obs_x
 
 
 #####################################
 if __name__ == "__main__":
     logger = get_logger()
 
+    def validate():
 
-    def __assert(x_y):
-        logger.info('X shape {}'.format(x_y[0].shape))
-        logger.info('Y shape {}'.format(x_y[1].shape))
+        def on_ready(x_y):
+            logger.info('Received X shape {}'
+                        .format(x_y[0].shape))
+            logger.info('Received Y shape {}'
+                        .format(x_y[1].shape))
+            assert x_y[0].shape[0] == x_y[1].shape[0]
 
-        assert x_y[0].shape[0] == x_y[1].shape[0]
-        
+        values, source, _ = Data()\
+            .initialize(0.7)\
+            .get_train_batch(5)
 
-    Preprocessor(
-        PreprocessorParams(
-            backward=(0, 1, 2, 3, 4),
-            frame_y_trim=(230, -150),
-            frame_x_trim=(180, -180),
-            frame_scale=1.4,
-        ),
-        Augmenters.get_new_training()
-    ).build(
-        list(range(67, 200)),
-        (Settings.TRAIN_FRAMES, Settings.TRAIN_Y)
-    ).subscribe(__assert, on_error=lambda e: logger
-                .error('Exception! ' + str(e)))
+        logger.debug(
+            'Requesting from Source: {}. Next Indexes: {}\n\n'
+                .format(source.name, values))
+
+        Preprocessor(
+            PreprocessorParams(
+                backward=(0, 1, 2, 3),
+                frame_y_trim=(230, -150),
+                frame_x_trim=(180, -180),
+                frame_scale=1.4,
+            ),
+            Augmenters.get_new_training()
+        ).build(
+            values, source.path, source.y_values
+        ).subscribe(on_ready, on_error=lambda e: logger
+                    .error('Exception! ' + str(e)))
+
+    validate()
