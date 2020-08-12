@@ -2,7 +2,7 @@ from keras import Sequential
 from keras.activations import linear
 from keras.engine import InputLayer
 from keras.initializers import he_normal
-from keras.layers import Dense, ELU, Flatten, Conv2D, Conv3D, BatchNormalization, LeakyReLU, MaxPooling3D
+from keras.layers import Dense, ELU, Flatten, Conv2D, Conv3D, BatchNormalization, MaxPooling3D
 from keras.losses import mean_squared_error
 from keras.optimizers import Adam
 
@@ -81,9 +81,17 @@ class Models:
             x_shape[4])
 
         model = Sequential()
-        model.add(InputLayer(input_shape=input_shape))
         model.add(Conv3D(
-            filters=86, kernel_size=(2, 5, 5), strides=(1, 3, 3),
+            filters=64, kernel_size=(2, 5, 5), strides=(1, 2, 2),
+            padding='same',
+            kernel_initializer=he_normal(),
+            input_shape=input_shape
+        ))
+        model.add(ELU())
+        model.add(BatchNormalization())
+
+        model.add(Conv3D(
+            filters=64, kernel_size=(2, 3, 3), strides=(1, 2, 2),
             padding='same',
             kernel_initializer=he_normal(),
         ))

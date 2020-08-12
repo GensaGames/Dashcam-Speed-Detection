@@ -103,23 +103,26 @@ def save_plot(path_to, plot, prefix):
 
 
 ##########################################
-def backup_model_with(path_to, name, model, *args):
-    path_to = path_to + '/' + Settings.MODELS \
-              + '/' + name + '/'
-    if not os.path.exists(path_to):
-        os.makedirs(path_to)
-
-    model.save(path_to + Settings.NAME_MODEL)
+def backup_model_with(path, model, *args):
+    model.save(path + Settings.NAME_MODEL)
     for i in args:
-        with open(path_to + type(i).__name__, "w+") as file:
+        with open(path + type(i).__name__, "w+") as file:
             file.write(jsonpickle.encode(i))
 
 
 ##########################################
-def restore_model_with(path_to, name):
-    path_to = path_to + '/' + Settings.MODELS \
+def get_model_path(folder, name):
+    path = folder + '/' + Settings.MODELS \
               + '/' + name + '/'
-    if not os.path.exists(path_to):
+    if not os.path.exists(path):
+        os.makedirs(path)
+    return path
+
+
+##########################################
+def restore_model_with(path_to):
+    if not os.path.isfile(
+            path_to + Settings.NAME_MODEL):
         raise FileNotFoundError
 
     p_params, c_params, visual = \

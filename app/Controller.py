@@ -17,137 +17,147 @@ class MiniBatchWorker:
     def __init__(self, p_params, c_params):
         self.P_PARAMS, self.C_PARAMS, self.VISUAL \
             = p_params, c_params, VisualHolder()
-        self.model = None
+        self.MODEL = None
 
-    def start_training_epochs(self):
-
+    def start_training(self):
+        # Iterate over Controller Epochs
         for e in range(self.C_PARAMS.epochs):
             get_logger().info('Starting {} Training Epoch!'
                               .format(str(e)))
-            data = Data() \
-                .initialize(self.C_PARAMS.train_part)
+
+            data = Data().initialize(
+                len(self.P_PARAMS.backward),
+                self.C_PARAMS.train_part
+            )
 
             step = 0
+            # Iterate over all known Samples
             while True:
                 t_idx, t_source, _ = data \
                     .get_train_batch(self.C_PARAMS.baths)
 
-                if not t_source or not t_idx:
+                if not t_source or not len(t_idx):
+                    get_logger().debug(
+                        'Epoch: {} Training Done!'.format(e))
                     break
 
-                get_logger().debug(
-                    'Processing Training Step: {}'
-                        .format(step))
-
-                Preprocessor(
-                    self.P_PARAMS,
-                    Augmenters.get_new_training()
-                ).build(
-                    t_idx, t_source.path, t_source.y_values
-                ).subscribe(
-                    self.__step_model,
-                    on_error=lambda error: get_logger()
-                        .error('Exception! ' + str(error))
-                )
-
+                # Batch Training Step
                 step += 1
+                get_logger().debug(
+                    'Training Process. Source: {} Step: {}'
+                        .format(t_source.name, step))
+
+                self.__step_model(t_idx, t_source)
+
                 if step % self.C_PARAMS.step_vis == 0:
+                    # Validation Step and Visualization
                     v_idx, v_source, _ = data\
                         .get_validation_batch(120)
                     self.__step_validation(v_idx, v_source)
-                    self.do_backup()
+                    WorkerUtils.do_backup(self)
 
-            get_logger().debug('Epoch: {} Training Done!'
-                               .format(e))
-
-    def restore_backup(self):
-        get_logger().info("Restoring Backup...")
-        if self.model is not None:
-            get_logger().error(
-                'Model already created. Do not override!')
-            return
-
-        try:
-            self.model, self.P_PARAMS, self.C_PARAMS, self.VISUAL = \
-                Helper.restore_model_with(
-                    Settings.BUILD, self.C_PARAMS.name)
-        except FileNotFoundError:
-            get_logger().error(
-                'Do not have Backup! Starting new.')
-
-    def do_backup(self):
-        get_logger().info("Making Backup...")
-        Helper.backup_model_with(
-            Settings.BUILD, self.C_PARAMS.name,
-            self.model, self.P_PARAMS, self.C_PARAMS, self.VISUAL)
-
-    def __step_model(self, x_y):
-        if self.model is None:
-            self.model = Models.get3D_CNN(x_y[0])
-            plot_structure(self)
-
-        value = self.model.train_on_batch(x_y[0], x_y[1])
-        self.VISUAL.add_training_point(value)
-
-        get_logger().debug('Training Batch loss: {}'
-                           .format(value))
-
-    def __step_validation(self, indexes, source):
-        get_logger().info("Starting Cross Validation.")
+    def __step_model(self, indexes, source):
 
         def __internal(x_y):
-            mse = self.model \
+            if self.MODEL is None:
+                self.MODEL = Models.get3D_CNN(x_y[0])
+                WorkerUtils.plot_structure(self)
+
+            value = self.MODEL.train_on_batch(x_y[0], x_y[1])
+            self.VISUAL.add_training_point(value)
+
+            get_logger().debug('Training Batch loss: {}'
+                               .format(value))
+        Preprocessor(
+            self.P_PARAMS,
+            Augmenters.get_new_training()
+        ).build(
+            indexes, source.path, source.y_values
+        ).subscribe(
+            __internal,
+            on_error=lambda error: get_logger()
+                .error('Exception! ' + str(error))
+        )
+
+    def __step_validation(self, indexes, source):
+        get_logger().debug("Starting Cross Validation.")
+
+        def __internal(x_y):
+            mse = self.MODEL \
                 .evaluate(x_y[0], x_y[1])
 
-            get_logger().info(
+            get_logger().debug(
                 "Cross Validation Done on Items Size: {} "
                 "MSE: {}".format(len(x_y[0]), mse))
 
             self.VISUAL.add_validation_point(mse)
 
-            Preprocessor(
-                self.P_PARAMS,
-                Augmenters.get_new_validation()
-            ).build(
-                indexes, source.path, source.y_values
-            ).subscribe(
-                __internal,
-                on_error=lambda error: get_logger()
-                    .error('Exception! ' + str(error))
+        Preprocessor(
+            self.P_PARAMS,
+            Augmenters.get_new_validation()
+        ).build(
+            indexes, source.path, source.y_values
+        ).subscribe(
+            __internal,
+            on_error=lambda error: get_logger()
+                .error('Exception! ' + str(error))
+        )
+
+
+class WorkerUtils:
+
+    @staticmethod
+    def restore_backup(worker):
+        get_logger().info("Restoring Backup...")
+
+        if worker.MODEL is not None:
+            get_logger().error(
+                'Model already created. Do not override!')
+            return
+
+        try:
+            path = Helper.get_model_path(
+                Settings.BUILD,
+                worker.C_PARAMS.name
             )
+            worker.MODEL, worker.P_PARAMS, worker.C_PARAMS, worker.VISUAL =\
+                Helper.restore_model_with(path)
+        except FileNotFoundError:
+            get_logger().error(
+                'Do not have Backup! Starting new.')
 
+    @staticmethod
+    def do_backup(worker):
+        get_logger().info("Making Backup...")
 
-#####################################
-if __name__ == "__main__":
+        path = Helper.get_model_path(
+            Settings.BUILD,
+            worker.C_PARAMS.name
+        )
 
-    def combine_workers():
-        workers = [MiniBatchWorker(
-            PreprocessorParams(
-                backward=(0, 1, 2, 3),
-                frame_y_trim=(230, -160),
-                frame_x_trim=(180, -180),
-                frame_scale=1),
+        Helper.backup_model_with(
+            path,
+            worker.MODEL,
+            worker.P_PARAMS,
+            worker.C_PARAMS,
+            worker.VISUAL
+        )
 
-            ControllerParams(
-                'STAR-3D-V3',
-                baths=30,
-                train_part=0.7,
-                epochs=1,
-                step_vis=10))
-        ]
-        return workers
-
-
+    @staticmethod
     def plot_structure(worker):
+        path = Helper.get_model_path(
+            Settings.BUILD,
+            worker.C_PARAMS.name
+        )
         plot_model(
-            worker.model,
-            to_file=Settings.NAME_STRUCTURE,
+            worker.MODEL,
+            to_file=path + Settings.NAME_STRUCTURE,
             show_shapes=True,
             show_layer_names=True
         )
         return plt
 
-
+    @staticmethod
     def plot_progress(worker):
         fig, ax = plt.subplots()
 
@@ -180,11 +190,31 @@ if __name__ == "__main__":
         return plt
 
 
+#####################################
+if __name__ == "__main__":
+
+    def combine_workers():
+        workers = [MiniBatchWorker(
+            PreprocessorParams(
+                backward=(0, 1, 2, 3),
+                frame_y_trim=(230, -160),
+                frame_x_trim=(180, -180),
+                frame_scale=1),
+
+            ControllerParams(
+                'COMP_NEW_V1',
+                baths=30,
+                train_part=0.7,
+                epochs=1,
+                step_vis=10))
+        ]
+        return workers
+
     def start_actions():
         for worker in combine_workers():
-            worker.restore_backup()
-            worker.start_training_epochs()
-            plot_progress(worker)
+            WorkerUtils.restore_backup(worker)
+            worker.start_training()
+            WorkerUtils.plot_progress(worker)
 
 
     start_actions()

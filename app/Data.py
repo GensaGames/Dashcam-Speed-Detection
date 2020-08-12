@@ -23,17 +23,19 @@ class Data:
     def __init__(self):
         self.entries = []
 
-    def initialize(self, part):
-        get_logger().info('Data is Initializing with part: {}'
-                          .format(part))
+    def initialize(self, backward, part):
+        get_logger().info(
+            'Data is Initializing. Back: {} Part: {}'
+                .format(backward, part))
 
         for source in Data.get_sources():
             point = int(source.amount * part)
 
-            train = np.arange(point)
+            train = np.arange(backward, point)
             np.random.shuffle(train)
 
-            validation = np.arange(point, source.amount)
+            validation = np.arange(
+                point + backward, source.amount)
             np.random.shuffle(validation)
 
             self.entries.append((
@@ -63,12 +65,13 @@ class Data:
     def get_validation_batch(self, amount):
         source, holder = random.choice(
             list(filter(
-                lambda x: x[1].train >= amount,
+                lambda x: len(x[1].train) >= amount,
                 self.entries
             ))
         )
-        np.shuffle(holder.validation)
-        return holder.validation[:amount]
+        np.random.shuffle(holder.validation)
+        indexes = holder.validation[:amount]
+        return indexes, source, holder
 
     @staticmethod
     def get_sources():
@@ -108,7 +111,7 @@ class Data:
 
                 array.append(
                     Data.Source(
-                        'Custom-Chunk1-{}-{}'.format(i, d2),
+                        'Chunk1-{}-{}'.format(i, d2),
                         path,
                         Data.summarize_y(y, len(os.listdir(path)))
                     ),
@@ -127,7 +130,7 @@ class Data:
 
 if __name__ == "__main__":
     logger = get_logger()
-    data = Data().initialize(0.7)
+    data = Data().initialize(10, 0.7)
 
 
     def print_info():

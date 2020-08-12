@@ -37,7 +37,7 @@ class VideoWriter:
         x = self.preproc.buildOne(
             image1, image2).run()
 
-        y = self.worker.model.predict(x)
+        y = self.worker.MODEL.predict(x)
 
         # Smooth Aggressive:
         # if len(memory) > 10:
