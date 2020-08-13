@@ -1,4 +1,4 @@
-from imgaug.augmenters import CoarseDropout, AllChannelsCLAHE, Fliplr
+from imgaug.augmenters import CoarseDropout, AllChannelsCLAHE, Fliplr, MultiplyAndAddToBrightness
 from imgaug.augmenters import Sequential
 from imgaug.augmenters import Sometimes
 
@@ -8,7 +8,8 @@ from imgaug.augmenters import Sometimes
 def get_new_training():
     return AugmenterSettings(
         image=Sequential([
-            AllChannelsCLAHE(),
+            AllChannelsCLAHE(clip_limit=(1, 4), per_channel=True),
+            MultiplyAndAddToBrightness(mul=1.0, add=(10, 40)),
             Fliplr(0.5),
         ]),
         area_float=6,
@@ -19,7 +20,8 @@ def get_new_training():
 def get_new_validation():
     return AugmenterSettings(
         image=Sequential([
-            AllChannelsCLAHE(),
+            AllChannelsCLAHE(clip_limit=(1, 4), per_channel=True),
+            MultiplyAndAddToBrightness(mul=1.0, add=(10, 40))
         ]),
         area_float=0,
         features_dropout=0.0

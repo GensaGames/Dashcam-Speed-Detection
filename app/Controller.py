@@ -197,12 +197,12 @@ if __name__ == "__main__":
         workers = [MiniBatchWorker(
             PreprocessorParams(
                 backward=(0, 1, 2, 3),
-                frame_y_trim=(230, -160),
+                frame_y_trim=(230, -150),
                 frame_x_trim=(180, -180),
-                frame_scale=1.4),
+                frame_scale=1),
 
             ControllerParams(
-                'COMP_NEW_V1',
+                'COMP_NEW_V2',
                 baths=30,
                 train_part=0.7,
                 epochs=1,
@@ -213,7 +213,7 @@ if __name__ == "__main__":
     def start_actions():
         for worker in combine_workers():
             WorkerUtils.restore_backup(worker)
-            # worker.start_training()
+            worker.start_training()
             WorkerUtils.plot_progress(worker)
 
 

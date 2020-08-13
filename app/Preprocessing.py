@@ -140,8 +140,8 @@ class Preprocessor:
                 mag, None, 0, 255, cv2.NORM_MINMAX)
 
             # Сonvert HSV to float32's
-            # new = cv2.cvtColor(hsv, cv2.COLOR_HSV2RGB_FULL)
-            h, s, new = cv2.split(hsv)
+            new = cv2.cvtColor(hsv, cv2.COLOR_HSV2RGB_FULL)
+
             """
             Comment/Uncomment for showing each image
             moving optical flow.

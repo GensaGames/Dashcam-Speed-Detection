@@ -78,7 +78,7 @@ class Data:
         array = [
             # 1. Source Train frames and Y values.
             Data.Source(
-                'Source',
+                'Default',
                 Settings.RESOURCE + 'frames/',
                 np.loadtxt(
                     Settings.RESOURCE + 'source/train.txt',

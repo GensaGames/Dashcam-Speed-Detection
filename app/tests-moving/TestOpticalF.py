@@ -1,9 +1,9 @@
 from __future__ import division
 
+from app.Data import Data
 from app.tools import Augmenters
 from app.other.Helper import *
 import cv2
-import app.Settings as Settings
 
 
 def opticalFlowOverlay1(image_pv, image):
@@ -48,27 +48,33 @@ def testOpenCVOpticalMoving():
             img[230:-150, 180:-180], (0, 0), fx=1.5, fy=1.5)
         return img
 
-    for _ in range(10, 20400, 10):
+    sources = list(filter(
+        lambda x: x.name == 'Default',
+        Data().get_sources()
+    ))
 
-        for i in range(_, _ + 10):
+    while True:
+        s = sources[np.random.randint(0, len(sources))]
+        print('Using Source: {}'.format(s.name))
+
+        start = np.random.randint(10, len(s.y_values))
+        for i in range(start, start + 30):
             img_aug = augmenter.image.to_deterministic()
 
-            image_pv = cv2.imread(
-                Settings.TRAIN_FRAMES + '/'
+            image_pv = cv2.imread(s.path + '/'
                 + str(i) + '.jpg', cv2.IMREAD_COLOR)
             image_pv = format_image(
                 img_aug.augment_image(image_pv)
             )
 
-            image = cv2.imread(
-                Settings.TRAIN_FRAMES + '/'
+            image = cv2.imread(s.path + '/'
                 + str(i + 1) + '.jpg', cv2.IMREAD_COLOR)
-            # cv2.imshow('source', format_image(image))
-
             image = format_image(
                 img_aug.augment_image(image)
             )
-
+            print('Frame Idx: {}. Speed: {}'.format(
+                i, s.y_values[i]
+            ))
             opticalFlowOverlay1(image_pv, image)
 
 
