@@ -80,7 +80,8 @@ class MiniBatchWorker:
         )
 
     def __step_validation(self, indexes, source):
-        get_logger().debug("Starting Cross Validation.")
+        get_logger().debug("Starting Cross Validation. Source: {}"
+                           .format(source.name))
 
         def __internal(x_y):
             mse = self.MODEL \
@@ -174,7 +175,6 @@ class WorkerUtils:
             worker.VISUAL.points_training)
 
         ax.legend(['Validation', 'Training'])
-        ax.set_ylim([0, 40])
         ax.set(
             xlabel='Batch Step (S)',
             ylabel='Errors (J)'
@@ -199,7 +199,7 @@ if __name__ == "__main__":
                 backward=(0, 1, 2, 3),
                 frame_y_trim=(230, -160),
                 frame_x_trim=(180, -180),
-                frame_scale=1),
+                frame_scale=1.4),
 
             ControllerParams(
                 'COMP_NEW_V1',
@@ -213,7 +213,7 @@ if __name__ == "__main__":
     def start_actions():
         for worker in combine_workers():
             WorkerUtils.restore_backup(worker)
-            worker.start_training()
+            # worker.start_training()
             WorkerUtils.plot_progress(worker)
 
 

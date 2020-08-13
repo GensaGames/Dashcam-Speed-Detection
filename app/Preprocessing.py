@@ -12,6 +12,7 @@ from app.Data import Data
 from app.tools import Augmenters
 from app.other.Parameters import PreprocessorParams
 from app.other.LoggerFactory import get_logger
+from matplotlib.colors import hsv_to_rgb
 
 
 class Preprocessor:
@@ -139,8 +140,8 @@ class Preprocessor:
                 mag, None, 0, 255, cv2.NORM_MINMAX)
 
             # Сonvert HSV to float32's
-            new = cv2.cvtColor(hsv, cv2.COLOR_HSV2RGB_FULL)
-
+            # new = cv2.cvtColor(hsv, cv2.COLOR_HSV2RGB_FULL)
+            h, s, new = cv2.split(hsv)
             """
             Comment/Uncomment for showing each image
             moving optical flow.
@@ -234,7 +235,7 @@ if __name__ == "__main__":
             assert x_y[0].shape[0] == x_y[1].shape[0]
 
         values, source, _ = Data()\
-            .initialize(0.7)\
+            .initialize(4, 0.7)\
             .get_train_batch(5)
 
         logger.debug(
