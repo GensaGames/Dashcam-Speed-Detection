@@ -82,7 +82,7 @@ class Models:
 
         model = Sequential()
         model.add(Conv3D(
-            filters=86, kernel_size=(2, 5, 5), strides=(1, 2, 2),
+            filters=86, kernel_size=(3, 5, 5), strides=(1, 2, 2),
             padding='same',
             kernel_initializer=he_normal(),
             input_shape=input_shape
@@ -91,8 +91,8 @@ class Models:
         model.add(BatchNormalization())
 
         model.add(Conv3D(
-            filters=64, kernel_size=(2, 3, 3), strides=(1, 2, 2),
-            padding='same',
+            filters=64, kernel_size=(3, 3, 3), strides=(1, 2, 2),
+            padding='valid',
             kernel_initializer=he_normal(),
         ))
         model.add(ELU())
@@ -100,14 +100,14 @@ class Models:
 
         model.add(Conv3D(
             filters=64, kernel_size=(2, 3, 3), strides=(1, 1, 1),
-            padding='same',
+            padding='valid',
             kernel_initializer=he_normal(),
         ))
         model.add(ELU())
         model.add(BatchNormalization())
 
         model.add(Conv3D(
-            filters=64, kernel_size=(1, 3, 3), strides=(1, 1, 1),
+            filters=64, kernel_size=(2, 3, 3), strides=(1, 1, 1),
             padding='valid',
             kernel_initializer=he_normal(),
         ))
@@ -124,7 +124,7 @@ class Models:
 
         model.add(
             MaxPooling3D(
-                pool_size=(1, 3, 3),
+                pool_size=(1, 2, 2),
                 padding="valid"
             )
         )

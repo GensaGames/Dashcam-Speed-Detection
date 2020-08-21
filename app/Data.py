@@ -125,6 +125,15 @@ class Data:
         value = [np.mean(a) for a in np.array_split(
             y[20:], frames_len)]
         assert len(value) == frames_len
+
+        if frames_len < 2:
+            return value
+
+        # A bit of Magic
+        for i in range(1, frames_len):
+            f_delta = (value[i] - value[i - 1]) * (20/25)
+            value[i] = value[i - 1] + f_delta
+
         return value
 
 

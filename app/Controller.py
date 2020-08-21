@@ -196,13 +196,13 @@ if __name__ == "__main__":
     def combine_workers():
         workers = [MiniBatchWorker(
             PreprocessorParams(
-                backward=(0, 1, 2, 3),
+                backward=(0, 1, 2, 3, 4, 5, 6),
                 frame_y_trim=(230, -150),
                 frame_x_trim=(180, -180),
                 frame_scale=1),
 
             ControllerParams(
-                'COMP_NEW_V2',
+                'COMP_NEW_V10',
                 baths=30,
                 train_part=0.7,
                 epochs=1,
