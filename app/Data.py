@@ -23,13 +23,13 @@ class Data:
     def __init__(self):
         self.entries = []
 
-    def initialize(self, backward, part):
+    def initialize(self, backward, t_part):
         get_logger().info(
             'Data is Initializing. Back: {} Part: {}'
-                .format(backward, part))
+                .format(backward, t_part))
 
         for source in Data.get_sources():
-            point = int(source.amount * part)
+            point = int(source.amount * t_part)
 
             train = np.arange(backward, point)
             np.random.shuffle(train)
@@ -96,45 +96,46 @@ class Data:
                     np.zeros(len(os.listdir(path)))
                 )
             )
-
-        # 3. Custom CommaAi data
-        location = Settings.CUSTOM + 'Chunk_1/'
-        for i, d1 in enumerate(os.listdir(location)):
-            for d2 in os.listdir(location + d1):
-                outer = os.path.join(location, d1, d2)
-
-                y = np.fromfile(os.path.join(
-                    outer, 'processed_log/CAN/speed/value'
-                ))
-                path = os.path.join(outer, 'frames/')
-                assert os.path.isdir(path)
-
-                array.append(
-                    Data.Source(
-                        'Chunk1-{}-{}'.format(i, d2),
-                        path,
-                        Data.summarize_y(y, len(os.listdir(path)))
-                    ),
-                )
-
         return array
 
-    @staticmethod
-    def summarize_y(y, frames_len):
-        # Should Start from 20th element.
-        value = [np.mean(a) for a in np.array_split(
-            y[20:], frames_len)]
-        assert len(value) == frames_len
-
-        if frames_len < 2:
-            return value
-
-        # A bit of Magic
-        for i in range(1, frames_len):
-            f_delta = (value[i] - value[i - 1]) * (20/25)
-            value[i] = value[i - 1] + f_delta
-
-        return value
+        # 3. Custom CommaAi data
+    #     location = Settings.CUSTOM + 'Chunk_1/'
+    #     for i, d1 in enumerate(os.listdir(location)):
+    #         for d2 in os.listdir(location + d1):
+    #             outer = os.path.join(location, d1, d2)
+    #
+    #             y = np.fromfile(os.path.join(
+    #                 outer, 'processed_log/CAN/speed/value'
+    #             ))
+    #             path = os.path.join(outer, 'frames/')
+    #             assert os.path.isdir(path)
+    #
+    #             array.append(
+    #                 Data.Source(
+    #                     'Chunk1-{}-{}'.format(i, d2),
+    #                     path,
+    #                     Data.summarize_y(y, len(os.listdir(path)))
+    #                 ),
+    #             )
+    #
+    #     return array
+    #
+    # @staticmethod
+    # def summarize_y(y, frames_len):
+    #     # Should Start from 20th element.
+    #     value = [np.mean(a) for a in np.array_split(
+    #         y[20:], frames_len)]
+    #     assert len(value) == frames_len
+    #
+    #     if frames_len < 2:
+    #         return value
+    #
+    #     # A bit of Magic
+    #     for i in range(1, frames_len):
+    #         f_delta = (value[i] - value[i - 1]) * (20/25)
+    #         value[i] = value[i - 1] + f_delta
+    #
+    #     return value
 
 
 if __name__ == "__main__":

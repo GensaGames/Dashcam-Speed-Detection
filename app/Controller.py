@@ -3,27 +3,26 @@ from keras.utils import plot_model
 
 import app.other.Helper as Helper
 from app import Settings
-from app.Data import Data
-from app.tools import Augmenters
 from app.Models import Models
-from app.other.Parameters import ControllerParams, \
-    VisualHolder, PreprocessorParams
-from app.Preprocessing import Preprocessor
+from app.other.Parameters import *
+from app.Preprocessing import *
 from app.other.LoggerFactory import get_logger
 
 
 class MiniBatchWorker:
 
-    def __init__(self, p_params, c_params):
-        self.P_PARAMS, self.C_PARAMS, self.VISUAL \
-            = p_params, c_params, VisualHolder()
-        self.MODEL = None
+    def __init__(self, c_params, p_params, visual=VisualHolder(), model=None):
+        self.P_PARAMS = c_params
+        self.C_PARAMS = p_params
+        self.VISUAL = visual
+        self.MODEL = model
 
     def start_training(self):
         # Iterate over Controller Epochs
         for e in range(self.C_PARAMS.epochs):
-            get_logger().info('Starting {} Training Epoch!'
-                              .format(str(e)))
+            get_logger().info(
+                'Starting {} Training Epoch!'
+                    .format(str(e)))
 
             data = Data().initialize(
                 len(self.P_PARAMS.backward),
@@ -66,22 +65,21 @@ class MiniBatchWorker:
             value = self.MODEL.train_on_batch(x_y[0], x_y[1])
             self.VISUAL.add_training_point(value)
 
-            get_logger().debug('Training Batch loss: {}'
-                               .format(value))
-        Preprocessor(
-            self.P_PARAMS,
-            Augmenters.get_new_training()
-        ).build(
-            indexes, source.path, source.y_values
-        ).subscribe(
-            __internal,
-            on_error=lambda error: get_logger()
-                .error('Exception! ' + str(error))
-        )
+            get_logger().debug(
+                'Training Batch loss: {}'.format(value))
+
+        Preprocessor(self.P_PARAMS)\
+            .build(indexes, source.path, source.y_values)\
+            .subscribe(
+                __internal,
+                on_error=lambda error: get_logger()
+                    .error('Exception! ' + str(error))
+            )
 
     def __step_validation(self, indexes, source):
-        get_logger().debug("Starting Cross Validation. Source: {}"
-                           .format(source.name))
+        get_logger().debug(
+            "Starting Cross Validation. Source: {}"
+                .format(source.name))
 
         def __internal(x_y):
             mse = self.MODEL \
@@ -93,51 +91,39 @@ class MiniBatchWorker:
 
             self.VISUAL.add_validation_point(mse)
 
-        Preprocessor(
-            self.P_PARAMS,
-            Augmenters.get_new_validation()
-        ).build(
-            indexes, source.path, source.y_values
-        ).subscribe(
-            __internal,
-            on_error=lambda error: get_logger()
-                .error('Exception! ' + str(error))
-        )
+        Preprocessor(self.P_PARAMS)\
+            .build(indexes, source.path, source.y_values)\
+            .subscribe(
+                __internal,
+                on_error=lambda error: get_logger()
+                    .error('Exception! ' + str(error))
+            )
 
 
 class WorkerUtils:
 
     @staticmethod
-    def restore_backup(worker):
+    def restore_backup(name):
         get_logger().info("Restoring Backup...")
 
-        if worker.MODEL is not None:
-            get_logger().error(
-                'Model already created. Do not override!')
-            return
-
         try:
-            path = Helper.get_model_path(
-                Settings.BUILD,
-                worker.C_PARAMS.name
+            path = Helper.get_model_path(name)
+            return MiniBatchWorker(
+                *Helper.restore_model_with(path)
             )
-            worker.MODEL, worker.P_PARAMS, worker.C_PARAMS, worker.VISUAL =\
-                Helper.restore_model_with(path)
         except FileNotFoundError:
             get_logger().error(
-                'Do not have Backup! Starting new.')
+                'Do not have Backup! Starting new?')
+            return None
 
     @staticmethod
     def do_backup(worker):
         get_logger().info("Making Backup...")
 
-        path = Helper.get_model_path(
-            Settings.BUILD,
-            worker.C_PARAMS.name
-        )
-
         Helper.backup_model_with(
-            path,
+            Helper.get_model_path(
+                worker.C_PARAMS.name
+            ),
             worker.MODEL,
             worker.P_PARAMS,
             worker.C_PARAMS,
@@ -147,7 +133,6 @@ class WorkerUtils:
     @staticmethod
     def plot_structure(worker):
         path = Helper.get_model_path(
-            Settings.BUILD,
             worker.C_PARAMS.name
         )
         plot_model(
@@ -194,25 +179,28 @@ class WorkerUtils:
 if __name__ == "__main__":
 
     def combine_workers():
-        workers = [MiniBatchWorker(
-            PreprocessorParams(
-                backward=(0, 1, 2, 3, 4, 5, 6),
-                frame_y_trim=(230, -150),
-                frame_x_trim=(180, -180),
-                frame_scale=1),
 
+        workers = [MiniBatchWorker(
             ControllerParams(
-                'COMP_NEW_V10',
+                '2021-New-V1',
                 baths=30,
                 train_part=0.7,
-                epochs=1,
-                step_vis=10))
-        ]
+                epochs=3,
+                step_vis=10,
+            ),
+            PrepParams(
+                backward=(0, 1, 2, 3, 4, 5, 6),
+                func=PrepParams.formatting_ex1,
+                augmenter=Augmenters.get_new_validation(),
+            ),
+        )]
         return workers
 
     def start_actions():
-        for worker in combine_workers():
-            WorkerUtils.restore_backup(worker)
+        for newly in combine_workers():
+            worker = WorkerUtils.restore_backup(
+                newly.C_PARAMS.name) or newly
+
             worker.start_training()
             WorkerUtils.plot_progress(worker)
 

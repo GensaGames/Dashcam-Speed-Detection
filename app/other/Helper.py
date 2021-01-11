@@ -111,7 +111,7 @@ def backup_model_with(path, model, *args):
 
 
 ##########################################
-def get_model_path(folder, name):
+def get_model_path(name, folder=Settings.BUILD):
     path = folder + '/' + Settings.MODELS \
               + '/' + name + '/'
     if not os.path.exists(path):
@@ -147,8 +147,8 @@ def restore_model_with(path_to):
             except UnicodeDecodeError:
                 pass
 
-    return load_model(path_to + Settings.NAME_MODEL), \
-           p_params, c_params, visual
+    return c_params, p_params, visual, \
+           load_model(path_to + Settings.NAME_MODEL),
 
 
 ##########################################

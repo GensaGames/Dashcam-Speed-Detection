@@ -1,34 +1,6 @@
 from collections import deque
 
 
-class PreprocessorParams:
-
-    def __init__(
-            self, backward=(0,), frame_y_trim=(230, 350),
-            frame_x_trim=(140, 380), frame_scale=0.7):
-
-        self._backward = backward
-        self._frame_y_trim = frame_y_trim
-        self._frame_x_trim = frame_x_trim
-        self._frame_scale = frame_scale
-
-    @property
-    def backward(self):
-        return self._backward
-
-    @property
-    def frame_y_trim(self):
-        return self._frame_y_trim
-
-    @property
-    def frame_x_trim(self):
-        return self._frame_x_trim
-
-    @property
-    def frame_scaler(self):
-        return self._frame_scale
-
-
 class ControllerParams:
 
     def __init__(

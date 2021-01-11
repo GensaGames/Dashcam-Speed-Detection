@@ -10,16 +10,30 @@ from rx import operators as ops
 
 from app.Data import Data
 from app.tools import Augmenters
-from app.other.Parameters import PreprocessorParams
 from app.other.LoggerFactory import get_logger
-from matplotlib.colors import hsv_to_rgb
+
+
+class PrepParams:
+
+    def __init__(self, backward, func, augmenter):
+        self.backward = backward
+        self.func = func
+        self.augmenter = augmenter
+
+    @staticmethod
+    def formatting_ex1(x):
+        x = cv2.resize(
+            x[150:-150, 50:-50], (0, 0), fx=1, fy=1)
+
+        x = cv2.resize(
+            x, (220, 66), interpolation=cv2.INTER_AREA)
+        return x
 
 
 class Preprocessor:
 
-    def __init__(self, params, augmenter):
+    def __init__(self, params):
         self.PARAMS = params
-        self.AUGMENTER = augmenter
 
     def __take_x(self, indexes, path):
 
@@ -39,7 +53,7 @@ class Preprocessor:
             list_paths = itemgetter(
                 *looking_back)(complete_path)
 
-            img_aug = self.AUGMENTER.image.to_deterministic()
+            img_aug = self.PARAMS.augmenter.to_deterministic()
 
             for full_path in np.flipud(np.array([list_paths]).flatten()):
 
@@ -66,49 +80,6 @@ class Preprocessor:
         y_values = np.reshape(
             y_values, (len(y_values), 1))
         return y_values
-
-    def __map_crop(self, frames):
-        assert isinstance(frames, list) and \
-               isinstance(frames[0], np.ndarray)
-
-        # Apply random floating Area Shift
-        def shift():
-            if self.AUGMENTER.area_float is 0:
-                return 0
-
-            return np.random.randint(
-                low=-1 * self.AUGMENTER.area_float,
-                high=self.AUGMENTER.area_float)
-
-        step = len(self.PARAMS.backward)
-        assert len(frames) % step == 0
-
-        for timeline in range(0, len(frames), step):
-            x_shift = shift()
-            y_shift = shift()
-
-            for idx in range(timeline, timeline + step):
-                frames[idx] = \
-                    frames[idx][
-                    self.PARAMS.frame_y_trim[0] + y_shift:
-                    self.PARAMS.frame_y_trim[1] + y_shift,
-
-                    self.PARAMS.frame_x_trim[0] + x_shift:
-                    self.PARAMS.frame_x_trim[1] + x_shift]
-        return frames
-
-    def __map_scale(self, frames):
-        assert isinstance(frames, list) and \
-               isinstance(frames[0], np.ndarray)
-
-        if self.PARAMS.frame_scaler == 1.0:
-            return frames
-
-        for idx, frame in enumerate(frames):
-            frames[idx] = cv2.resize(
-                frame, (0, 0), fx=self.PARAMS.frame_scaler,
-                fy=self.PARAMS.frame_scaler)
-        return frames
 
     def __build_optical_flow(self, frames):
 
@@ -140,14 +111,15 @@ class Preprocessor:
                 mag, None, 0, 255, cv2.NORM_MINMAX)
 
             # Сonvert HSV to float32's
-            new = cv2.cvtColor(hsv, cv2.COLOR_HSV2RGB_FULL)
+            # hsv = np.asarray(hsv, dtype=np.float32)
+            new = cv2.cvtColor(hsv, cv2.COLOR_HSV2RGB)
 
             """
             Comment/Uncomment for showing each image
             moving optical flow.
             """
-            # cv2.imshow('Preprocessing Flow.', new)
-            # cv2.waitKey(0)
+            cv2.imshow('Preprocessing Flow.', new)
+            cv2.waitKey(0)
             return new
 
         flow_frames = []
@@ -168,13 +140,19 @@ class Preprocessor:
 
         return flow_frames
 
-    @staticmethod
-    def __map_normalize(frames):
+    def __apply_formatting(self, frames):
         assert isinstance(frames, list) and \
                isinstance(frames[0], np.ndarray)
 
-        for idx, val in enumerate(frames):
-            frames[idx] = val / 256.0
+        for idx, frame in enumerate(frames):
+            frames[idx] = self.PARAMS.func(frame)
+
+            """
+            Comment/Uncomment for showing each image
+            moving optical flow.
+            """
+            cv2.imshow('Preprocessing Flow.', frames[idx])
+            cv2.waitKey(0)
 
         return frames
 
@@ -192,7 +170,7 @@ class Preprocessor:
             timeline,
             frames[0].shape[0],
             frames[0].shape[1],
-            3 if len(frames[0].shape) > 2 else 1
+            3 if len(frames[0].shape) > 1 else 1
         ))
 
     @staticmethod
@@ -203,14 +181,12 @@ class Preprocessor:
         return frames.reshape(len(frames), 1)
 
     # noinspection PyUnresolvedReferences
-    def build(self, indexes, path, y_values):
+    def build(self, indexes, x_path, y_values):
 
-        x = self.__take_x(indexes, path)
+        x = self.__take_x(indexes, x_path)
         obs_x = rx.of(x).pipe(
-            ops.map(self.__map_crop),
-            ops.map(self.__map_scale),
             ops.map(self.__build_optical_flow),
-            ops.map(self.__map_normalize),
+            ops.map(self.__apply_formatting),
             ops.map(self.__to_timeline_x),
         )
 
@@ -235,7 +211,7 @@ if __name__ == "__main__":
             assert x_y[0].shape[0] == x_y[1].shape[0]
 
         values, source, _ = Data()\
-            .initialize(4, 0.7)\
+            .initialize(2, 0.01)\
             .get_train_batch(5)
 
         logger.debug(
@@ -243,16 +219,14 @@ if __name__ == "__main__":
                 .format(source.name, values))
 
         Preprocessor(
-            PreprocessorParams(
-                backward=(0, 1, 2, 3),
-                frame_y_trim=(230, -150),
-                frame_x_trim=(180, -180),
-                frame_scale=1.4,
-            ),
-            Augmenters.get_new_training()
+            PrepParams(
+                backward=(0, 1),
+                func=PrepParams.formatting_ex1,
+                augmenter=Augmenters.get_new_validation(),
+            )
         ).build(
             values, source.path, source.y_values
         ).subscribe(on_ready, on_error=lambda e: logger
-                    .error('Exception! ' + str(e)))
+                    .error('Exception! {}'.format(e)))
 
     validate()
