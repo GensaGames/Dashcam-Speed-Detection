@@ -125,7 +125,7 @@ def restore_model_with(path_to):
             path_to + Settings.NAME_MODEL):
         raise FileNotFoundError
 
-    p_params, c_params, visual = \
+    c_params, p_params, visual = \
         None, None, None
 
     for i in os.listdir(path_to):
@@ -137,7 +137,7 @@ def restore_model_with(path_to):
                 decoded = jsonpickle.decode(
                     file.read())
                 if type(decoded).__name__.__eq__(
-                        'PreprocessorParams'):
+                        'PrepParams'):
                     p_params = decoded
                 elif type(decoded).__name__.__eq__(
                         'ControllerParams'):

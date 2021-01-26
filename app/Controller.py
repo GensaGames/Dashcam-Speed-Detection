@@ -12,8 +12,8 @@ from app.other.LoggerFactory import get_logger
 class MiniBatchWorker:
 
     def __init__(self, c_params, p_params, visual=VisualHolder(), model=None):
-        self.P_PARAMS = c_params
-        self.C_PARAMS = p_params
+        self.C_PARAMS = c_params
+        self.P_PARAMS = p_params
         self.VISUAL = visual
         self.MODEL = model
 
@@ -49,9 +49,10 @@ class MiniBatchWorker:
                 self.__step_model(t_idx, t_source)
 
                 if step % self.C_PARAMS.step_vis == 0:
-                    # Validation Step and Visualization
                     v_idx, v_source, _ = data\
                         .get_validation_batch(120)
+
+                    # Validation Step, Visualization & Backup
                     self.__step_validation(v_idx, v_source)
                     WorkerUtils.do_backup(self)
 
@@ -59,7 +60,12 @@ class MiniBatchWorker:
 
         def __internal(x_y):
             if self.MODEL is None:
-                self.MODEL = Models.get3D_CNN(x_y[0])
+                self.MODEL = Models.nvidia_model()
+
+                # Custom loading.
+                self.MODEL.load_weights(
+                    Settings.RESOURCE + 'other/model-weights-Vtest2.h5')
+
                 WorkerUtils.plot_structure(self)
 
             value = self.MODEL.train_on_batch(x_y[0], x_y[1])
@@ -182,16 +188,16 @@ if __name__ == "__main__":
 
         workers = [MiniBatchWorker(
             ControllerParams(
-                '2021-New-V1',
+                '2021-New-V2',
                 baths=30,
                 train_part=0.7,
                 epochs=3,
                 step_vis=10,
             ),
             PrepParams(
-                backward=(0, 1, 2, 3, 4, 5, 6),
-                func=PrepParams.formatting_ex1,
-                augmenter=Augmenters.get_new_validation(),
+                backward=(0, 1),
+                func=PrepParams.formatting_ex2,
+                augmenter=Augmenters.get_new_training(),
             ),
         )]
         return workers

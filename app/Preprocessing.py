@@ -29,6 +29,14 @@ class PrepParams:
             x, (220, 66), interpolation=cv2.INTER_AREA)
         return x
 
+    @staticmethod
+    def formatting_ex2(x):
+        x = x[100:440, :-90]
+
+        x = cv2.resize(
+            x, (220, 66), interpolation=cv2.INTER_AREA)
+        return x
+
 
 class Preprocessor:
 
@@ -57,8 +65,11 @@ class Preprocessor:
 
             for full_path in np.flipud(np.array([list_paths]).flatten()):
 
-                image = cv2.imread(
-                    str(full_path), cv2.IMREAD_COLOR)
+                image = cv2.cvtColor(
+                    cv2.imread(str(full_path)),
+                    cv2.COLOR_BGR2RGB
+                )
+
                 image = img_aug.augment_image(image)
                 items.append(image)
 
@@ -97,7 +108,7 @@ class Preprocessor:
             flow = cv2.calcOpticalFlowFarneback(
                 cv2.cvtColor(img1, cv2.COLOR_RGB2GRAY),
                 cv2.cvtColor(img2, cv2.COLOR_RGB2GRAY), None,
-                0.6, 4, 20, 3, 5, 1.1, 0)
+                0.5, 1, 15, 2, 5, 1.3, 0)
 
             # convert from cartesian to polar
             mag, ang = cv2.cartToPolar(
@@ -118,8 +129,8 @@ class Preprocessor:
             Comment/Uncomment for showing each image
             moving optical flow.
             """
-            cv2.imshow('Preprocessing Flow.', new)
-            cv2.waitKey(0)
+            # cv2.imshow('Preprocessing Flow.', new)
+            # cv2.waitKey(0)
             return new
 
         flow_frames = []
@@ -151,8 +162,8 @@ class Preprocessor:
             Comment/Uncomment for showing each image
             moving optical flow.
             """
-            cv2.imshow('Preprocessing Flow.', frames[idx])
-            cv2.waitKey(0)
+            # cv2.imshow('Preprocessing Flow.', frames[idx])
+            # cv2.waitKey(0)
 
         return frames
 
@@ -165,13 +176,23 @@ class Preprocessor:
         samples = int(len(
             frames) / timeline)
 
-        return np.array(frames).reshape((
-            samples,
-            timeline,
+        frame_shape = (
             frames[0].shape[0],
             frames[0].shape[1],
             3 if len(frames[0].shape) > 1 else 1
-        ))
+        )
+        
+        if timeline > 1:
+            return np.array(frames).reshape((
+                samples,
+                timeline,
+                *frame_shape
+            ))
+        else:
+            return np.array(frames).reshape((
+                samples,
+                *frame_shape
+            ))
 
     @staticmethod
     def __to_timeline_y(frames):
@@ -185,8 +206,8 @@ class Preprocessor:
 
         x = self.__take_x(indexes, x_path)
         obs_x = rx.of(x).pipe(
-            ops.map(self.__build_optical_flow),
             ops.map(self.__apply_formatting),
+            ops.map(self.__build_optical_flow),
             ops.map(self.__to_timeline_x),
         )
 
@@ -201,8 +222,8 @@ class Preprocessor:
 if __name__ == "__main__":
     logger = get_logger()
 
-    def validate():
 
+    def validate():
         def on_ready(x_y):
             logger.info('Received X shape {}'
                         .format(x_y[0].shape))
@@ -210,23 +231,30 @@ if __name__ == "__main__":
                         .format(x_y[1].shape))
             assert x_y[0].shape[0] == x_y[1].shape[0]
 
-        values, source, _ = Data()\
-            .initialize(2, 0.01)\
-            .get_train_batch(5)
+        values, source, _ = Data() \
+            .initialize(2, 0.01) \
+            .get_validation_batch(5)
 
         logger.debug(
             'Requesting from Source: {}. Next Indexes: {}\n\n'
                 .format(source.name, values))
 
-        Preprocessor(
+        processor = Preprocessor(
             PrepParams(
                 backward=(0, 1),
-                func=PrepParams.formatting_ex1,
+                func=PrepParams.formatting_ex2,
                 augmenter=Augmenters.get_new_validation(),
+            ))
+
+        processor\
+            .build(values, source.path, source.y_values)\
+            .subscribe(
+                on_ready,
+                on_error=lambda e:
+                    logger.error('Exception! {}'.format(e))
             )
-        ).build(
-            values, source.path, source.y_values
-        ).subscribe(on_ready, on_error=lambda e: logger
-                    .error('Exception! {}'.format(e)))
+
 
     validate()
+
+
