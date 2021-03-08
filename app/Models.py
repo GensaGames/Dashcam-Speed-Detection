@@ -195,15 +195,26 @@ class Models:
 
         model.add(Flatten(name='flatten'))
         model.add(ELU())
-        model.add(Dense(100, init='he_normal', name='fc1'))
+        model \
+            .add(Dense(units=100,
+                       kernel_initializer=he_normal(),
+                       activation=linear))
         model.add(ELU())
-        model.add(Dense(50, init='he_normal', name='fc2'))
+        model \
+            .add(Dense(units=50,
+                       kernel_initializer=he_normal(),
+                       activation=linear))
         model.add(ELU())
-        model.add(Dense(10, init='he_normal', name='fc3'))
+        model \
+            .add(Dense(units=10,
+                       kernel_initializer=he_normal(),
+                       activation=linear))
         model.add(ELU())
 
-        # do not put activation at the end because we want to exact output, not a class identifier
-        model.add(Dense(1, name='output', init='he_normal'))
+        model \
+            .add(Dense(units=1,
+                       kernel_initializer=he_normal(),
+                       activation=linear))
 
         adam = Adam(lr=1e-4, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
         model.compile(optimizer=adam, loss='mse')

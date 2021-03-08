@@ -13,13 +13,7 @@ from app.tools import Augmenters
 from app.other.LoggerFactory import get_logger
 
 
-class PrepParams:
-
-    def __init__(self, backward, func, augmenter):
-        self.backward = backward
-        self.func = func
-        self.augmenter = augmenter
-
+class Formats:
     @staticmethod
     def formatting_ex1(x):
         x = cv2.resize(
@@ -37,14 +31,25 @@ class PrepParams:
             x, (220, 66), interpolation=cv2.INTER_AREA)
         return x
 
+    @staticmethod
+    def formatting_raw(x):
+        x = cv2.resize(
+            x[120:-150, 60:-60], (0, 0), fx=1, fy=1)
+        return x
+
 
 class Preprocessor:
+
+    class Params:
+        def __init__(self, backward, func, augmenter):
+            self.backward = backward
+            self.func = func
+            self.augmenter = augmenter
 
     def __init__(self, params):
         self.PARAMS = params
 
     def __take_x(self, indexes, path):
-
         assert min(indexes) - max(
             self.PARAMS.backward) >= 0
 
@@ -64,14 +69,8 @@ class Preprocessor:
             img_aug = self.PARAMS.augmenter.to_deterministic()
 
             for full_path in np.flipud(np.array([list_paths]).flatten()):
-
-                image = cv2.cvtColor(
-                    cv2.imread(str(full_path)),
-                    cv2.COLOR_BGR2RGB
-                )
-
-                image = img_aug.augment_image(image)
-                items.append(image)
+                image = cv2.imread(str(full_path))
+                items.append(img_aug.augment_image(image))
 
         assert len(indexes) * (
             len(self.PARAMS.backward)) == len(items)
@@ -79,21 +78,52 @@ class Preprocessor:
 
     def __take_y(self, indexes, y):
         if y is None:
-            return None
+            return []
 
         assert min(indexes) - \
                max(self.PARAMS.backward) >= 0
 
         y_values = []
-        for i in indexes:
-            y_values.append(y[i])
+        for idx in indexes:
+            y_range = list(range(
+                idx, idx-len(self.PARAMS.backward), -1
+            ))
+            y_values.append(
+                np.mean([y[i] for i in y_range])
+            )
 
         y_values = np.reshape(
             y_values, (len(y_values), 1))
         return y_values
 
-    def __build_optical_flow(self, frames):
+    def __apply_formatting(self, frames):
+        assert isinstance(frames, list) and \
+               isinstance(frames[0], np.ndarray)
 
+        for idx, frame in enumerate(frames):
+            frames[idx] = self.PARAMS.func(frame)
+
+        return frames
+
+    def __custom_brightness(self, frames):
+        timeline = len(self.PARAMS.backward)
+
+        for line in range(0, len(frames), timeline):
+
+            factor = 0.2 + np.random.uniform()
+            for idx in range(line, line + timeline):
+
+                hsv_image = cv2.cvtColor(frames[idx], cv2.COLOR_RGB2HSV)
+                # perform brightness augmentation only on the second channel
+                hsv_image[:, :, 2] = hsv_image[:, :, 2] * factor
+
+                # change back to RGB
+                image_rgb = cv2.cvtColor(hsv_image, cv2.COLOR_HSV2RGB)
+                frames[idx] = image_rgb
+
+        return frames
+
+    def __build_optical_flow(self, frames):
         timeline = len(self.PARAMS.backward)
         assert len(frames) % timeline == 0
 
@@ -137,12 +167,6 @@ class Preprocessor:
         for line in range(0, len(frames), timeline):
 
             for idx in range(line, line + timeline - 1):
-                """
-                Comment/Uncomment for showing each image
-                moving optical flow.
-                """
-                # cv2.imshow('Preprocessing Flow.', frames[idx])
-                # cv2.waitKey(0)
                 optical = get_flow_change(
                     frames[idx],
                     frames[idx + 1]
@@ -150,22 +174,6 @@ class Preprocessor:
                 flow_frames.append(optical)
 
         return flow_frames
-
-    def __apply_formatting(self, frames):
-        assert isinstance(frames, list) and \
-               isinstance(frames[0], np.ndarray)
-
-        for idx, frame in enumerate(frames):
-            frames[idx] = self.PARAMS.func(frame)
-
-            """
-            Comment/Uncomment for showing each image
-            moving optical flow.
-            """
-            # cv2.imshow('Preprocessing Flow.', frames[idx])
-            # cv2.waitKey(0)
-
-        return frames
 
     # Merging previous Frames to the Timeline
     # With 3D array of Samples * Timeline * Features
@@ -207,6 +215,7 @@ class Preprocessor:
         x = self.__take_x(indexes, x_path)
         obs_x = rx.of(x).pipe(
             ops.map(self.__apply_formatting),
+            ops.map(self.__custom_brightness),
             ops.map(self.__build_optical_flow),
             ops.map(self.__to_timeline_x),
         )
@@ -222,7 +231,7 @@ class Preprocessor:
 if __name__ == "__main__":
     logger = get_logger()
 
-
+    # TEST 1
     def validate():
         def on_ready(x_y):
             logger.info('Received X shape {}'
@@ -232,17 +241,17 @@ if __name__ == "__main__":
             assert x_y[0].shape[0] == x_y[1].shape[0]
 
         values, source, _ = Data() \
-            .initialize(2, 0.01) \
-            .get_validation_batch(5)
+            .initialize(2, t_part=0.1) \
+            .get_validation_batch()
 
         logger.debug(
             'Requesting from Source: {}. Next Indexes: {}\n\n'
                 .format(source.name, values))
 
         processor = Preprocessor(
-            PrepParams(
+            Preprocessor.Params(
                 backward=(0, 1),
-                func=PrepParams.formatting_ex2,
+                func=Formats.formatting_raw,
                 augmenter=Augmenters.get_new_validation(),
             ))
 
@@ -254,7 +263,4 @@ if __name__ == "__main__":
                     logger.error('Exception! {}'.format(e))
             )
 
-
     validate()
-
-

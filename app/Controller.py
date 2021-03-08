@@ -1,122 +1,111 @@
+import os
+
 import matplotlib.pyplot as plt
+from keras.callbacks import ModelCheckpoint
+from keras.engine.saving import load_model
 from keras.utils import plot_model
 
 import app.other.Helper as Helper
 from app import Settings
 from app.Models import Models
-from app.other.Parameters import *
 from app.Preprocessing import *
 from app.other.LoggerFactory import get_logger
 
 
-class MiniBatchWorker:
+class Worker:
 
-    def __init__(self, c_params, p_params, visual=VisualHolder(), model=None):
+    class Params:
+        def __init__(self, name, train_part):
+            self.name = name
+            self.train_part = train_part
+
+    def __init__(self, c_params, p_params):
         self.C_PARAMS = c_params
         self.P_PARAMS = p_params
-        self.VISUAL = visual
-        self.MODEL = model
+
+        self.MODEL = Utils\
+            .restore_backup(self.C_PARAMS.name)
+        # Checking Backup if already exist
+        if not self.MODEL:
+            get_logger().warn(
+                'Creating New clean Model!'
+            )
+            # Change New model Structure here
+            self.MODEL = Models.nvidia_model()
+            Utils.plot_structure(self)
+        else:
+            get_logger().info(
+                'Model was restored from Backup'
+            )
 
     def start_training(self):
-        # Iterate over Controller Epochs
-        for e in range(self.C_PARAMS.epochs):
-            get_logger().info(
-                'Starting {} Training Epoch!'
-                    .format(str(e)))
+        get_logger().info(
+            'Start training from Controller!'
+        )
 
-            data = Data().initialize(
-                len(self.P_PARAMS.backward),
-                self.C_PARAMS.train_part
-            )
+        self.MODEL.fit_generator(
+            steps_per_epoch=500,
+            epochs=85,
+            validation_steps=30,
+            generator=self.__get_generator(),
+            validation_data=self.__get_generator(
+                validation=True
+            ),
+            callbacks=[
+                ModelCheckpoint(
+                    Helper.get_model_path(
+                        self.C_PARAMS.name) + Settings.NAME_MODEL,
+                    monitor='val_loss',
+                    save_best_only=True,
+                    mode='min',
+                    verbose=1,
+                )
+            ]
+        )
 
-            step = 0
-            # Iterate over all known Samples
-            while True:
-                t_idx, t_source, _ = data \
-                    .get_train_batch(self.C_PARAMS.baths)
+    def __get_generator(self, validation=False):
 
-                if not t_source or not len(t_idx):
-                    get_logger().debug(
-                        'Epoch: {} Training Done!'.format(e))
-                    break
+        data = None
+        while True:
+            if not data or not data.is_available():
+                get_logger().info(
+                    'Data Source is not Available! Create new. ' +
+                    'Validation? {}'.format(validation)
+                )
 
-                # Batch Training Step
-                step += 1
-                get_logger().debug(
-                    'Training Process. Source: {} Step: {}'
-                        .format(t_source.name, step))
+                data = Data(batches=32).initialize(
+                    len(self.P_PARAMS.backward),
+                    self.C_PARAMS.train_part
+                )
 
-                self.__step_model(t_idx, t_source)
-
-                if step % self.C_PARAMS.step_vis == 0:
-                    v_idx, v_source, _ = data\
-                        .get_validation_batch(120)
-
-                    # Validation Step, Visualization & Backup
-                    self.__step_validation(v_idx, v_source)
-                    WorkerUtils.do_backup(self)
-
-    def __step_model(self, indexes, source):
-
-        def __internal(x_y):
-            if self.MODEL is None:
-                self.MODEL = Models.nvidia_model()
-
-                # Custom loading.
-                self.MODEL.load_weights(
-                    Settings.RESOURCE + 'other/model-weights-Vtest2.h5')
-
-                WorkerUtils.plot_structure(self)
-
-            value = self.MODEL.train_on_batch(x_y[0], x_y[1])
-            self.VISUAL.add_training_point(value)
+            indexes, source, _ = data.get_train_batch() \
+                if not validation else \
+                data.get_validation_batch()
 
             get_logger().debug(
-                'Training Batch loss: {}'.format(value))
-
-        Preprocessor(self.P_PARAMS)\
-            .build(indexes, source.path, source.y_values)\
-            .subscribe(
-                __internal,
-                on_error=lambda error: get_logger()
-                    .error('Exception! ' + str(error))
+                'Gen Source: {}'.format(source.name)
             )
 
-    def __step_validation(self, indexes, source):
-        get_logger().debug(
-            "Starting Cross Validation. Source: {}"
-                .format(source.name))
+            x, y = Preprocessor(self.P_PARAMS) \
+                .build(indexes, source.path, source.y_values) \
+                .run()
 
-        def __internal(x_y):
-            mse = self.MODEL \
-                .evaluate(x_y[0], x_y[1])
-
-            get_logger().debug(
-                "Cross Validation Done on Items Size: {} "
-                "MSE: {}".format(len(x_y[0]), mse))
-
-            self.VISUAL.add_validation_point(mse)
-
-        Preprocessor(self.P_PARAMS)\
-            .build(indexes, source.path, source.y_values)\
-            .subscribe(
-                __internal,
-                on_error=lambda error: get_logger()
-                    .error('Exception! ' + str(error))
-            )
+            yield x, y
 
 
-class WorkerUtils:
+class Utils:
 
     @staticmethod
     def restore_backup(name):
         get_logger().info("Restoring Backup...")
 
         try:
-            path = Helper.get_model_path(name)
-            return MiniBatchWorker(
-                *Helper.restore_model_with(path)
-            )
+            path = Helper.get_model_path(name) + Settings.NAME_MODEL
+            if not os.path.isfile(path):
+                raise FileNotFoundError
+
+            return load_model(path)
+
         except FileNotFoundError:
             get_logger().error(
                 'Do not have Backup! Starting new?')
@@ -185,30 +174,23 @@ class WorkerUtils:
 if __name__ == "__main__":
 
     def combine_workers():
-
-        workers = [MiniBatchWorker(
-            ControllerParams(
+        workers = [Worker(
+            Worker.Params(
                 '2021-New-V2',
-                baths=30,
-                train_part=0.7,
-                epochs=3,
-                step_vis=10,
+                train_part=0.8,
             ),
-            PrepParams(
+            Preprocessor.Params(
                 backward=(0, 1),
-                func=PrepParams.formatting_ex2,
-                augmenter=Augmenters.get_new_training(),
+                func=Formats.formatting_ex2,
+                augmenter=Augmenters.get_new_validation(),
             ),
         )]
         return workers
 
-    def start_actions():
-        for newly in combine_workers():
-            worker = WorkerUtils.restore_backup(
-                newly.C_PARAMS.name) or newly
 
+    def start_actions():
+        for worker in combine_workers():
             worker.start_training()
-            WorkerUtils.plot_progress(worker)
 
 
     start_actions()

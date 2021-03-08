@@ -48,23 +48,28 @@ def test5():
 # Augmented, using current model from Project.
 def test6():
 
-    aug_model = Augmenters.get_new_validation()
+    def custom_aug(image, factor):
+        hsv_image = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
+        # perform brightness augmentation only on the second channel
+        hsv_image[:,:,2] = hsv_image[:,:,2] * factor
+
+        # change back to RGB
+        image_rgb = cv2.cvtColor(hsv_image, cv2.COLOR_HSV2RGB)
+        return image_rgb
 
     start_index = 3490
     for _ in range(0, 20400, 1000):
 
-        state = aug_model.to_deterministic()
+        factor = 0.2 + np.random.uniform()
+        print(factor)
         for i in range(_, _ + 10):
             image = cv2.imread(
                 Settings.TEST_FRAMES + '/'
                 + str(start_index + i) + '.jpg', cv2.IMREAD_COLOR)
 
-            cv2.imshow('Augmented', state.augment_image(image))
+            cv2.imshow('Augmented', custom_aug(image, factor))
             cv2.imshow('Original', image)
             cv2.waitKey(0)
-
-
-test6()
 
 
 def test8():
@@ -84,6 +89,27 @@ def test8():
     plt.subplot(122),plt.imshow(dst),plt.title('Output')
     plt.show()
 
+
+def test9():
+
+    aug_model = Augmenters.get_new_validation()
+
+    start_index = 3490
+    for _ in range(0, 20400, 1000):
+
+        state = aug_model.to_deterministic()
+
+        for i in range(_, _ + 10):
+            image = cv2.imread(
+                Settings.TEST_FRAMES + '/'
+                + str(start_index + i) + '.jpg', cv2.IMREAD_COLOR)
+
+            cv2.imshow('Augmented', state.augment_image(image))
+            cv2.imshow('Original', image)
+            cv2.waitKey(0)
+
+
+test6()
 
 
 
