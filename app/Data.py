@@ -29,7 +29,7 @@ class Data:
             'Data is Initializing. Back: {} Part: {}'
                 .format(backward, train_part))
 
-        for source in Data.get_sources():
+        for source in SourceCombination.get_default():
             point = int(source.amount * train_part)
 
             train = np.arange(backward, point)
@@ -84,25 +84,31 @@ class Data:
         return indexes, source, holder
 
     @staticmethod
-    def get_sources():
+    def summarize_y(y, frames_len):
+        # Should Start from 20th element.
+        value = [np.mean(a) for a in np.array_split(
+            y[20:], frames_len)]
+        assert len(value) == frames_len
+
+        if frames_len < 2:
+            return value
+
+        # A bit of Magic
+        for i in range(1, frames_len):
+            f_delta = (value[i] - value[i - 1]) * (20/25)
+            value[i] = value[i - 1] + f_delta
+
+        return value
+
+
+class SourceCombination:
+
+    @staticmethod
+    def get_all():
         array = [
             # 1. Source Train frames and Y values.
             Data.Source(
                 'Default',
-                Settings.RESOURCE + 'frames/',
-                np.loadtxt(
-                    Settings.RESOURCE + 'source/train.txt',
-                    delimiter=" ")
-            ),
-            Data.Source(
-                'Default-2',
-                Settings.RESOURCE + 'frames/',
-                np.loadtxt(
-                    Settings.RESOURCE + 'source/train.txt',
-                    delimiter=" ")
-            ),
-            Data.Source(
-                'Default-3',
                 Settings.RESOURCE + 'frames/',
                 np.loadtxt(
                     Settings.RESOURCE + 'source/train.txt',
@@ -144,21 +150,16 @@ class Data:
         return array
 
     @staticmethod
-    def summarize_y(y, frames_len):
-        # Should Start from 20th element.
-        value = [np.mean(a) for a in np.array_split(
-            y[20:], frames_len)]
-        assert len(value) == frames_len
-
-        if frames_len < 2:
-            return value
-
-        # A bit of Magic
-        for i in range(1, frames_len):
-            f_delta = (value[i] - value[i - 1]) * (20/25)
-            value[i] = value[i - 1] + f_delta
-
-        return value
+    def get_default():
+        return [
+            # 1. Source Train frames and Y values.
+            Data.Source(
+                'Default',
+                Settings.RESOURCE + 'frames/',
+                np.loadtxt(
+                    Settings.RESOURCE + 'source/train.txt',
+                    delimiter=" ")
+            )]
 
 
 if __name__ == "__main__":

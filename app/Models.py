@@ -143,9 +143,12 @@ class Models:
             .add(Dense(units=1,
                        kernel_initializer=he_normal(),
                        activation=linear))
-        model \
-            .compile(loss=mean_squared_error,
-                     optimizer=Adam(lr=1e-4))
+        model.compile(
+            loss=mean_squared_error,
+            optimizer=Adam(lr=1e-4),
+            metrics=['accuracy']
+        )
+
         return model
 
     @staticmethod
@@ -217,6 +220,10 @@ class Models:
                        activation=linear))
 
         adam = Adam(lr=1e-4, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
-        model.compile(optimizer=adam, loss='mse')
+        model.compile(
+            optimizer=adam,
+            loss='mse',
+            metrics=['accuracy']
+        )
 
         return model

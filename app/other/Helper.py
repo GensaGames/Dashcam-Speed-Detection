@@ -103,8 +103,7 @@ def save_plot(path_to, plot, prefix):
 
 
 ##########################################
-def backup_model_with(path, model, *args):
-    model.save(path + Settings.NAME_MODEL)
+def backup_worker(path, *args):
     for i in args:
         with open(path + type(i).__name__, "w+") as file:
             file.write(jsonpickle.encode(i))

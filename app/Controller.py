@@ -1,5 +1,4 @@
-import os
-
+import jsonpickle
 import matplotlib.pyplot as plt
 from keras.callbacks import ModelCheckpoint
 from keras.engine.saving import load_model
@@ -19,34 +18,20 @@ class Worker:
             self.name = name
             self.train_part = train_part
 
-    def __init__(self, c_params, p_params):
-        self.C_PARAMS = c_params
+    def __init__(self, w_params, p_params, model):
+        self.W_PARAMS = w_params
         self.P_PARAMS = p_params
-
-        self.MODEL = Utils\
-            .restore_backup(self.C_PARAMS.name)
-        # Checking Backup if already exist
-        if not self.MODEL:
-            get_logger().warn(
-                'Creating New clean Model!'
-            )
-            # Change New model Structure here
-            self.MODEL = Models.nvidia_model()
-            Utils.plot_structure(self)
-        else:
-            get_logger().info(
-                'Model was restored from Backup'
-            )
+        self.MODEL = model
 
     def start_training(self):
         get_logger().info(
             'Start training from Controller!'
         )
 
-        self.MODEL.fit_generator(
+        result = self.MODEL.fit_generator(
             steps_per_epoch=500,
-            epochs=85,
-            validation_steps=30,
+            epochs=280,
+            validation_steps=100,
             generator=self.__get_generator(),
             validation_data=self.__get_generator(
                 validation=True
@@ -54,7 +39,7 @@ class Worker:
             callbacks=[
                 ModelCheckpoint(
                     Helper.get_model_path(
-                        self.C_PARAMS.name) + Settings.NAME_MODEL,
+                        self.W_PARAMS.name) + Settings.NAME_MODEL,
                     monitor='val_loss',
                     save_best_only=True,
                     mode='min',
@@ -62,6 +47,11 @@ class Worker:
                 )
             ]
         )
+
+        get_logger().info(
+            'Data fitting is done. Return the results. '
+        )
+        return result
 
     def __get_generator(self, validation=False):
 
@@ -75,7 +65,7 @@ class Worker:
 
                 data = Data(batches=32).initialize(
                     len(self.P_PARAMS.backward),
-                    self.C_PARAMS.train_part
+                    self.W_PARAMS.train_part
                 )
 
             indexes, source, _ = data.get_train_batch() \
@@ -96,42 +86,43 @@ class Worker:
 class Utils:
 
     @staticmethod
+    def backup_params(name, *params):
+        get_logger().info("Making Params Backup...")
+        path = Helper.get_model_path(name)
+
+        for i in params:
+            with open(path + type(i).__qualname__, "w+") as file:
+                file.write(jsonpickle.encode(i))
+
+    @staticmethod
     def restore_backup(name):
         get_logger().info("Restoring Backup...")
+        path = Helper.get_model_path(name)
 
+        # noinspection PyBroadException
         try:
-            path = Helper.get_model_path(name) + Settings.NAME_MODEL
-            if not os.path.isfile(path):
-                raise FileNotFoundError
+            params = []
+            for i in [Worker.Params, Preprocessor.Params]:
+                with open(path + i.__qualname__, "rb") as file:
+                    params.append(
+                        jsonpickle.decode(file.read())
+                    )
 
-            return load_model(path)
+            return Worker(*params, load_model(
+                path + Settings.NAME_MODEL))
 
-        except FileNotFoundError:
+        except Exception:
             get_logger().error(
-                'Do not have Backup! Starting new?')
+                'Do not have Backup! Starting new.')
             return None
 
     @staticmethod
-    def do_backup(worker):
-        get_logger().info("Making Backup...")
+    def plot_structure(name, model):
+        get_logger().info("Plotting Model Structure...")
+        path = Helper.get_model_path(name)
 
-        Helper.backup_model_with(
-            Helper.get_model_path(
-                worker.C_PARAMS.name
-            ),
-            worker.MODEL,
-            worker.P_PARAMS,
-            worker.C_PARAMS,
-            worker.VISUAL
-        )
-
-    @staticmethod
-    def plot_structure(worker):
-        path = Helper.get_model_path(
-            worker.C_PARAMS.name
-        )
         plot_model(
-            worker.MODEL,
+            model,
             to_file=path + Settings.NAME_STRUCTURE,
             show_shapes=True,
             show_layer_names=True
@@ -139,35 +130,36 @@ class Utils:
         return plt
 
     @staticmethod
-    def plot_progress(worker):
-        fig, ax = plt.subplots()
-
-        ax.plot(
-            list(map(
-                lambda x: (x + 1) * worker.C_PARAMS.step_vis,
-                list(range(0, len(worker.VISUAL.points_validation)))
-            )), worker.VISUAL.points_validation)
-
-        ax.plot(
-            list(
-                range(0, len(worker.VISUAL.points_training))
-            ),
-            worker.VISUAL.points_training)
-
-        ax.legend(['Validation', 'Training'])
-        ax.set(
-            xlabel='Batch Step (S)',
-            ylabel='Errors (J)'
+    def plot_history(name, history):
+        get_logger().info(
+            "Plotting History Object: {} ..."
+                .format(history.keys())
         )
-        ax.grid()
+        path = Helper.get_model_path(name)
 
-        plt.savefig('/'.join([
-            Settings.BUILD,
-            Settings.MODELS,
-            worker.C_PARAMS.name,
-            Settings.NAME_MODEL_PLOT
-        ]))
-        return plt
+        try:
+            plt.figure(1)
+            plt.plot(history['accuracy'])
+            plt.plot(history['val_accuracy'])
+            plt.title('Model accuracy')
+            plt.ylabel('Accuracy')
+            plt.xlabel('Epoch')
+            plt.legend(['Train', 'Validation'], loc='upper left')
+            plt.savefig(path + 'Model-Accuracy.png')
+        except Exception as e:
+            get_logger().error(e)
+
+        try:
+            plt.figure(2)
+            plt.plot(history['loss'])
+            plt.plot(history['val_loss'])
+            plt.title('Model loss')
+            plt.ylabel('Loss')
+            plt.xlabel('Epoch')
+            plt.legend(['Train', 'Validation'], loc='upper left')
+            plt.savefig(path + 'Model-Loss.png')
+        except Exception as e:
+            get_logger().error(e)
 
 
 #####################################
@@ -176,21 +168,36 @@ if __name__ == "__main__":
     def combine_workers():
         workers = [Worker(
             Worker.Params(
-                '2021-New-V2',
+                '2021-New-V3',
                 train_part=0.8,
             ),
             Preprocessor.Params(
                 backward=(0, 1),
                 func=Formats.formatting_ex2,
-                augmenter=Augmenters.get_new_validation(),
+                augmenter=Augmenters.get_new_training(),
             ),
+            Models.nvidia_model(),
         )]
         return workers
 
 
     def start_actions():
         for worker in combine_workers():
-            worker.start_training()
+            name = worker.W_PARAMS.name
+
+            # Try to Restore from backup
+            actual = Utils.restore_backup(name) \
+                     or worker
+
+            # Check Start checkpoint
+            if actual == worker:
+                Utils.plot_structure(name, actual.MODEL)
+                Utils.backup_params(
+                    name, *[actual.W_PARAMS, actual.P_PARAMS]
+                )
+
+            result = actual.start_training()
+            Utils.plot_history(name, result.history)
 
 
     start_actions()
