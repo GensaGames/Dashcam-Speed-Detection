@@ -32,7 +32,10 @@ class Data:
         for source in SourceCombination.get_default():
             point = int(source.amount * train_part)
 
+            # Remove Every Second frame for variety
             train = np.arange(backward, point)
+            train = train[train % 2 == 0]
+            
             np.random.shuffle(train)
 
             validation = np.arange(

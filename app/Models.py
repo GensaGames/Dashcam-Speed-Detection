@@ -20,7 +20,14 @@ class Models:
         model = Sequential()
         model.add(InputLayer(input_shape=input_shape))
         model.add(Conv2D(
-            filters=86, kernel_size=(5, 5), strides=(2, 2),
+            filters=24, kernel_size=(5, 5), strides=(2, 2),
+            padding='valid',
+            kernel_initializer=he_normal(),
+        ))
+        model.add(ELU())
+
+        model.add(Conv2D(
+            filters=36, kernel_size=(5, 5), strides=(2, 2),
             padding='valid',
             kernel_initializer=he_normal(),
         ))
@@ -28,15 +35,7 @@ class Models:
         model.add(BatchNormalization())
 
         model.add(Conv2D(
-            filters=64, kernel_size=(5, 5), strides=(2, 2),
-            padding='valid',
-            kernel_initializer=he_normal(),
-        ))
-        model.add(ELU())
-        model.add(BatchNormalization())
-
-        model.add(Conv2D(
-            filters=64, kernel_size=(3, 3), strides=(2, 2),
+            filters=48, kernel_size=(5, 5), strides=(2, 2),
             padding='valid',
             kernel_initializer=he_normal(),
         ))
@@ -45,6 +44,14 @@ class Models:
 
         model.add(Conv2D(
             filters=48, kernel_size=(3, 3), strides=(1, 1),
+            padding='valid',
+            kernel_initializer=he_normal(),
+        ))
+        model.add(ELU())
+        model.add(BatchNormalization())
+
+        model.add(Conv2D(
+            filters=64, kernel_size=(3, 3), strides=(1, 1),
             padding='valid',
             kernel_initializer=he_normal(),
         ))

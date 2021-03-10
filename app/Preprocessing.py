@@ -41,13 +41,13 @@ class Formats:
 class Preprocessor:
 
     class Params:
-        def __init__(self, backward, func, augmenter):
+        def __init__(self, backward, func):
             self.backward = backward
             self.func = func
-            self.augmenter = augmenter
 
-    def __init__(self, params):
+    def __init__(self, params, augmenter=Augmenters.get_new_empty()):
         self.PARAMS = params
+        self.AUGIMG = augmenter
 
     def __take_x(self, indexes, path):
         assert min(indexes) - max(
@@ -66,7 +66,7 @@ class Preprocessor:
             list_paths = itemgetter(
                 *looking_back)(complete_path)
 
-            img_aug = self.PARAMS.augmenter.to_deterministic()
+            img_aug = self.AUGIMG.to_deterministic()
 
             for full_path in np.flipud(np.array([list_paths]).flatten()):
                 image = cv2.imread(str(full_path))
@@ -241,7 +241,7 @@ if __name__ == "__main__":
             assert x_y[0].shape[0] == x_y[1].shape[0]
 
         values, source, _ = Data() \
-            .initialize(2, t_part=0.1) \
+            .initialize(2, train_part=0.1) \
             .get_validation_batch()
 
         logger.debug(
@@ -251,8 +251,7 @@ if __name__ == "__main__":
         processor = Preprocessor(
             Preprocessor.Params(
                 backward=(0, 1),
-                func=Formats.formatting_raw,
-                augmenter=Augmenters.get_new_validation(),
+                func=Formats.formatting_raw
             ))
 
         processor\
@@ -262,5 +261,6 @@ if __name__ == "__main__":
                 on_error=lambda e:
                     logger.error('Exception! {}'.format(e))
             )
+        logger.debug('Tests Done!')
 
     validate()

@@ -76,7 +76,10 @@ class Worker:
                 'Gen Source: {}'.format(source.name)
             )
 
-            x, y = Preprocessor(self.P_PARAMS) \
+            aug = Augmenters.get_new_validation() if validation \
+                else Augmenters.get_new_training()
+
+            x, y = Preprocessor(self.P_PARAMS, aug) \
                 .build(indexes, source.path, source.y_values) \
                 .run()
 
@@ -174,7 +177,6 @@ if __name__ == "__main__":
             Preprocessor.Params(
                 backward=(0, 1),
                 func=Formats.formatting_ex2,
-                augmenter=Augmenters.get_new_training(),
             ),
             Models.nvidia_model(),
         )]
