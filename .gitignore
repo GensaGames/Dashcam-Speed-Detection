@@ -105,6 +105,7 @@ venv.bak/
 
 # Project
 .idea/workspace.xml
+.idea/dictionaries/*
 
 resource/frames/
 resource/source/
