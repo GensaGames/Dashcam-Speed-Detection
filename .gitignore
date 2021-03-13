@@ -109,3 +109,8 @@ venv.bak/
 
 resource/frames/
 resource/source/
+=======
+.idea/
+res/
+custom/
+Comma-AI-Speed.iml

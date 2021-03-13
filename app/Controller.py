@@ -1,214 +1,245 @@
-import os
-import sys
-import numpy as np
-
-import app.core.Parameters
-import app.Settings as Settings
-import app.other.Helper as Helper
-import pandas as pd
-from scipy.interpolate import griddata
-from mpl_toolkits.mplot3d import Axes3D
-from matplotlib import cm
-from matplotlib.ticker import LinearLocator, FormatStrFormatter
-from matplotlib import cm
-from mpl_toolkits.mplot3d import Axes3D
+import jsonpickle
 import matplotlib.pyplot as plt
-import itertools
-import logging
+from keras.callbacks import ModelCheckpoint, EarlyStopping
+from keras.engine.saving import load_model
+from keras.utils import plot_model
 
-from keras import Sequential
-from keras.layers import Dense, Conv2D, MaxPooling2D, Flatten, TimeDistributed, Dropout
-from keras.layers import SimpleRNN
-from keras.losses import mean_squared_error
-from keras.activations import tanh, linear, sigmoid, relu
-from keras.optimizers import RMSprop, SGD, Adadelta, Adam
-from keras.initializers import RandomUniform, he_normal
-from keras.layers import Embedding
-from keras.layers import LSTM
-from keras.layers import InputLayer
-
-from app.core.Parameters import ControllerParams, \
-    VisualHolder, PreprocessorParams
-from app.core.Preprocessing import Preprocessor
+import app.other.Helper as Helper
+from app import Settings
+from app.Models import Models
+from app.Preprocessing import *
+from app.other.LoggerFactory import get_logger
 
 
-class MiniBatchWorker:
+class Worker:
 
-    def __init__(self, p_params, c_params):
-        self.P_PARAMS, self.C_PARAMS, self.VISUAL \
-            = p_params, c_params, VisualHolder()
-        self.model = None
+    class Params:
+        def __init__(self, name, train_part):
+            self.name = name
+            self.train_part = train_part
 
-    def run(self):
-        train, validation = \
-            self.split_indexes()
+    def __init__(self, w_params, p_params, model):
+        self.W_PARAMS = w_params
+        self.P_PARAMS = p_params
+        self.MODEL = model
 
-        for e in range(10000):
-            np.random.shuffle(train)
-            logger.info('Starting {} Training Epoch!'
-                        .format(str(e)))
+    def start_training(self):
+        get_logger().info(
+            'Start training from Controller!'
+        )
 
-            for i in range(0, len(train), self.C_PARAMS.baths):
-                indexes = train[list(range(
-                    i, i + self.C_PARAMS.baths))]
-                self.__step_process(i, indexes)
+        result = self.MODEL.fit(
+            self.__get_generator(),
+            steps_per_epoch=440,
+            epochs=60,
+            validation_steps=160,
+            validation_data=self.__get_generator(
+                validation=True
+            ),
+            callbacks=[
+                ModelCheckpoint(
+                    Helper.get_model_path(
+                        self.W_PARAMS.name) + Settings.NAME_MODEL,
+                    monitor='val_loss',
+                    save_best_only=True,
+                    mode='min',
+                    verbose=1,
+                ),
+                EarlyStopping(
+                    monitor='val_loss',
+                    patience=4,
+                    verbose=1,
+                )
+            ]
+        )
 
-            np.random.shuffle(validation)
-            self.__evaluate(validation)
+        get_logger().info(
+            'Data fitting is done. Return the results. '
+        )
+        return result
 
-    def split_indexes(self):
-        indexes = np.arange(
-            max(self.P_PARAMS.backward), self.C_PARAMS.samples)
+    def predict_test(self):
+        get_logger().info(
+            'Start Test evaluation...'
+        )
 
-        assert 0 < self \
-            .C_PARAMS.train_part < 1
-        max_train_index = int(
-            self.C_PARAMS.train_part * len(indexes))
+        def test_generator(batches=32):
+            samples = np.arange(
+                max(self.P_PARAMS.backward), 10798)
 
-        max_train_index = self.C_PARAMS.baths * int(
-            max_train_index / self.C_PARAMS.baths)
+            for i in range(samples[0], samples[-1], batches):
+                indexes = samples[i:i+batches]
 
-        train = indexes[:max_train_index]
-        return train, \
-               indexes[max_train_index:]
+                aug = Augmenters.get_new_validation()
 
-    def __step_process(self, step, indexes):
-        obs = Preprocessor(self.P_PARAMS).build(
-            '../' + Settings.TRAIN_FRAMES,
-            '../' + Settings.TRAIN_Y, indexes) \
-            .publish()
+                x, y = Preprocessor(self.P_PARAMS, aug) \
+                    .build(indexes, Settings.TEST_FRAMES, None) \
+                    .run()
+                print(x)
+                yield x, y
 
-        obs \
-            .subscribe(self.__step_model)
+        Utils.save_predicts(
+            self.W_PARAMS.name,
+            self.MODEL.predict(
+                test_generator(),
+                verbose=1,
+            )
+        )
 
-        obs \
-            .filter(lambda _: step > self.C_PARAMS.step_vis and (
-                step % self.C_PARAMS.step_vis == 0 or
-                step >= self.C_PARAMS.samples - self.C_PARAMS.baths)) \
-            .map(lambda x_y: (x_y[0], x_y[1], step)) \
-            .subscribe(self.__step_visual)
+    def __get_generator(self, validation=False):
 
-        obs.connect()
+        data = None
+        while True:
+            if not data or not data.is_available():
+                get_logger().info(
+                    'Data Source is not Available! Create new. ' +
+                    'Validation? {}'.format(validation)
+                )
 
-    def __step_visual(self, x_y_s):
-        cost = self.model \
-            .evaluate(x_y_s[0], x_y_s[1])
+                data = Data(batches=32).initialize(
+                    len(self.P_PARAMS.backward),
+                    self.W_PARAMS.train_part
+                )
 
-        logger.info("Added for Visualisation. Iter: {} Cost: {}"
-                    .format(x_y_s[2], cost))
-        self.VISUAL.add(x_y_s[2], cost)
+            indexes, source, _ = data.get_train_batch() \
+                if not validation else \
+                data.get_validation_batch()
 
-    def __step_model(self, x_y):
-        if self.model is None:
-            input_shape = (x_y[0].shape[2],
-                           x_y[0].shape[3], 1)
+            get_logger().debug(
+                'Gen Source: {}'.format(source.name)
+            )
 
-            convolution = Sequential()
-            convolution.add(Conv2D(
-                filters=12, kernel_size=(5, 5),
-                padding='same', input_shape=input_shape,
-                data_format='channels_last'))
+            aug = Augmenters.get_new_validation() if validation \
+                else Augmenters.get_new_training()
 
-            convolution.add(Conv2D(
-                filters=24, kernel_size=(3, 3), strides=(2, 2),
-                padding='valid', input_shape=input_shape,
-                data_format='channels_last'))
+            x, y = Preprocessor(self.P_PARAMS, aug) \
+                .build(indexes, source.path, source.y_values) \
+                .run()
 
-            convolution.add(MaxPooling2D(pool_size=(3, 3)))
-            convolution.add(Flatten())
+            yield x, y
 
-            self.model = Sequential()
-            self.model.add(TimeDistributed(convolution))
 
-            self.model.add(
-                LSTM(units=36, return_sequences=True,
-                     kernel_initializer=he_normal()))
+class Utils:
 
-            self.model.add(
-                LSTM(units=12, return_sequences=False,
-                     kernel_initializer=he_normal()))
+    @staticmethod
+    def backup_params(name, *params):
+        get_logger().info("Making Params Backup...")
+        path = Helper.get_model_path(name)
 
-            self.model \
-                .add(Dense(units=1,
-                           kernel_initializer=he_normal(),
-                           activation=linear))
-            self.model \
-                .compile(loss=mean_squared_error,
-                         optimizer=Adam(lr=0.001))
+        for i in params:
+            with open(path + type(i).__qualname__, "w+") as file:
+                file.write(jsonpickle.encode(i))
 
-        logger.info(
-            'Training Batch loss: {}'.format(
-                self.model.train_on_batch(x_y[0], x_y[1])))
+    @staticmethod
+    def restore_backup(name):
+        get_logger().info("Restoring Backup...")
+        path = Helper.get_model_path(name)
 
-    def __evaluate(self, validation):
+        # noinspection PyBroadException
+        try:
+            params = []
+            for i in [Worker.Params, Preprocessor.Params]:
+                with open(path + i.__qualname__, "rb") as file:
+                    params.append(
+                        jsonpickle.decode(file.read())
+                    )
 
-        def local_save(x_y):
-            logger.info("Starting Cross Validation...")
+            return Worker(*params, load_model(
+                path + Settings.NAME_MODEL))
 
-            evaluation = self.model \
-                .evaluate(x_y[0], x_y[1])
+        except Exception:
+            get_logger().error(
+                'Do not have Backup! Starting new.')
+            return None
 
-            logger.info("Cross Validation Done on "
-                        "Items Size: {} Value: {}".format(
-                len(x_y[0]), evaluation))
-            self.VISUAL.set_evaluation(evaluation)
+    @staticmethod
+    def save_predicts(name, result):
+        get_logger().info("Saving Predicts...")
+        path = Helper.get_model_path(name)
+        np.savetxt(path + 'test.txt', result, delimiter=' ')
 
-        Preprocessor(self.P_PARAMS).build(
-            '../' + Settings.TRAIN_FRAMES,
-            '../' + Settings.TRAIN_Y, validation[:10]) \
-            .subscribe(local_save)
+    @staticmethod
+    def plot_structure(name, model):
+        get_logger().info("Plotting Model Structure...")
+        path = Helper.get_model_path(name)
+
+        plot_model(
+            model,
+            to_file=path + Settings.NAME_STRUCTURE,
+            show_shapes=True,
+            show_layer_names=True
+        )
+        return plt
+
+    @staticmethod
+    def plot_history(name, history):
+        get_logger().info(
+            "Plotting History Object: {} ..."
+                .format(history.keys())
+        )
+        path = Helper.get_model_path(name)
+
+        try:
+            plt.figure(1)
+            plt.plot(history['accuracy'])
+            plt.plot(history['val_accuracy'])
+            plt.title('Model accuracy')
+            plt.ylabel('Accuracy')
+            plt.xlabel('Epoch')
+            plt.legend(['Train', 'Validation'], loc='upper left')
+            plt.savefig(path + 'Model-Accuracy.png')
+        except Exception as e:
+            get_logger().error(e)
+
+        try:
+            plt.figure(2)
+            plt.plot(history['loss'])
+            plt.plot(history['val_loss'])
+            plt.title('Model loss')
+            plt.ylabel('Loss')
+            plt.xlabel('Epoch')
+            plt.legend(['Train', 'Validation'], loc='upper left')
+            plt.savefig(path + 'Model-Loss.png')
+        except Exception as e:
+            get_logger().error(e)
 
 
 #####################################
 if __name__ == "__main__":
 
-    def set_logger():
-        sys.setrecursionlimit(1001001)
-        formatter = logging.Formatter(
-            '%(asctime)-15s %(message)s')
-
-        log = logging.getLogger(
-            os.path.basename(__file__))
-
-        handler = logging.FileHandler(
-            filename='../' + Settings.BUILD_LOGS)
-        handler.setLevel(logging.DEBUG)
-        handler.setFormatter(formatter)
-
-        log.addHandler(handler)
-        return log
-
-    logger = set_logger()
-
     def combine_workers():
-        workers = [MiniBatchWorker(
-            PreprocessorParams(
-                backward=(0, 1, 2), frame_y_trim=(190, -190),
-                frame_x_trim=(220, -220), frame_scale=1),
-            ControllerParams(
-                baths=10, train_part=0.99, step_vis=150,
-                samples=20400))]
+        workers = [Worker(
+            Worker.Params(
+                '2021-New-V20',
+                train_part=0.8,
+            ),
+            Preprocessor.Params(
+                backward=(0, 1),
+                func=Formats.formatting_ex2,
+            ),
+            Models.nvidia_model(),
+        )]
         return workers
 
 
-    def worker_plot(worker):
-        fig, ax = plt.subplots()
-        ax.plot(worker.VISUAL.iters,
-                worker.VISUAL.costs)
-
-        ax.set(xlabel='Num of Iter (I)',
-               ylabel='Costs (J)')
-        ax.grid()
-        return plt
-
-
-    def start_train():
+    def start_actions():
         for worker in combine_workers():
-            worker.run()
+            name = worker.W_PARAMS.name
 
-            Helper.save_plot_with(
-                '../' + Settings.BUILD_PATH, worker_plot(worker),
-                'V1', worker.model, worker.P_PARAMS)
-            plt.show()
+            # Try to Restore from backup
+            actual = Utils.restore_backup(name) \
+                     or worker
 
-    start_train()
+            # Check Start checkpoint
+            if actual == worker:
+                Utils.plot_structure(name, actual.MODEL)
+                Utils.backup_params(
+                    name, *[actual.W_PARAMS, actual.P_PARAMS]
+                )
+
+            result = actual.start_training()
+            Utils.plot_history(name, result.history)
+            actual.predict_test()
+
+
+    start_actions()

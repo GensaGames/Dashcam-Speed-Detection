@@ -1,33 +1,37 @@
-# PreProcessing
-TRAIN_VIDEO = 'resource/source/train.mp4'
-TRAIN_Y = 'resource/source/train.txt'
+import os
 
-TRAIN_FRAMES = 'resource/frames/'
-TEST_VIDEO = 'resource/source/test.mp4'
+PROJECT = os.path.dirname(
+    os.path.realpath(__file__)) + '/../'
+RESOURCE = PROJECT + 'res/'
+CUSTOM = PROJECT + 'custom/'
 
-BUILD_PATH = 'build/'
-BUILD_LOGS = 'build/logs.txt'
+TRAIN_VIDEO = RESOURCE + 'source/train.mp4'
+TRAIN_FRAMES = RESOURCE + 'frames/'
+TRAIN_Y = RESOURCE + 'source/train.txt'
+TRAIN_FRAMES_STOP = RESOURCE + 'frames-stop/'
 
-# import cv2
-# import numpy as np
-#
-# image1 = cv2.imread('../' + TRAIN_FRAMES + '/207.jpg', cv2.IMREAD_COLOR)
-# image2 = cv2.imread('../' + TRAIN_FRAMES + '/208.jpg', cv2.IMREAD_COLOR)
-#
-#
-# frm = image1.mean(axis=2)
-# frm = frm[190:-190, 220:-220]
-# frm = cv2.resize(frm, (320, 160))
-#
-# # image1 = image1[220:350, 0:640]
-# # image2 = image2[220:350, 0:640]
-#
-# list1 = np.array([1, 2, 3, 4, 5, 6])
-# print(list1[2:-2])
-#
-# cv2.imwrite('sift_keypoints.jpg', frm)
-# # cv2.imwrite('sift_keypoints1.jpg', image2)
+TEST_VIDEO = RESOURCE + 'source/test.mp4'
+TEST_FRAMES = RESOURCE + 'frames-t/'
+NAME_LOGS = 'logs.txt'
+
+BUILD = PROJECT + 'build/'
+BUILT_TEST_PR1 = 'test-pp1.txt'
+BUILT_TEST_FORMAT = '.txt'
+
+MODELS = 'models'
+NAME_MODEL = 'model-view.h5'
+NAME_MODEL_PLOT = 'epochs-plot.png'
+NAME_STRUCTURE = 'structure.png'
+
+PREFIX_STOP_SIZE = int(10.e+4)
 
 
+WRITE_VIDEO_PATH = RESOURCE + 'videos-o/'
+WRITE_VIDEO_1 = WRITE_VIDEO_PATH + 'Bilkamera-F.mp4'
+WRITE_VIDEO_2 = WRITE_VIDEO_PATH + 'y2mate.com-F.mp4'
+
+EXTRA_DATA = PROJECT + '../../Data/CommaAi/'
+EXTRA_DATA_V1 = EXTRA_DATA + 'camera/2016-01-30--11-24-51.h5'
+EXTRA_DATA_L1 = EXTRA_DATA + 'log/2016-01-30--11-24-51.h5'
 
 
