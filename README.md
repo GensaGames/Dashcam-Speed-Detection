@@ -17,7 +17,7 @@ Start with checking training video, we will see highway varience 70% of the vide
 <br/> <br/> <br/>
 <br/><br/>
 
-<img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/car-normal-ex1-0.gif" width="280" height="170" /> <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/car-normal-ex2-0.gif" width="280" height="170" /> <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/car-normal-ex3-0.gif" width="280" height="170" /> 
+<img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/car-normal-ex1-0.gif" width="270" height="170" /> <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/car-normal-ex2-0.gif" width="270" height="170" /> <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/car-normal-ex3-0.gif" width="270" height="170" /> 
 
 1.1.1. Examples of Working Areas in the train set.
 <br/> <br/> <br/> 
@@ -32,7 +32,7 @@ So lets describe test set, and what we have. Only 30% of varience from the highw
 <br/> <br/> <br/>
 <br/><br/>
 
-<img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/car-turning-ex1-0.gif" width="280" height="170" /> <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/car-stop-ex1-0.gif" width="280" height="170" />  <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/car-turning-ex2-0.gif" width="280" height="170" /> 
+<img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/car-turning-ex1-0.gif" width="270" height="170" /> <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/car-stop-ex1-0.gif" width="270" height="170" />  <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/car-turning-ex2-0.gif" width="270" height="170" /> 
 
 1.1.2. Examples of Working Areas in the test set. LTR Car turning Ex.1 - Car stop - Car turning Ex.2
 <br/> <br/> <br/>
@@ -110,7 +110,7 @@ Below animation, how we can estimate it, with changes over time. Note, this samp
 
 <br/>
 
-<img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/1.1/image-mov-top-0.gif" width="280" height="170" /> <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/1.1/image-mov-mid-0.gif" width="280" height="170" /> <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/1.1/image-mov-bot-0.gif" width="280" height="170" /> 
+<img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/1.1/image-mov-top-0.gif" width="270" height="170" /> <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/1.1/image-mov-mid-0.gif" width="270" height="170" /> <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/1.1/image-mov-bot-0.gif" width="270" height="170" /> 
 
 2.1.3. Sub Area features changing over time. LTR Far - Mid - Close Areas.
 <br/> <br/>
@@ -169,7 +169,7 @@ As you can see from the Analyze above, we should care enough about Regularizatio
 
 <br/><br/>
 
-<img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/2.4-2/aug-image-1.jpg" width="280" height="170" /> <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/2.4-2/aug-image-2.jpg" width="280" height="170" /> <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/2.4-2/aug-image-3.jpg" width="280" height="170" /> 
+<img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/2.4-2/aug-image-1.jpg" width="270" height="170" /> <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/2.4-2/aug-image-2.jpg" width="270" height="170" /> <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/2.4-2/aug-image-3.jpg" width="270" height="170" /> 
 
 1.1.1. Examples of Working Areas in the train set.
 <br/> <br/>
@@ -191,7 +191,7 @@ And of course we have to resolve the change from frame to frame to understand ho
 
 * [Source frame from the Test Video, just for representation]
 
-<img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/2.4-2/change-gif-delta.gif" width="620" height="300" /> 
+<img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/2.4-2/change-gif-source.gif" width="620" height="300" /> 
 <br/>
 
 * Delta changes. With Threshold and Sharpens. 
@@ -260,7 +260,7 @@ Even 2D CNN was enough, I think you could achieve much better with LSTM. The rea
 
 
 ## One interesting question
-There is one interesting question to answer. And this question is about splitting data for next validation. Let me explain you, why> 
+There is one interesting question to answer. And this question is about splitting data for next validation. Let me explain you, why?
 
 - From the task we have 20400 frames of given video. And we need to have at least 2 frames, as one data point to create Optical Flow. So to create training and validation data, we can take two consecutive frames as one data point, shuffle all pairs, and split (for ex. 50% for training and 50% for validation). This approach was used in models above, and I was able to achieve perfect result on validation data. 
 
