@@ -1,9 +1,5 @@
 # Toy-Model-Checking
-<<<<<<< HEAD
-*My mad diary*
-=======
 
->>>>>>> origin/feature/new/experimental
 
 
 
@@ -11,11 +7,7 @@
 <br/><br/>
 
 
-<<<<<<< HEAD
-## Analyze
-=======
 ## 1. Analyze
->>>>>>> origin/feature/new/experimental
 
 
 We have 17 min training video, with 20 frames per second. It's 20400 frames, where we have speed on each frame. From the initial description, we can start with some basics on it a) Features taken from Images b) Features elapsed over time. We will include all work we had, and other possible thoughts.
@@ -27,11 +19,7 @@ Start with checking training video, we will see highway varience 70% of the vide
 
 <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/car-normal-ex1-0.gif" width="280" height="170" /> <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/car-normal-ex2-0.gif" width="280" height="170" /> <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/car-normal-ex3-0.gif" width="280" height="170" /> 
 
-<<<<<<< HEAD
-Examples of Working Areas in the train set.
-=======
 1.1.1. Examples of Working Areas in the train set.
->>>>>>> origin/feature/new/experimental
 <br/> <br/> <br/> 
 <br/><br/>
 
@@ -46,11 +34,7 @@ So lets describe test set, and what we have. Only 30% of varience from the highw
 
 <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/car-turning-ex1-0.gif" width="280" height="170" /> <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/car-stop-ex1-0.gif" width="280" height="170" />  <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/car-turning-ex2-0.gif" width="280" height="170" /> 
 
-<<<<<<< HEAD
-Examples of Working Areas in the test set. LTR Car turning Ex.1 - Car stop - Car turning Ex.2
-=======
 1.1.2. Examples of Working Areas in the test set. LTR Car turning Ex.1 - Car stop - Car turning Ex.2
->>>>>>> origin/feature/new/experimental
 <br/> <br/> <br/>
 <br/><br/>
 
@@ -63,22 +47,14 @@ We will start with check training data and it's changes over time. Most useful i
 
 <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/speed-changes-with-frame.png" width="900" height="250" /> 
 
-<<<<<<< HEAD
-Speed value at Frame index from initial training Video. 
-=======
 1.1.3. Speed value at Frame index from initial training Video. 
->>>>>>> origin/feature/new/experimental
 <br/> <br/>
 
 <br/> 
 
 <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/speed-changes-with-previous.png" width="900" height="250" /> 
 
-<<<<<<< HEAD
-Delta Speed changes over Previous frame. 
-=======
 1.1.4. Delta Speed changes over Previous frame. 
->>>>>>> origin/feature/new/experimental
 <br/> <br/> 
 
 
@@ -88,27 +64,11 @@ Above Image explains how Speed may change from the previous. Even one Video is n
 
 <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/0/speed-changes-delta-20-frame.png" width="900" height="250" /> 
 
-<<<<<<< HEAD
-Delta Speed changes over Previous 20 frames.
-=======
 1.1.5. Delta Speed changes over Previous 20 frames.
->>>>>>> origin/feature/new/experimental
 <br/> <br/>
 
 
 
-<<<<<<< HEAD
-## Feature Extraction
-
-This is the most important step to solve this task. The way for creation model, regularization and preprocessing make no sense, unless we know what features are going to work! All examples below will consider the next way. Take frame at time T and next to it frame T+1. Use this two frames for feature extraction. 
-
-### Optical Flow Gunnar Farneback
-
-### Optical Flow Gunnar Farneback
-
-### Optical Flow Lucas-Kanade
-=======
->>>>>>> origin/feature/new/experimental
 
 
 
@@ -119,28 +79,17 @@ This is the most important step to solve this task. The way for creation model, 
 
 <br/> <br/>
 
-<<<<<<< HEAD
-## Preprocessing
-
-
-### Working Area
-=======
 ## 2. Preprocessing
 
 
 ### 2.1 Working Area
->>>>>>> origin/feature/new/experimental
 From each frame, we can decide working area, which includes most of the features, depending on our task. And reduce number of the Inputs. Even we did some feature area investigation, it's easy to manually retrive most useful part.
 
 <br/>
 
 <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/1.1/source-image.jpg" width="400" height="300" /> <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/1.1/source-feature-area.png" width="400" height="300" /> 
 
-<<<<<<< HEAD
-Source Image and Source Image Areas. Red Box represents Working Area, for the next steps. 
-=======
 2.1.1. Source Image and Source Image Areas. Red Box represents Working Area, for the next steps. 
->>>>>>> origin/feature/new/experimental
 <br/> <br/>
 
 But we have another interesting question here. As you can see, we have Working Area, which consist from some Sub Areas, Close and Far. First one, has more features about road changes (has more changes over time, due of camera angle). And Second one with more noise like side objects, other cars and less road changes. 
@@ -149,11 +98,7 @@ But we have another interesting question here. As you can see, we have Working A
 
 <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/1.1/car-angle-variants.jpg" width="800" height="200" /> 
 
-<<<<<<< HEAD
-Frame changes updates in different way, based on Angle of a Camera. 
-=======
 2.1.2. Frame changes updates in different way, based on Angle of a Camera. 
->>>>>>> origin/feature/new/experimental
 <br/> <br/>
 
 At this point, we have few variants, for next preprocessing steps. We will use this options in the next phases. - Using Far Sub Area. - Using Close Sub Area, and so on.
@@ -167,11 +112,7 @@ Below animation, how we can estimate it, with changes over time. Note, this samp
 
 <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/1.1/image-mov-top-0.gif" width="280" height="170" /> <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/1.1/image-mov-mid-0.gif" width="280" height="170" /> <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/1.1/image-mov-bot-0.gif" width="280" height="170" /> 
 
-<<<<<<< HEAD
-Sub Area features changing over time. LTR Far - Mid - Close Areas.
-=======
 2.1.3. Sub Area features changing over time. LTR Far - Mid - Close Areas.
->>>>>>> origin/feature/new/experimental
 <br/> <br/>
 
 As a result, we come with few options for next work **a) Check Model velocity using several Sub Areas Types. b) Check Model velocity over all possible Sub Areas, with momentum over some shifting.**
@@ -180,11 +121,7 @@ As a result, we come with few options for next work **a) Check Model velocity us
 
 <br/>
 
-<<<<<<< HEAD
-### Scaling and Normalization
-=======
 ### 2.2 Scaling and Normalization
->>>>>>> origin/feature/new/experimental
 
 Scaling takes some part in preprocessing, even we can simplify and avoid it's usage. Scale working in two directions, and for some cases might reduce a Dimensionality in two different ways. We will not talk about simple scaling down Image, to reduce it's size, but in some resources, you can find opossite usage of scaling, by increasing Image size.
 
@@ -192,31 +129,19 @@ Scaling takes some part in preprocessing, even we can simplify and avoid it's us
 
 <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/1.2/scale-source.gif" width="280" height="170" /> <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/1.2/scale-image.gif" width="280" height="170" /> <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/1.2/scale-compressed.gif" width="280" height="170" />
 
-<<<<<<< HEAD
-Feature changing over time. LTR Source - Scaled - Compressed Images.
-=======
 2.2.1. Feature changing over time. LTR Source - Scaled - Compressed Images.
->>>>>>> origin/feature/new/experimental
 <br/><br/>
 
 For some cases, very simple process of scaling up small Image helps to make some kind of preprocessing and retaint most important features and their changes over time. We can compare this process, to some N Compressing, but requires substantially less resources to compute. 
 
 For the normalization, we don't have something new. In case we working with Images, we can just normilize features, over maximum value of colors. Mean of RBG values at pixel divided by Max possible color value (255) (or even simpler for an Image, loaded in the Grey filter). As a another point, we can think about normalization with `Scikit-Learn` Scalers, however first variant is good enough. 
 
-<<<<<<< HEAD
-At this stage, we will play with Scaling in two different ways. After choosing some Sub Area from Working, we will **c) Apply some Scalling up and down based on Working Area size.*
-=======
 At this stage, we will play with Scaling in two different ways. After choosing some Sub Area from Working, we will **a) Apply some Scalling up and down based on Working Area size.*
->>>>>>> origin/feature/new/experimental
 
 
 <br/>
 
-<<<<<<< HEAD
-### Frames Timeline 
-=======
 ### 2.3 Frames Timeline 
->>>>>>> origin/feature/new/experimental
 
 As we mentioned before, we will work on features elapsed over time. And for the single training sample, we should have few frames before the focus one. This Timeline of single training sample, might be configured in very different way. And not only previous frame, before the focused.
 
@@ -224,96 +149,18 @@ As we mentioned before, we will work on features elapsed over time. And for the 
 
 <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/1.3/frames-elapsed-over-time.jpg" width="800" height="160" /> 
 
-<<<<<<< HEAD
-Single training sample consist from several frames
-=======
 2.3.1. Single training sample consist from several frames
->>>>>>> origin/feature/new/experimental
 <br/><br/>
 
 For testing purpose, we created Preprocessor objects, which can retrive Timelines in different format, and not only previous frame. We can represent it, as indexes '(0, 1, 2)', where '(0)' it's current frame, where we now the right Y value (and looking back to the previous '(1)', and next to it '(2)' frames). 
 
-<<<<<<< HEAD
-In out testing, we might check dependencies between frames '(0, 1)' or '(0, 1, 2, 3, 4)' and some variations in this range.   And even more complicated behavior, Timeline with different steps (ex. with step 2, we will have '(0, 2, 4)'), where frame changes will be more visible. So action items for this mapping is **d) Check different Frame Timelines.**
-=======
 In out testing, we might check dependencies between frames '(0, 1)' or '(0, 1, 2, 3, 4)' and some variations in this range.   And even more complicated behavior, Timeline with different steps (ex. with step 2, we will have '(0, 2, 4)'), where frame changes will be more visible. So action items for this mapping is **a) Check different Frame Timelines.**
->>>>>>> origin/feature/new/experimental
 
 
 
 
 <br/>
 
-<<<<<<< HEAD
-### Regularization
-
-After coming with different tests we see that regularization is very specific for task/model, and feature params/extraction which we have. Hence we suppose to skip this session and describe just agnostic points of it. 
-
-- Floating area in the working frames. Descents and ascents might effect Camera angle and cause different frame representation. To cover such cases we added few functions, which produce floating area, during training phase. 
-
-- Other.
-
-
-<br/>
-
-### Summary
-
-
-In general it's very simple process, where we just shared all thoughts during Preprocessing. For some model, we should take Frames Timeline on Working Area and Normilize inputs. However we came up with several different options: Preprocessor combinations (marked above) which we should investigate. Keep in mind it might be quite specific for particular model and feature extraction purpose. 
-
-Well known other algorithms might be used for feature extraction on Images. Some of them like `SIFT`, `ORB`, `HOG` and other, could work very well, but they don't. During validation and testing, patterns between their changes, doesn't work for speed. And other reasons related to the performance of a model, and such actions require huge time for computing.
-
-
-
-
-
-
-
-<br/> <br/>
-
-
-## Model
-
-Same with preprocessing, we will describe just all investigation and work for choosing Model. We will start from simple implementations. In first phases, we suppose to keep everything as simple, as possible. Because you can increase complexity in any time and every part of the Model. 
-
-Below you will find some graphics and Model structures. No Models (or it's structure) has the goal of being correct and used in dirty examples for general evaluation. Check sub branches, for the detailed implementation for each of them. They might have mistakes.  
-
-
-<br/>
-
-### MLP and 2D-CNN
-
-Even from the initial sentence of the task (with processing video), which gives us hint to move in RNN directions, we had few examples of MLP. In our examples, we might represent features as delta changes between frames, where tried to achive some kind of Compressing during Timeline.
-
-After some minor updates in Preprocessing behavior, we used different types of MLP, with different structure. However, this work, didn't effect model learning, and it was hard to resolve pattern in delta changes over time. Even with no Regularization, model didn't fit training samples. As for 2D-CNN, Convolution over Delta changes might work too. For the testing, it find correct Windows for patterns in delta changes over time, and not so good for a validation.
-
-
-<br/>
-
-### RNN and LSTM
-
-Back to initial thoughts, RNN should have enough velocity on data over time. One more pros here, it's number of the inputs. Comparing to the previous methods, where we Flatten few frames (based on Timeline) into one blob features, here we can consume frames one by one. But for validation this model doesn't suite at all, even Plot below seems to be fine. 
-
-
-
-<img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/2.1-2.3/lstm-sample-over-iteration.png" width="600" height="300" /> 
-
-Velocity of RNN model on some Preprocessor Combinations. TYPO. By `Number of Iter(I)` there is Number of Samples, during minibatch learning. 
-<br/><br/>
-
-
-
-<br/>
-
-### 2D-CNN with LSTM
-
-Combination of 2D-CNN windows, and tracking frames changes over time might work very well. Back to model strucutre, we continue some updates, slowly increasing model complexity, but validation results still not enough to work in this direction. 
-
-
-<img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/2.1-2.3/lstm-cnn-sample-over-iteration.png" width="600" height="300" /> 
-
-Velocity of 2D-CNN with LSTM Model on some Preprocessor Combinations. TYPO. By `Number of Iter(I)` there is Number of Samples, during minibatch learning. 
-=======
 ### 2.4 Regularization
 
 As you can see from the Analyze above, we should care enough about Regularization. And model should be well rounded to cover most cases. We seperate all regularization objective into several points. 
@@ -396,24 +243,11 @@ Another straight forward idea it's to use CNN to resolve this changes. Window pa
 <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/2.1-2.3/lstm-cnn-sample-over-iteration.png" width="600" height="300" /> 
 
 3.3.1. Velocity of 2D-CNN with LSTM Model on some Preprocessor Combinations. TYPO. By `Number of Iter(I)` there is Number of Samples, during minibatch learning. 
->>>>>>> origin/feature/new/experimental
 <br/><br/>
 
 
 <br/>
 
-<<<<<<< HEAD
-### 3D-CNN
-
-Obviously 3D-CNN takes places in this list. Even this is most recommended types for the features elapsed over time, we came to this Model in last examples. And this Model works noticeably well on validation data. Starting from very simple Model we can see very good results, and continue work on Model complexity and Preprocessor Combinations. You can see how well this Model fit, comparing to other types. 
-
-
-TBD
-
-Velocity of 3D-CNN Model.Note. Comparing to previous Plots, this X direction represents epoches over all samples. Since this model was better, we continue training. 
-<br/><br/>
-
-=======
 ### 3.4 2D-CNN + LSTM & 3D-CNN
 
 Even 2D CNN was enough, I think you could achieve much better with LSTM. The reason here, it's very important to value previous frames to understand acceleration over time. And next feature extraction changes (in our cases Optical Dense Flow) I started with 2D CNN + LSTM and update it to 3D CNN with all power of Keras lib. This Model was one the best on the validation data and speed of learning.  <i> Branch with 3D CNN usage TBD </i>
@@ -441,4 +275,3 @@ However, it's still question for me, how to solve this task, considering we use 
 ## Conclusion
 
 Even I had a very good result on my validation data, this work was more like self education challenge. That's why I don't have actual test result from Comma AI challenge. Moreover, there is still complex question to answer (see above). But in any case, it was a very valuable task. 
->>>>>>> origin/feature/new/experimental
