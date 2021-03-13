@@ -22,7 +22,7 @@ def opticalFlowOverlay1(image_pv, image):
 def testOpenCVOpticalMoving():
     def format_image(img):
         img = cv2.resize(
-            img[250:-160, 150:-150], (0, 0), fx=2, fy=2)
+            img[160:-160, 100:-100], (0, 0), fx=1.5, fy=1.5)
         return img
 
     for _ in range(2000, 20400, 10):

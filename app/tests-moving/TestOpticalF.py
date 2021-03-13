@@ -7,15 +7,7 @@ import cv2
 
 
 def opticalFlowOverlay1(image_pv, image):
-    optical = calcOptical(image_pv, image)
-
-    cv2.imshow('frame1', optical)
-    cv2.imshow('frame2', image)
-
-    img3 = cv2.resize(
-        image, (220, 66), interpolation=cv2.INTER_AREA)
-    cv2.imshow('frame3', img3)
-    cv2.waitKey(0)
+    return calcOptical(image_pv, image)
 
 
 def calcOptical(img1, img2):
@@ -83,7 +75,6 @@ def calcOptical2(image_current, image_next):
                                         STD,
                                         0)
 
-
     # convert from cartesian to polar
     mag, ang = cv2.cartToPolar(flow[..., 0], flow[..., 1])
 
@@ -100,44 +91,34 @@ def calcOptical2(image_current, image_next):
 
 
 def testOpenCVOpticalMoving():
-    augmenter = Augmenters.get_new_validation()
-
     def format_image(img):
-        # img = cv2.resize(
-        #     img[150:-150, 50:-50], (220, 66), interpolation=cv2.INTER_AREA)
+
+        ia = Augmenters.get_new_validation()
+        img = ia.augment_image(img)
 
         img = cv2.resize(
-            img[150:-150, 50:-50], (0, 0), fx=1, fy=1)
+            img[160:-160, 100:-100], (0, 0), fx=1.5, fy=1.5)
         return img
 
-    sources = list(filter(
-        lambda x: x.name == 'Default',
-        Data().get_sources()
-    ))
+    for _ in range(1700, 20400, 20):
 
-    while True:
-        s = sources[np.random.randint(0, len(sources))]
-        print('Using Source: {}'.format(s.name))
-
-        start = np.random.randint(10, len(s.y_values))
-        for i in range(start, start + 30):
-            img_aug = augmenter.image.to_deterministic()
-
-            image_pv = cv2.imread(s.path + '/'
+        for i in range(_, _ + 10):
+            image_pv = cv2.imread(
+                Settings.TEST_FRAMES + '/'
                 + str(i) + '.jpg', cv2.IMREAD_COLOR)
-            image_pv = format_image(
-                img_aug.augment_image(image_pv)
-            )
+            image_pv = format_image(image_pv)
 
-            image = cv2.imread(s.path + '/'
+            image = cv2.imread(
+                Settings.TEST_FRAMES + '/'
                 + str(i + 1) + '.jpg', cv2.IMREAD_COLOR)
-            image = format_image(
-                img_aug.augment_image(image)
-            )
-            print('Frame Idx: {}. Speed: {}'.format(
-                i, s.y_values[i]
-            ))
-            opticalFlowOverlay1(image_pv, image)
+            image = format_image(image)
+
+            img_new = opticalFlowOverlay1(image_pv, image)
+            cv2.imshow('source', image)
+            cv2.imshow('frame1', img_new)
+            # cv2.imwrite('pyrLK-{}-source.png'.format(i), image)
+            cv2.imwrite('pyrLK-{}.png'.format(i), img_new)
+            cv2.waitKey(0)
 
 
 testOpenCVOpticalMoving()

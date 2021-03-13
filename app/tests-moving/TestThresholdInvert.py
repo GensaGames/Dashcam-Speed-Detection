@@ -12,18 +12,16 @@ def opticalFlowOverlay1(image_pv, image):
         image, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
         cv2.THRESH_BINARY, 11, 2
     )
-    new = cv2.bitwise_not(new)
-    cv2.imshow('frame1', new)
-    cv2.waitKey(0)
+    return cv2.bitwise_not(new)
 
 
 def testOpenCVOpticalMoving():
     def format_image(img):
         img = cv2.resize(
-            img[250:-160, 100:-100], (0, 0), fx=1, fy=1)
+            img[160:-160, 100:-100], (0, 0), fx=1.5, fy=1.5)
         return img
 
-    for _ in range(8000, 20400, 10):
+    for _ in range(1700, 20400, 10):
 
         for i in range(_, _ + 10):
             image_pv = cv2.imread(
@@ -36,7 +34,12 @@ def testOpenCVOpticalMoving():
                 + str(i + 1) + '.jpg', cv2.IMREAD_GRAYSCALE)
             image = format_image(image)
 
-            opticalFlowOverlay1(image_pv, image)
+            img_new = opticalFlowOverlay1(image_pv, image)
+            cv2.imshow('source', image)
+            cv2.imshow('frame1', img_new)
+            # cv2.imwrite('pyrLK-{}-source.png'.format(i), image)
+            cv2.imwrite('pyrLK-{}.png'.format(i), img_new)
+            cv2.waitKey(0)
 
 
 testOpenCVOpticalMoving()

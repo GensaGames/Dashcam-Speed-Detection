@@ -184,20 +184,40 @@ As you can see from the Analyze above, we should care enough about Regularizatio
 
 <br/>
 
-### 2.5 Сonclusions
+### 2.5 Features Extraction
 
 
-In general it's very simple process, where we just shared all thoughts during Preprocessing. For some model, we should take Frames Timeline on Working Area and Normilize inputs. However we came up with several different options: Preprocessor Combinations, which we should investigate (combination of all possible parameters, also marked above). 
+And of course we have to resolve the change from frame to frame to understand how speed was changed. There are few ways, how we can extract features over two frames. And besides most effective solution with Optical Flow, I think it was also possible to delta changes over two frames.  
 
-Well known other algorithms might be used for feature extraction on Images. Some of them like `SIFT`, `ORB`, `HOG` and other, could work very well, but they don't. During validation and testing, patterns between their changes, doesn't work for speed. And other reasons related to the performance of a model, and such actions require huge time for computing.
+* [Source frame from the Test Video, just for representation]
 
+<img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/2.4-2/change-gif-delta.gif" width="620" height="300" /> 
+<br/>
 
+* Delta changes. With Threshold and Sharpens. 
 
+<img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/2.4-2/change-gif-delta.gif" width="620" height="300" /> 
+<br/>
 
+* Lucas-Kanade Optical Flow based on "good features to track". Result converted to vector changes in moving direction.
 
+<img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/2.4-2/change-gif-optical-vector.gif" width="620" height="300" /> 
+<br/>
+
+* Dense Optical Flow. 
+
+<img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/2.4-2/change-gif-optical.gif" width="620" height="300" /> 
+<br/>
+
+* ....
+<br/>
+
+Above examples, it's just a small part of all possible variations between changes of two frames. For ex. we tried different Threshold and invertion level between delta changes of Gray/RGB frames. Or for Dense flow we might use current frame and frame two steps back, or Optical Flow between two Dense flow frames. <b> In general, simple Dense optical flow was quite enough to extract everything we need from the frame. </b>
 
 
 <br/> <br/>
+
+
 
 
 ## 3. Model.
@@ -207,36 +227,18 @@ Same with preprocessing, we will describe just all investigation and work for ch
 Below you will find some graphics and Model structures. No Models (or it's structure) has the goal of being correct and used in dirty examples for general evaluation. Check sub branches, for the detailed implementation for each of them. They might have mistakes.  
 
 
-<br/>
-
-### 3.1 MLP and 2D-CNN
-
-Even from the initial sentence of the task (with processing video), which gives us hint to move in RNN directions, we had few examples of MLP. In our examples, we might represent features as delta changes between frames, where tried to achive some kind of Compressing during Timeline.
-
-After some minor updates in Preprocessing behavior, we used different types of MLP, with different structure. However, this work, didn't effect model learning, and it was hard to resolve pattern in delta changes over time. Even with no Regularization, model didn't fit training samples. As for 2D-CNN, Convolution over Delta changes might work too. For the testing, it find correct Windows for patterns in delta changes over time, and not so good for a validation.
-
-
-<br/>
+<br/> <br/>
 
 ### 3.2 RNN and LSTM
 
-Back to initial thoughts, RNN should have enough velocity on data over time. One more pros here, it's number of the inputs. Comparing to the previous methods, where we Flatten few frames (based on Timeline) into one blob features, here we can consume frames one by one. But for validation this model doesn't suite at all, even Plot below seems to be fine. 
-
-
-
-<img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/2.1-2.3/lstm-sample-over-iteration.png" width="600" height="300" /> 
-
-3.2.1. Velocity of RNN model on some Preprocessor Combinations. TYPO. By `Number of Iter(I)` there is Number of Samples, during minibatch learning. 
-<br/><br/>
-
+I usually don't like idea to jump directly to complex solution. And try to evaluate everything step by step. The idea here was to use delta changes over time in frame and represent it in large MLP model. In theory it could work because weight can find patterns on speed changes while remembering previous result. Hence FC layers were used on flatten image delta changes and consumed by LSTM. Even it was fitting on training data, I didn't receive further good result on validation.  
 
 
 <br/>
 
-### 3.3 2D-CNN with LSTM
+### 3.3 2D-CNN
 
-Combination of 2D-CNN windows, and tracking frames changes over time might work very well. Back to model strucutre, we continue some updates, slowly increasing model complexity, but validation results still not enough to work in this direction. 
-
+Another straight forward idea it's to use CNN to resolve this changes. Window pattern could work very well, and it was proven on validation data. We tried different levels of CNN, including window size, strides, etc. Most of them could come up with good evaluation. <i> Current master branch is based on 2D CNN solution. </i>
 
 <img src="https://raw.githubusercontent.com/GensaGames/Toy-Model-Checking/master/files/2.1-2.3/lstm-cnn-sample-over-iteration.png" width="600" height="300" /> 
 
@@ -246,13 +248,30 @@ Combination of 2D-CNN windows, and tracking frames changes over time might work 
 
 <br/>
 
-### 3.4 3D-CNN
+### 3.4 2D-CNN + LSTM & 3D-CNN
 
-Obviously 3D-CNN takes places in this list. Even this is most recommended types for the features elapsed over time, we came to this Model in last examples. And this Model works noticeably well on validation data. Starting from very simple Model we can see very good results, and continue work on Model complexity and Preprocessor Combinations. You can see how well this Model fit, comparing to other types. 
+Even 2D CNN was enough, I think you could achieve much better with LSTM. The reason here, it's very important to value previous frames to understand acceleration over time. And next feature extraction changes (in our cases Optical Dense Flow) I started with 2D CNN + LSTM and update it to 3D CNN with all power of Keras lib. This Model was one the best on the validation data and speed of learning.  <i> Branch with 3D CNN usage TBD </i>
 
 
-TBD
+[TBD]
 
 3.4.1. Velocity of 3D-CNN Model.Note. Comparing to previous Plots, this X direction represents epoches over all samples. Since this model was better, we continue training. 
 <br/><br/>
 
+
+## One interesting question
+There is one interesting question to answer. And this question is about splitting data for next validation. Let me explain you, why> 
+
+- From the task we have 20400 frames of given video. And we need to have at least 2 frames, as one data point to create Optical Flow. So to create training and validation data, we can take two consecutive frames as one data point, shuffle all pairs, and split (for ex. 50% for training and 50% for validation). This approach was used in models above, and I was able to achieve perfect result on validation data. 
+
+- In case we change the validation to be and continues range on given video. Let's say last 15% of the video (~3000 frames). <b> Neither of above solution will work. </b> The main reason it's because we didn't shuffle pair of image, and this validation data will be completely new to the model. 
+
+Seems like right approach for splitting data will be the last one. We want to get some unique range of video, to be used for validation. Because using pairs of frames within shuffled data still gives some chance for model to get a somewhat similar frame.
+
+However, it's still question for me, how to solve this task, considering we use continues video range for validation. Because of lack of training data, how we can solve this problem in this case?
+
+
+
+## Conclusion
+
+Even I had a very good result on my validation data, this work was more like self education challenge. That's why I don't have actual test result from Comma AI challenge. Moreover, there is still complex question to answer (see above). But in any case, it was a very valuable task. 

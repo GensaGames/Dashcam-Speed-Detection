@@ -18,9 +18,11 @@ pydot = "*"
 scikit-image = "*"
 imgaug = "*"
 graphviz = "*"
-graphviz-python = "*"
 tensorflow-cpu = "*"
 opencv-contrib-python = "*"
+tqdm = "*"
+install = "*"
+sk-video = "*"
 
 [requires]
 python_version = "3.7"

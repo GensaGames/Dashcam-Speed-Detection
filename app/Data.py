@@ -25,22 +25,20 @@ class Data:
         self.batches = batches
 
     def initialize(self, backward, train_part):
+        np.random.seed(144)
+
         get_logger().info(
             'Data is Initializing. Back: {} Part: {}'
                 .format(backward, train_part))
 
-        for source in SourceCombination.get_default():
-            point = int(source.amount * train_part)
+        for source in SourceCombination.get_other():
+            samples = np.arange(backward, source.amount)
+            samples = samples[samples % 2 == 0]
+            np.random.shuffle(samples)
 
-            # Remove Every Second frame for variety
-            train = np.arange(backward, point)
-            train = train[train % 2 == 0]
-            
-            np.random.shuffle(train)
-
-            validation = np.arange(
-                point + backward, source.amount)
-            np.random.shuffle(validation)
+            point = int(len(samples) * train_part)
+            train = samples[:point]
+            validation = samples[point:]
 
             self.entries.append((
                 source,
@@ -72,7 +70,7 @@ class Data:
         except IndexError:
             get_logger().info(
                 'All entries were processed! Return None.')
-            return None, None, None
+            return [], None, None
 
     def get_validation_batch(self):
         batches = self.batches
@@ -86,39 +84,14 @@ class Data:
         indexes = holder.validation[:batches]
         return indexes, source, holder
 
-    @staticmethod
-    def summarize_y(y, frames_len):
-        # Should Start from 20th element.
-        value = [np.mean(a) for a in np.array_split(
-            y[20:], frames_len)]
-        assert len(value) == frames_len
-
-        if frames_len < 2:
-            return value
-
-        # A bit of Magic
-        for i in range(1, frames_len):
-            f_delta = (value[i] - value[i - 1]) * (20/25)
-            value[i] = value[i - 1] + f_delta
-
-        return value
-
 
 class SourceCombination:
 
     @staticmethod
-    def get_all():
-        array = [
-            # 1. Source Train frames and Y values.
-            Data.Source(
-                'Default',
-                Settings.RESOURCE + 'frames/',
-                np.loadtxt(
-                    Settings.RESOURCE + 'source/train.txt',
-                    delimiter=" ")
-            )
-        ]
-        # 2. Stop Frames and Zero-Y values
+    def get_other():
+        array = []
+
+        # Stop Frames and Zero-Y values
         location = Settings.RESOURCE + 'frames-stop/'
         for d1 in os.listdir(location):
             path = location + '/' + d1
@@ -130,9 +103,26 @@ class SourceCombination:
                 )
             )
 
-        # 3. Custom CommaAi data
+        # Custom CommaAi data
         location = Settings.CUSTOM + 'Chunk_1/'
-        for i, d1 in enumerate(os.listdir(location)):
+
+        def summarize_y(y_val, frames_len):
+            # Should Start from 20th element.
+            value = [np.mean(a) for a in np.array_split(
+                y_val[20:], frames_len)]
+            assert len(value) == frames_len
+
+            if frames_len < 2:
+                return value
+
+            # A bit of Magic
+            for i in range(1, frames_len):
+                f_delta = (value[i] - value[i - 1]) * (20/25)
+                value[i] = value[i - 1] + f_delta
+
+            return value
+
+        for idx, d1 in enumerate(os.listdir(location)):
             for d2 in os.listdir(location + d1):
                 outer = os.path.join(location, d1, d2)
 
@@ -144,9 +134,9 @@ class SourceCombination:
 
                 array.append(
                     Data.Source(
-                        'Chunk1-{}-{}'.format(i, d2),
+                        'Chunk1-{}-{}'.format(idx, d2),
                         path,
-                        Data.summarize_y(y, len(os.listdir(path)))
+                        summarize_y(y, len(os.listdir(path)))
                     ),
                 )
 
@@ -167,12 +157,11 @@ class SourceCombination:
 
 if __name__ == "__main__":
     logger = get_logger()
-    data = Data().initialize(10, 0.7)
 
 
     def print_info():
         logger.debug('Listing Data Sources!')
-        for e, _ in data.entries:
+        for e, _ in Data().initialize(10, 0.7).entries:
             logger.debug('\n\n{}:'.format(e.name))
             logger.debug(
                 '-> Path: {}. Y len: {}.'
@@ -189,6 +178,8 @@ if __name__ == "__main__":
 
 
     def validate():
+        # Check source extraction
+        data = Data().initialize(10, 0.7)
         for _ in range(3):
             items, source, holder = data.get_train_batch()
             logger.debug('Validation {}.\nIndexes: {}'
@@ -196,6 +187,18 @@ if __name__ == "__main__":
             for i in items:
                 assert i not in holder.train
                 assert i not in holder.validation
+
+        # Check Random Seed is the same
+        b1 = Data().initialize(10, 0.7).get_train_batch()
+        b2 = Data().initialize(10, 0.7).get_train_batch()
+        print("B1: {} B2: {}".format(b1, b2))
+        assert np.array_equal(b1[0], b2[0])
+
+        # Check Validation is not the same
+        data = Data().initialize(10, 0.7)
+        for i in data.entries[0][1].validation:
+            assert i not in data.entries[0][1].train
+
         logger.debug('Validation Done successfully!')
 
     validate()

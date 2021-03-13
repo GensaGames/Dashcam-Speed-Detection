@@ -1,6 +1,6 @@
 import jsonpickle
 import matplotlib.pyplot as plt
-from keras.callbacks import ModelCheckpoint
+from keras.callbacks import ModelCheckpoint, EarlyStopping
 from keras.engine.saving import load_model
 from keras.utils import plot_model
 
@@ -28,11 +28,11 @@ class Worker:
             'Start training from Controller!'
         )
 
-        result = self.MODEL.fit_generator(
-            steps_per_epoch=500,
-            epochs=280,
-            validation_steps=100,
-            generator=self.__get_generator(),
+        result = self.MODEL.fit(
+            self.__get_generator(),
+            steps_per_epoch=440,
+            epochs=60,
+            validation_steps=160,
             validation_data=self.__get_generator(
                 validation=True
             ),
@@ -44,6 +44,11 @@ class Worker:
                     save_best_only=True,
                     mode='min',
                     verbose=1,
+                ),
+                EarlyStopping(
+                    monitor='val_loss',
+                    patience=4,
+                    verbose=1,
                 )
             ]
         )
@@ -52,6 +57,34 @@ class Worker:
             'Data fitting is done. Return the results. '
         )
         return result
+
+    def predict_test(self):
+        get_logger().info(
+            'Start Test evaluation...'
+        )
+
+        def test_generator(batches=32):
+            samples = np.arange(
+                max(self.P_PARAMS.backward), 10798)
+
+            for i in range(samples[0], samples[-1], batches):
+                indexes = samples[i:i+batches]
+
+                aug = Augmenters.get_new_validation()
+
+                x, y = Preprocessor(self.P_PARAMS, aug) \
+                    .build(indexes, Settings.TEST_FRAMES, None) \
+                    .run()
+                print(x)
+                yield x, y
+
+        Utils.save_predicts(
+            self.W_PARAMS.name,
+            self.MODEL.predict(
+                test_generator(),
+                verbose=1,
+            )
+        )
 
     def __get_generator(self, validation=False):
 
@@ -120,6 +153,12 @@ class Utils:
             return None
 
     @staticmethod
+    def save_predicts(name, result):
+        get_logger().info("Saving Predicts...")
+        path = Helper.get_model_path(name)
+        np.savetxt(path + 'test.txt', result, delimiter=' ')
+
+    @staticmethod
     def plot_structure(name, model):
         get_logger().info("Plotting Model Structure...")
         path = Helper.get_model_path(name)
@@ -171,7 +210,7 @@ if __name__ == "__main__":
     def combine_workers():
         workers = [Worker(
             Worker.Params(
-                '2021-New-V3',
+                '2021-New-V20',
                 train_part=0.8,
             ),
             Preprocessor.Params(
@@ -200,6 +239,7 @@ if __name__ == "__main__":
 
             result = actual.start_training()
             Utils.plot_history(name, result.history)
+            actual.predict_test()
 
 
     start_actions()

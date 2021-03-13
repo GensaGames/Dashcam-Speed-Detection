@@ -76,26 +76,6 @@ class Preprocessor:
             len(self.PARAMS.backward)) == len(items)
         return items
 
-    def __take_y(self, indexes, y):
-        if y is None:
-            return []
-
-        assert min(indexes) - \
-               max(self.PARAMS.backward) >= 0
-
-        y_values = []
-        for idx in indexes:
-            y_range = list(range(
-                idx, idx-len(self.PARAMS.backward), -1
-            ))
-            y_values.append(
-                np.mean([y[i] for i in y_range])
-            )
-
-        y_values = np.reshape(
-            y_values, (len(y_values), 1))
-        return y_values
-
     def __apply_formatting(self, frames):
         assert isinstance(frames, list) and \
                isinstance(frames[0], np.ndarray)
@@ -152,7 +132,7 @@ class Preprocessor:
                 mag, None, 0, 255, cv2.NORM_MINMAX)
 
             # Сonvert HSV to float32's
-            # hsv = np.asarray(hsv, dtype=np.float32)
+            hsv = np.asarray(hsv, dtype=np.float32)
             new = cv2.cvtColor(hsv, cv2.COLOR_HSV2RGB)
 
             """
@@ -202,12 +182,33 @@ class Preprocessor:
                 *frame_shape
             ))
 
-    @staticmethod
-    def __to_timeline_y(frames):
-        if frames is None:
+    def __take_y(self, indexes, y):
+        if y is None:
             return None
-        assert isinstance(frames, np.ndarray)
-        return frames.reshape(len(frames), 1)
+
+        assert min(indexes) - \
+               max(self.PARAMS.backward) >= 0
+
+        y_values = []
+        for idx in indexes:
+            y_range = list(range(
+                idx, idx-len(self.PARAMS.backward), -1
+            ))
+            y_values.append(
+                np.mean([y[i] for i in y_range])
+            )
+
+        y_values = np.reshape(
+            y_values, (len(y_values), 1))
+        return y_values
+
+    @staticmethod
+    def __to_timeline_y(y):
+        if y is None:
+            return None
+
+        assert isinstance(y, np.ndarray)
+        return y.reshape(len(y), 1)
 
     # noinspection PyUnresolvedReferences
     def build(self, indexes, x_path, y_values):
