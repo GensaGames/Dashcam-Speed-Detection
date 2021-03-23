@@ -259,17 +259,6 @@ Even 2D CNN was enough, I think you could achieve much better with LSTM. The rea
 <br/><br/>
 
 
-## One interesting question
-There is one interesting question to answer. And this question is about splitting data for next validation. Let me explain you, why?
-
-- From the task we have 20400 frames of given video. And we need to have at least 2 frames, as one data point to create Optical Flow. So to create training and validation data, we can take two consecutive frames as one data point, shuffle all pairs, and split (for ex. 50% for training and 50% for validation). This approach was used in models above, and I was able to achieve perfect result on validation data. 
-
-- In case we change the validation to be and continues range on given video. Let's say last 15% of the video (~3000 frames). <b> Neither of above solution will work. </b> The main reason it's because we didn't shuffle pair of image, and this validation data will be completely new to the model. 
-
-Seems like right approach for splitting data will be the last one. We want to get some unique range of video, to be used for validation. Because using pairs of frames within shuffled data still gives some chance for model to get a somewhat similar frame.
-
-However, it's still question for me, how to solve this task, considering we use continues video range for validation. Because of lack of training data, how we can solve this problem in this case?
-
 
 
 ## Conclusion
