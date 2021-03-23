@@ -263,4 +263,4 @@ Even 2D CNN was enough, I think you could achieve much better with LSTM. The rea
 
 ## Conclusion
 
-Even I had a very good result on my validation data, it's will require further review on test data. However, for me it was more a self education task, with great experience on computer vision analyze. This project has a good hints on different AI task, which we could reuse in future. 
+Even I had a good result on my validation data, it's will require further review on test data. However, for me it was more a self education task, with great experience on computer vision analyze. This project has a good hints on different AI task, which we could reuse in future. 
