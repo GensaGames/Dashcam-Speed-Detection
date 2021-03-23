@@ -1,5 +1,5 @@
 # Detecting Car Speed form the dashcam
-
+This is popular task from Comma AI. More about the task https://github.com/commaai/speedchallenge. Your goal is to predict the speed of a car from a video.
 
 
 
@@ -263,4 +263,4 @@ Even 2D CNN was enough, I think you could achieve much better with LSTM. The rea
 
 ## Conclusion
 
-Even I had a very good result on my validation data, this work was more like self education challenge. That's why I don't have actual test result from Comma AI challenge. Moreover, there is still complex question to answer (see above). But in any case, it was a very valuable task. 
+Even I had a very good result on my validation data, it's will require further review on test data. However, for me it was more a self education task, with great experience on computer vision analyze. This project has a good hints on different AI task, which we could reuse in future. 
