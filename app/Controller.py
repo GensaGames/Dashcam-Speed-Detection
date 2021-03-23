@@ -30,9 +30,9 @@ class Worker:
 
         result = self.MODEL.fit(
             self.__get_generator(),
-            steps_per_epoch=440,
-            epochs=60,
-            validation_steps=160,
+            steps_per_epoch=500,
+            epochs=45,
+            validation_steps=125,
             validation_data=self.__get_generator(
                 validation=True
             ),
@@ -210,7 +210,7 @@ if __name__ == "__main__":
     def combine_workers():
         workers = [Worker(
             Worker.Params(
-                '2021-New-V20',
+                '2021-New-V30',
                 train_part=0.8,
             ),
             Preprocessor.Params(

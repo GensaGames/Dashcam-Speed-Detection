@@ -31,7 +31,7 @@ class Data:
             'Data is Initializing. Back: {} Part: {}'
                 .format(backward, train_part))
 
-        for source in SourceCombination.get_other():
+        for source in SourceCombination.get_default():
             samples = np.arange(backward, source.amount)
             samples = samples[samples % 2 == 0]
             np.random.shuffle(samples)

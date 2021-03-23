@@ -85,24 +85,6 @@ class Preprocessor:
 
         return frames
 
-    def __custom_brightness(self, frames):
-        timeline = len(self.PARAMS.backward)
-
-        for line in range(0, len(frames), timeline):
-
-            factor = 0.2 + np.random.uniform()
-            for idx in range(line, line + timeline):
-
-                hsv_image = cv2.cvtColor(frames[idx], cv2.COLOR_RGB2HSV)
-                # perform brightness augmentation only on the second channel
-                hsv_image[:, :, 2] = hsv_image[:, :, 2] * factor
-
-                # change back to RGB
-                image_rgb = cv2.cvtColor(hsv_image, cv2.COLOR_HSV2RGB)
-                frames[idx] = image_rgb
-
-        return frames
-
     def __build_optical_flow(self, frames):
         timeline = len(self.PARAMS.backward)
         assert len(frames) % timeline == 0
@@ -132,7 +114,7 @@ class Preprocessor:
                 mag, None, 0, 255, cv2.NORM_MINMAX)
 
             # Сonvert HSV to float32's
-            hsv = np.asarray(hsv, dtype=np.float32)
+            # hsv = np.asarray(hsv, dtype=np.float32)
             new = cv2.cvtColor(hsv, cv2.COLOR_HSV2RGB)
 
             """
@@ -216,7 +198,6 @@ class Preprocessor:
         x = self.__take_x(indexes, x_path)
         obs_x = rx.of(x).pipe(
             ops.map(self.__apply_formatting),
-            ops.map(self.__custom_brightness),
             ops.map(self.__build_optical_flow),
             ops.map(self.__to_timeline_x),
         )
