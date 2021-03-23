@@ -1,5 +1,5 @@
 # Detecting Car Speed form the dashcam
-This is popular task from Comma AI. More about the task https://github.com/commaai/speedchallenge. Your goal is to predict the speed of a car from a video.
+This is popular task from Comma AI. Your goal is to predict the speed of a car from a video. More about the task https://github.com/commaai/speedchallenge.
 
 
 
